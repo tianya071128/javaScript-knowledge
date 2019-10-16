@@ -13,7 +13,7 @@
 
 ## 计划列表
 
-* 正则
 * css 和 css3
+* 正则
 * html 和 heml5
 * BOM 和 DOM
