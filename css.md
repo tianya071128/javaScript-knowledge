@@ -113,137 +113,162 @@
 > ```
 
 
-## 2. box属性(盒子属性)
 
-> 控制文档元素生成的容器外观, 包括尺寸, 边距,填充和边框
+****
 
-### 2.1 尺寸: 控制元素容器高度和宽度
 
-#### 2.1.1 height(高度)
 
-> height: { length| auto| inherit | percentage(百分比, 基于父元素高度) }
+## 2. CSS单位
 
-| 继承 | 初始值 | 版本 |
-| ---- | ------ | ---- |
-| 否   | auto   | CSS1 |
-
-#### 2.1.2 min-height(最小高度)
-
-> min-height: {  length | prcentage | inherit }
+> 长度单位包括: 相对单位 和 绝对单位
 >
-> 保证了盒子的最小高度, 当height的值小于min-height时, height属性失效
-
-| 继承 | 初始值 | 版本 |
-| ---- | ------ | ---- |
-| 否   | 0      | CSS2 |
-
-#### 2.1.3 max-height(最大高度)
-
-> max-height: { length | percentage | none | inherit }
-
-| 继承 | 初始值 | 版本 |
-| ---- | ------ | ---- |
-| 否   | none   | CSS2 |
-
-#### 2.1.4 width(宽度)
-
-> width: { length | percentage | auto | inherit }
-
-| 继承 | 初始值 | 版本 |
-| ---- | ------ | ---- |
-| 否   | auto   | CSS1 |
-
-#### 2.1.5 min-width(最小宽度)
-
-> min-width: { length | percentage | inherit }
-
-| 继承 | 初始值 | 版本 |
-| ---- | ------ | ---- |
-| 否   | 0      | CSS2 |
-
-#### 2.1.6 max-width(最大宽度)
-
-> max-width: { length | percentage | none | inherit }
-
-| 继承 | 初始值 | 版本 |
-| ---- | ------ | ---- |
-| 否   | none   | CSS2 |
-
-### 2.2 边距
-
-> 边距不会影响浮动元素 和 绝对定位元素, 因为浮动元素 和 绝对定位元素会从该文流程中删除
-
-#### 2.2.1 margin-top
-
-> margin-top: { length | percentage | auto | inherit }
+> 相对长度单位: em, ex, ch, rem vw, vh, vmax, vmin
 >
-> percentage: **百分比相对于包含块的宽度**
->
-> length: 值可以为负值
+> 绝对长度包括: cm, mm, q, in, pt, pc, px
 
-| 继承 | 初始值 | 版本 |
-| ---- | ------ | ---- |
-| 否   | 0      | CSS1 |
+### 2.1 长度 - 相对单位
 
-#### 2.2.2 margin-right
+> ***可用于多个属性, 不仅限于font-size***
 
-> margin-right: { length | percentage | auto | inherit }
->
-> percentage: **百分比相对于包含块的宽度**
->
-> length: 值可以为负值
+* vm: 相对于视口的宽度, 视口被均分为100单位的vw
 
-| 继承 | 初始值 | 版本 |
-| ---- | ------ | ---- |
-| 否   | 0      | CSS1 |
+  > IE8 及 IE8以下不支持
 
-#### 2.2.3 margin-bottom
+* vh: 相对于视口的高度, 视口被均分为100单位的vh
 
-> margin-bottom: { length | percentage | auto | inherit }
->
-> percentage: **百分比相对于包含块的宽度**
->
-> length: 值可以为负值
->
-> **与margin-top属性不同, 元素的底部边距会推开该元素下方的浮动元素, 因为浮动元素是从标准流中他们当前的位置获取它们的垂直位置**
+  > IE8 及 IE8以下不支持
 
-| 继承 | 初始值 | 版本 |
-| ---- | ------ | ---- |
-| 否   | 0      | CSS1 |
+* vmax: 相对于视口的宽度或高度中较大的那个, 视口被均分为100单位的vmax
 
-#### 2.2.4 margin-left
+  > IE不支持, 浏览器支持度不够
 
-> margin-left: { length | percentage | auto | inherit }
->
-> percentage: **百分比相对于包含块的宽度**
->
-> length: 值可以为负值
+* vmin: 相对于视口的宽度或高度中较小的那个, 视口被均分为100单位的vmin
 
-| 继承 | 初始值 | 版本 |
-| ---- | ------ | ---- |
-| 否   | 0      | CSS1 |
+  >  IE9仅支持使用 vm 代替vmin -- 浏览器支持度不够
 
-#### 2.2.5 margin(连写属性)
+* rem: 相对于根元素(即html元素)font-size计算值得倍数
 
-> margin: { { length | percentage | auto }[^1 to 4 valuse] | inherit }
+  > IE8 及 IE8以下不支持
 
-## 10 . 其他知识点
+* em: 相对于**当前对象(自身)**内文本的字体尺寸.
 
-### 1. CSS三大特性: 层叠, 特性, 继承
+  > 如当前对行内文本的字体尺寸未被人为设置，则相对于浏览器的默认字体尺寸。
 
-> 层叠: 指来自多种样式表源的样式叠加到文档元素的方式
->
-> 特性: CSS不同选择器的权重
->
-> 继承: 样式可以继承父元素
+* ex: 相对于字符"x"的高度, 通常为字体高度的一半
 
-### 2. inherit: 用来指代继承父元素的CSS属性值
+  >  如当前对行内文本的字体尺寸未被人为设置，则相对于浏览器的默认字体尺寸。 
 
-> ```	scss
-> p a {
->     // 表示继承父元素的文字颜色
->     color: inherit
-> }
-> ```
+* ch: 相对于数字 "0" 的宽度
 
-[^1 to 4 valuse]: 设置四个值
+### 2.2 长度 - 绝对单位
+
+> 转换单位: 1in = 2.54cm = 25.4 mm = 101.6q = 72pt = 6pc = 96px
+
+* px: 像素
+
+* cm: 厘米
+* mm: 毫米
+* q: 1/4毫米
+* in: 英寸
+* pt: 点
+* pc: 派卡
+
+### 2.3 百分比 和 数字(浮点数和整数)
+
+* 百分比
+
+  > 每个属性使用百分比的含义并不相同
+  >
+  > * width 和 height:  基于包裹它的父元素的宽和高来计算 
+  >
+  >   > 父元素高度不固定时, 子元素不再按照百分比来计算, 而是使用了auto值
+  >
+  > * margin 和 padding: 基于包裹它的父元素的宽来计算 
+  >
+  >   > ***不管是left,right, 还是top, bottom,都是基于宽度***
+  >
+  > * border-radius: 基于元素自身的宽度, 高度来计算
+  >
+  >   > 横轴上的百分比参考的是元素自身的宽度，纵轴上的百分比参考的是元素自身的高度，负值是无效的 
+  >
+  > * background-position:  (本身宽高-背景图片宽高)*百分比 
+  >
+  >   > 当(本身宽高-背景图片宽高)为负值时, 也是生效的
+  >
+  > * bottom、left、right、top: 基于父元素的宽高
+  >
+  >   > 所以可以配合margin来达到居中效果
+  >
+  > * transform: translate(): 基于自身的宽高
+  >
+  >   >  **参考的应该自身是`border-box`的尺寸** 
+  >
+  > * font-size: 基于 父元素的font-size
+  >
+  > * line-height: 基于  自身的font-size
+  >
+  > * vertical-align: 基于 自身的line-height
+
+* 数字
+
+
+
+**********
+
+
+
+## 3 关键字 和 函数
+
+### 3.1 关键字
+
+* inherit: 指定属性值从父元素继承它的值.
+
+  > IE8+兼容
+  >
+  > 可用于任何HTML元素上的任何CSS属性
+
+* initial: 用于设置CSS属性为它的默认值
+
+  > IE12+兼容
+  >
+  > 可用于任何HTML元素上的任何CSS属性
+
+* unset:  擦除属性申明 
+
+  >  如果**`unset`** 的CSS关键字从其父级继承，则将该属性重新设置为继承的值，如果没有继承父级样式，则将该属性重新设置为初始值。换句话说这个unset关键字会优先用 [`inherit`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/inherit) 的样式，其次会应该用[`initial`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/initial)的样式。它允许应用任意的CSS样式，包括CSS缩写 [`all`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/all) 关键字。 
+  >
+  > IE不支持
+
+### 3.2 函数
+
+* calc(): 用于动态计算长度值 -- width: calc(100% - 10px)
+
+  > 运算符前后需要保留一个空格
+  >
+  > 支持 + - * / 运算
+  >
+  > 使用标准的数学运算优先级规则
+  >
+  > IE9+ 兼容
+
+* attr(): 插入元素的属性值 -- content: attr(title) '还可以添加其他内容';
+
+  > attr()理论上可以用于任何CSS属性, 但目前适用于伪元素
+  >
+  > IE8+兼容
+
+* counter(): 插入计算器 -- content: counter(item)".";
+
+  > 只能用在content属性上
+  >
+  > IE8+兼容
+
+* counters(): 重复插入计数器
+
+* toggle(): 用于设置子孙元素使用取值序列中的值循环使用
+
+  > 例如: list-style-type: toggle(disk, circle, square, box)
+  >
+  > 在上述代码中，定义一个多级的ul，第一级使用disk markers，子孙级依次使用circle, square, box。 
+  >
+  > IE不支持
