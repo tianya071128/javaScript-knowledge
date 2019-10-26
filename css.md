@@ -235,7 +235,7 @@
 
 * unset:  擦除属性申明 
 
-  >  如果**`unset`** 的CSS关键字从其父级继承，则将该属性重新设置为继承的值，如果没有继承父级样式，则将该属性重新设置为初始值。换句话说这个unset关键字会优先用 [`inherit`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/inherit) 的样式，其次会应该用[`initial`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/initial)的样式。它允许应用任意的CSS样式，包括CSS缩写 [`all`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/all) 关键字。 
+  > 如果**`unset`** 的CSS关键字从其父级继承，则将该属性重新设置为继承的值，如果没有继承父级样式，则将该属性重新设置为初始值。换句话说这个unset关键字会优先用 [`inherit`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/inherit) 的样式，其次会应该用[`initial`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/initial)的样式。它允许应用任意的CSS样式，包括CSS缩写 [`all`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/all) 关键字。 
   >
   > IE不支持
 
