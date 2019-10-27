@@ -308,7 +308,7 @@
 | ---- | ------ | ------------ |
 | 否   | 0 0    | CSS1, CSS2.1 |
 
-### 2.5 background-attachment
+### 2.5 background-attachment: 背景图片是否滚动
 
 > background-attachment: { scroll | fixed | inherit }
 >
@@ -329,6 +329,156 @@
 | 继承 | 初始值               | 版本         |
 | ---- | -------------------- | ------------ |
 | 否   | 与各属性的初始值一致 | CSS1, CSS2.1 |
+
+
+
+***************************
+
+
+
+## 3 排版属性
+
+> 设置文本内容的外观和布局
+
+### 3.1 font-family
+
+> font-family: { family name, ... | inherit }
+
+| 继承 | 初始值     | 版本      |
+| ---- | ---------- | --------- |
+| 是   | sans-serif | CSS1,CSS2 |
+
+### 3.2 font-size
+
+> font-size: { absolute-size | relative-size | length | percentage | inherit }
+>
+> absolute-size, relative-size都是系列关键字尺寸(绝对单位), 不建议使用
+
+| 继承 | 初始值 | 版本       |
+| ---- | ------ | ---------- |
+| 是   | medium | CSS1, CSS2 |
+
+### 3.3 font-weight
+
+> font-weight: { 100-900 | bold |bolder | lighter | normal | inherit }
+>
+> ***有些字体(还跟浏览器有一定关系)只支持有限的字体粗细(normal和bold)***
+>
+> 属性值: 100-900(数值越大, 字体越粗) | bold(粗体, 约等于700) | normal(细体, 约等于400) | bolder(比继承来的要粗一些) | lighter(比继承要细一些)
+
+| 继承 | 初始值 | 版本       |
+| ---- | ------ | ---------- |
+| 是   | normal | CSS1, CSS2 |
+
+### 3.4 font-style
+
+> font-style: { italic | normal | oblique | inherit }
+>
+> 属性值: italic,oblique(都是斜体的意思) | normal( 标准的字体样式)
+
+| 继承 | 初始值 | 版本      |
+| ---- | ------ | --------- |
+| 是   | normal | CSS1,CSS2 |
+
+### 3.5 font-variant
+
+> font-variant: { normal | small-caps | inherit }
+>
+> 设置元素文本小型大写字母文本 -- 很少见
+>
+> small-caps: 显示小型大写字母的字体
+
+| 继承 | 初始值 | 版本      |
+| ---- | ------ | --------- |
+| 是   | normal | CSS1,CSS2 |
+
+### 3.6 line-height
+
+> line-height: { length | number | percentage | normal | inherit }
+
+| 继承 | 初始值 | 版本       |
+| ---- | ------ | ---------- |
+| 是   | normal | CSS1, CSS2 |
+
+### 3.7 font(连写属性)
+
+> font: { [font-style] [font-variant] [font-weight] [font-size]/[line-height] font-family(caption | icon | menu | message-box | small-caption | status-bar)| inherit }
+>
+> ***font-size 和 font-family是必须指定的***
+
+| 继承 | 初始值               | 版本       |
+| ---- | -------------------- | ---------- |
+| 是   | 基于每个属性的初始值 | CSS1, CSS2 |
+
+### 3.8 color
+
+> color: { color | inherit }
+
+| 继承 | 初始值             | 版本         |
+| ---- | ------------------ | ------------ |
+| 是   | 依照浏览器渲染不同 | CSS1, CSS2.1 |
+
+### 3.9 letter-spacing: 字符间距
+
+> letter-spacing: { length | normal | inherit }
+>
+> 属性值 接受负的长度值
+
+| 继承 | 初始值 | 版本       |
+| ---- | ------ | ---------- |
+| 是   | normal | CSS1, CSS2 |
+
+### 3.10 word-spacing: 单词的间距
+
+> word-spacing: { length | normal | inherit }
+>
+> 属性值接受负的值
+
+### 3.11 text-align
+
+> text-align: { center | justify | left | right | inherit }
+
+| 继承 | 初始值                | 版本       |
+| ---- | --------------------- | ---------- |
+| 是   | 跟direction属性值有关 | CSS1, CSS2 |
+
+### 3.12 text-decoration: 下划线、上划线等
+
+> text-decoration: { 文本装饰样式 | none | inherit }
+>
+> 属性值: line-through: 文本中间 | overline: 文本上方 | underline: 文本下方
+
+| 继承 | 初始值 | 版本       |
+| ---- | ------ | ---------- |
+| 否   | none   | CSS1, CSS2 |
+
+### 3.12 text-indent: 第一个文本缩进量
+
+> text-indent: { length | percentage | inherit }
+>
+> 可以使用负值
+
+| 继承 | 初始值 | 版本       |
+| ---- | ------ | ---------- |
+| 是   | 0      | CSS1, CSS2 |
+
+### 3.13 text-transform: 控制字母大小写
+
+> text-transform: { 见下面 | none | inherit }
+>
+> 属性值: capitalize: 将首字母变成大写 | lowercase: 所有字母变成小写 | uppercase: 所有变成大写
+
+| 继承 | 初始值 | 版本       |
+| ---- | ------ | ---------- |
+| 是   | none   | CSS1, CSS2 |
+
+
+
+
+
+
+
+
 
 
 
