@@ -8,7 +8,12 @@
 
 #### 1.1.1 height(高度)
 
-> height: { length| auto| inherit | percentage(百分比, 基于父元素高度) }
+> 属性值: 
+>
+> * auto	默认。浏览器会计算出实际的高度。
+> * length	使用 px、cm 等单位定义高度。
+> * %	基于包含它的块级对象的百分比高度。
+> * inherit	规定应该从父元素继承 height 属性的值。
 
 | 继承 | 初始值 | 版本 |
 | ---- | ------ | ---- |
@@ -16,9 +21,13 @@
 
 #### 1.1.2 min-height(最小高度)
 
-> min-height: {  length | prcentage | inherit }
+> ***保证了盒子的最小高度, 当height的值小于min-height时, height属性失效***
 >
-> 保证了盒子的最小高度, 当height的值小于min-height时, height属性失效
+> 属性值: 
+>
+> * length	定义元素的最小高度。默认值是 0。
+> * %	定义基于包含它的块级对象的百分比最小高度。
+> * inherit	规定应该从父元素继承 min-height 属性的值。
 
 | 继承 | 初始值 | 版本 |
 | ---- | ------ | ---- |
@@ -26,7 +35,12 @@
 
 #### 1.1.3 max-height(最大高度)
 
-> max-height: { length | percentage | none | inherit }
+> 属性值: 
+>
+> * none	默认。定义对元素被允许的最大高度没有限制。
+> * length	定义元素的最大高度值。
+> * %	定义基于包含它的块级对象的百分比最大高度。
+>   inherit	规定应该从父元素继承 max-height 属性的值。
 
 | 继承 | 初始值 | 版本 |
 | ---- | ------ | ---- |
@@ -34,7 +48,12 @@
 
 #### 1.1.4 width(宽度)
 
-> width: { length | percentage | auto | inherit }
+> 属性值: 
+>
+> * auto	默认值。浏览器可计算出实际的宽度。
+> * length	使用 px、cm 等单位定义宽度。
+> * %	定义基于包含块（父元素）宽度的百分比宽度。
+> * inherit	规定应该从父元素继承 width 属性的值。
 
 | 继承 | 初始值 | 版本 |
 | ---- | ------ | ---- |
@@ -42,7 +61,12 @@
 
 #### 1.1.5 min-width(最小宽度)
 
-> min-width: { length | percentage | inherit }
+> 属性值: 
+>
+> * none	默认。定义对元素被允许的最大高度没有限制。
+> * length	定义元素的最大高度值。
+> * %	定义基于包含它的块级对象的百分比最大高度。
+>   inherit	规定应该从父元素继承 max-height 属性的值。
 
 | 继承 | 初始值 | 版本 |
 | ---- | ------ | ---- |
@@ -50,7 +74,12 @@
 
 #### 1.1.6 max-width(最大宽度)
 
-> max-width: { length | percentage | none | inherit }
+> 属性值: 
+>
+> * none	默认。定义对元素被允许的最大高度没有限制。
+> * length	定义元素的最大高度值。
+> * %	定义基于包含它的块级对象的百分比最大高度。
+>   inherit	规定应该从父元素继承 max-height 属性的值。
 
 | 继承 | 初始值 | 版本 |
 | ---- | ------ | ---- |
@@ -62,11 +91,12 @@
 
 #### 1.2.1 margin-top
 
-> margin-top: { length | percentage | auto | inherit }
+> 属性值: 允许负值
 >
-> percentage: **百分比相对于包含块的宽度**
->
-> length: 值可以为负值
+> * auto	浏览器设置的上外边距。
+> * length	定义固定的上外边距。默认值是 0
+> * %	定义基于父对象总宽度的百分比上外边距。
+> * inherit	规定应该从父元素继承上外边距。
 
 | 继承 | 初始值 | 版本 |
 | ---- | ------ | ---- |
@@ -74,11 +104,12 @@
 
 #### 1.2.2 margin-right
 
-> margin-right: { length | percentage | auto | inherit }
+> 属性值: 允许负值
 >
-> percentage: **百分比相对于包含块的宽度**
->
-> length: 值可以为负值
+> * auto	浏览器设置的上外边距。
+> * length	定义固定的上外边距。默认值是 0
+> * %	定义基于父对象总宽度的百分比上外边距。
+> * inherit	规定应该从父元素继承上外边距。
 
 | 继承 | 初始值 | 版本 |
 | ---- | ------ | ---- |
@@ -86,11 +117,12 @@
 
 #### 1.2.3 margin-bottom
 
-> margin-bottom: { length | percentage | auto | inherit }
+> 属性值: 允许负值
 >
-> percentage: **百分比相对于包含块的宽度**
->
-> length: 值可以为负值
+> * auto	浏览器设置的上外边距。
+> * length	定义固定的上外边距。默认值是 0, 
+> * %	定义基于父对象总宽度的百分比上外边距。
+> * inherit	规定应该从父元素继承上外边距。
 >
 > **与margin-top属性不同, 元素的底部边距会推开该元素下方的浮动元素, 因为浮动元素是从标准流中他们当前的位置获取它们的垂直位置**
 
@@ -100,11 +132,12 @@
 
 #### 1.2.4 margin-left
 
-> margin-left: { length | percentage | auto | inherit }
+> 属性值:  允许负值
 >
-> percentage: **百分比相对于包含块的宽度**
->
-> length: 值可以为负值
+> * auto	浏览器设置的上外边距。
+> * length	定义固定的上外边距。默认值是 0
+> * %	定义基于父对象总宽度的百分比上外边距。
+> * inherit	规定应该从父元素继承上外边距。
 
 | 继承 | 初始值 | 版本 |
 | ---- | ------ | ---- |
@@ -118,11 +151,11 @@
 
 #### 1.3.1 padding-top
 
-> padding-top: { length | percentage | inherit }
+> 属性值:   负值是不允许的。 
 >
-> percentage: **百分比相对于包含块的宽度**
->
-> length: 值不可以为负值
+> * length	规定以具体单位计的固定的上内边距值，比如像素、厘米等。默认值是 0px。
+> * %	定义基于父元素宽度的百分比上内边距。此值不会如预期的那样工作于所有的浏览器中。
+> * inherit	规定应该从父元素继承上内边距。
 
 | 继承 | 初始值 | 版本         |
 | ---- | ------ | ------------ |
@@ -130,11 +163,11 @@
 
 #### 1.3.2 padding-right
 
-> padding-right: { length | percentage | inherit }
+> 属性值:   负值是不允许的。 
 >
-> percentage: **百分比相对于包含块的宽度**
->
-> length: 值不可以为负值
+> * length	规定以具体单位计的固定的上内边距值，比如像素、厘米等。默认值是 0px。
+> * %	定义基于父元素宽度的百分比上内边距。此值不会如预期的那样工作于所有的浏览器中。
+> * inherit	规定应该从父元素继承上内边距。
 
 | 继承 | 初始值 | 版本         |
 | ---- | ------ | ------------ |
@@ -142,11 +175,11 @@
 
 #### 1.3.3 padding-bottom
 
-> padding-bottom: { length | percentage | inherit }
+> 属性值:   负值是不允许的。 
 >
-> percentage: **百分比相对于包含块的宽度**
->
-> length: 值不可以为负值
+> * length	规定以具体单位计的固定的上内边距值，比如像素、厘米等。默认值是 0px。
+> * %	定义基于父元素宽度的百分比上内边距。此值不会如预期的那样工作于所有的浏览器中。
+> * inherit	规定应该从父元素继承上内边距。
 
 | 继承 | 初始值 | 版本         |
 | ---- | ------ | ------------ |
@@ -154,11 +187,11 @@
 
 #### 1.3.4 padding-left
 
-> padding-left: { length | percentage | inherit }
+> 属性值:   负值是不允许的。 
 >
-> percentage: **百分比相对于包含块的宽度**
->
-> length: 值不可以为负值
+> * length	规定以具体单位计的固定的上内边距值，比如像素、厘米等。默认值是 0px。
+> * %	定义基于父元素宽度的百分比上内边距。此值不会如预期的那样工作于所有的浏览器中。
+> * inherit	规定应该从父元素继承上内边距。
 
 | 继承 | 初始值 | 版本         |
 | ---- | ------ | ------------ |
@@ -172,11 +205,15 @@
 
 #### 1.4.1 border-color
 
-> padding: { { color| transparent}[^1 to 4 valuse] | inherit }
->
 > 设置4个边框颜色值 -- 也可分别设置4个边框(border-left(top,bottom,right)-color
 >
 > 初始值为元素的color属性值, 若是border-style属性为none,  则边框不显示
+>
+> 属性值:  
+>
+> * color	指定背景颜色。在CSS颜色值查找颜色值的完整列表
+> * transparent	指定边框的颜色应该是透明的。这是默认
+> * inherit	指定边框的颜色，应该从父元素继承
 
 | 继承 | 初始值 | 版本         |
 | ---- | ------ | ------------ |
@@ -184,13 +221,23 @@
 
 #### 1.4.2 border-style
 
-> border-style:  { { 边框样式}[^1 to 4 valuse] | inherit }
->
 > 设置4个边框样式 -- 也可分别设置4个边框(border-left(top,bottom,right)-style
 >
-> 属性值:　none(不显示) | dotted(点) | dashed(短线段) | solid(实线) | double(两条实线) |groove, ridge, inset, outset(实现三维效果) hidden(在表格中使用)
->
 > **只有设置border-style, 边框才会显示**
+>
+> 属性值: 
+>
+> * none	定义无边框。
+> * hidden	与 "none" 相同。不过应用于表时除外，对于表，hidden 用于解决边框冲突。
+> * dotted	定义点状边框。在大多数浏览器中呈现为实线。
+> * dashed	定义虚线。在大多数浏览器中呈现为实线。
+>   solid	定义实线。
+> * double	定义双线。双线的宽度等于 border-width 的值。
+> * groove	定义 3D 凹槽边框。其效果取决于 border-color 的值。
+> * ridge	定义 3D 垄状边框。其效果取决于 border-color 的值。
+> * inset	定义 3D inset 边框。其效果取决于 border-color 的值。
+> * outset	定义 3D outset 边框。其效果取决于 border-color 的值。
+> * inherit	规定应该从父元素继承边框样式。
 
 | 继承 | 初始值 | 版本         |
 | ---- | ------ | ------------ |
@@ -202,7 +249,13 @@
 >
 > 设置4个边框样式 -- 也可分别设置4个边框(border-left(top,bottom,right)-width
 >
-> 属性值: 关键字 thin <= medium <=thick. 根据用户客户端来显示, 没有显式定义
+> 属性值: 
+>
+> * thin	定义细的边框。
+> * medium	默认。定义中等的边框。
+>   thick	定义粗的边框。
+> * length	允许您自定义边框的宽度。
+> * inherit	规定应该从父元素继承边框宽度。
 
 | 继承 | 初始值 | 版本 |
 | ---- | ------ | ---- |
@@ -218,9 +271,11 @@
 
  #### 1.4.5 ouline-color
 
-> outline-color: { color | invert | inherit }
+> 属性值: 
 >
-> 属性值: invert(关键字) -- 进行像素颜色倒置
+> * color	指定轮廓颜色。在 CSS颜色值寻找颜色值的完整列表。
+> * invert	默认。执行颜色反转（逆向的颜色）。可使轮廓在不同的背景颜色中都是可见。
+> * inherit	规定应该从父元素继承轮廓颜色的设置。
 
 | 继承 | 初始值 | 版本         |
 | ---- | ------ | ------------ |
@@ -228,11 +283,20 @@
 
 #### 1.4.6 outline-style
 
-> outline-style: { 轮廓样式 }
->
-> 属性值: 与border-style属性值一致
->
 > **只有设置了outline-style, 轮廓才会生效**
+>
+> 属性值: 
+>
+> * none	默认。定义无轮廓。
+> * dotted	定义点状的轮廓。
+> * dashed	定义虚线轮廓。
+> * solid	定义实线轮廓。
+> * double	定义双线轮廓。双线的宽度等同于 outline-width 的值。
+> * groove	定义 3D 凹槽轮廓。此效果取决于 outline-color 值。
+> * ridge	定义 3D 凸槽轮廓。此效果取决于 outline-color 值。
+> * inset	定义 3D 凹边轮廓。此效果取决于 outline-color 值。
+> * outset	定义 3D 凸边轮廓。此效果取决于 outline-color 值。
+> * inherit	规定应该从父元素继承轮廓样式的设置。
 
 | 继承 | 初始值 | 版本        |
 | ---- | ------ | ----------- |
@@ -240,9 +304,13 @@
 
 #### 1.4.7 outline-width
 
-> outline-width: {  宽度 }
+> 属性值: 
 >
-> 属性值: 与border-width属性值一致
+> * thin	规定细轮廓。
+> * medium	默认。规定中等的轮廓。
+> * thick	规定粗的轮廓。
+> * length	允许您规定轮廓粗细的值。
+> * inherit	规定应该从父元素继承轮廓宽度的设置。
 
 | 继承 | 初始值 | 版本         |
 | ---- | ------ | ------------ |
@@ -266,13 +334,18 @@
 
 
 
-## 2. 背景
+## 2. 背景属性
+
+> ***元素的背景是元素的总大小，包括填充和边界（但不包括边距)***
 
 ### 2.1 background-color
 
-> background-color: { color | transparent | inherit }
+> 属性值: 
 >
-> 元素的背景包含填充 和 边框覆盖的区域
+> * color	指定背景颜色。在CSS颜色值近可能的寻找一个颜色值的完整列表。
+> * transparent	指定背景颜色应该是透明的。这是默认
+>   inherit	指定背景颜色，应该从父元素继承
+> * inherit	指定背景颜色，应该从父元素继承
 
 | 继承 | 初始值      | 版本 |
 | ---- | ----------- | ---- |
@@ -280,7 +353,11 @@
 
 ### 2.2 bakground-iamge
 
-> background-image: {  url | none | inherit }
+> 属性值: 
+>
+> * url('URL')	图像的URL
+> * none	无图像背景会显示。这是默认
+> * inherit	指定背景图像应该从父元素继承
 
 | 继承 | 初始值 | 版本 |
 | ---- | ------ | ---- |
@@ -288,11 +365,15 @@
 
 ### 2.3 background-repeat
 
-> background-repeat: {  repeat | repeat-x | repeat-y | no-repeat | inherit }
->
 > 控制是否背景图像是否重复显示
 >
-> 属性值: repeat(从4个方向, 沿两个轴重复) | repeat-x(沿X轴重复) | repeat-y(沿Y轴重复) |no-repeat(不重复) | inherit(继承)
+> 属性值: 
+>
+> * repeat	背景图像将向垂直和水平方向重复。这是默认
+> * repeat-x	只有水平位置会重复背景图像
+> * repeat-y	只有垂直位置会重复背景图像
+> * no-repeat	background-image不会重复
+> * inherit	指定background-repea属性设置应该从父元素继承
 
 | 继承 | 初始值 | 版本 |
 | ---- | ------ | ---- |
@@ -300,9 +381,22 @@
 
 ### 2.4 background-position
 
-> background-position: {{ percentage | length | left | center| right  [^ 1 or 2 values]} | inherit}
->
 > 设置背景图像的初始位置
+>
+> 属性值: 
+>
+> * left top
+>   left center
+>   left bottom
+>   right top
+>   right center
+>   right bottom
+>   center top
+>   center center
+>   center bottom: 如果仅指定一个关键字，其他值将会是"center"
+> * x% y%	第一个值是水平位置，第二个值是垂直。左上角是0％0％。右下角是100％100％。如果仅指定了一个值，其他值将是50％。 。默认值为：0％0％
+> * xpos ypos	第一个值是水平位置，第二个值是垂直。左上角是0。单位可以是像素（0px0px）或任何其他 CSS单位。如果仅指定了一个值，其他值将是50％。你可以混合使用％和positions
+> * inherit	指定background-position属性设置应该从父元素继承
 
 | 继承 | 初始值 | 版本         |
 | ---- | ------ | ------------ |
@@ -310,11 +404,16 @@
 
 ### 2.5 background-attachment: 背景图片是否滚动
 
-> background-attachment: { scroll | fixed | inherit }
->
 > 定义背景图片是随文档一同滚动还是固定在显示区中
 >
-> 定义是基于视口的, 但是只有background-iamge的background-position属性与应用该背景图像的元素的内容，填充和边框区域一致时， 背景图像才会可见
+> ***定义是基于视口的, 但是只有background-iamge的background-position属性与应用该背景图像的元素的内容，填充和边框区域一致时， 背景图像才会可见***
+>
+> 属性值: 
+>
+> * scroll	背景图片随着页面的滚动而滚动，这是默认的。
+> * fixed	背景图片不会随着页面的滚动而滚动。
+> * local	背景图片会随着元素内容的滚动而滚动。
+> * inherit	指定 background-attachment 的设置应该从父元素继承
 
 | 继承 | 初始值 | 版本         |
 | ---- | ------ | ------------ |
@@ -322,7 +421,7 @@
 
 ### 2.6 background(连写属性)
 
-> background: { background-color background-image background-repeat background-attachment backgroun-position | inherit }
+> 语法: **bg-color bg-image position/bg-size bg-repeat bg-origin bg-clip bg-attachment initial|inherit;**
 >
 > 顺序没有强制顺序, 但是还是需要按照上面顺序
 
@@ -336,23 +435,44 @@
 
 
 
-## 3 排版属性
+## 3 字体属性
 
-> 设置文本内容的外观和布局
+> 设置文本字体
 
 ### 3.1 font-family
 
-> font-family: { family name, ... | inherit }
+> 有两种类型的字体系列名称：
+>
+> - **family-name** - 指定的系列名称：具体字体的名称，比如："times"、"courier"、"arial"。
+> - **generic-family** - 通常字体系列名称：比如："serif"、"sans-serif"、"cursive"、"fantasy"、"monospace。
+>
+> 属性值: 
+>
+> * family-name
+>   generic-family: 用于某个元素的字体族名称或/及类族名称的一个优先表。默认值：取决于浏览器。
+> *  inherit: 规定应该从父元素继承字体系列。
 
-| 继承 | 初始值     | 版本      |
-| ---- | ---------- | --------- |
-| 是   | sans-serif | CSS1,CSS2 |
+| 继承 | 初始值       | 版本      |
+| ---- | ------------ | --------- |
+| 是   | 取决于浏览器 | CSS1,CSS2 |
 
 ### 3.2 font-size
 
-> font-size: { absolute-size | relative-size | length | percentage | inherit }
+> 属性值: 
 >
-> absolute-size, relative-size都是系列关键字尺寸(绝对单位), 不建议使用
+> * xx-small
+>   x-small
+>   small
+>   medium
+>   large
+>   x-large
+>   xx-large: 把字体的尺寸设置为不同的尺寸，从 xx-small 				到 xx-large。默认值：medium。
+> * smaller	把 font-size 设置为比父元素更小的尺寸。
+> * larger	把 font-size 设置为比父元素更大的尺寸。
+> * length	把 font-size 设置为一个固定的值。
+> * %	把 font-size 设置为基于父元素的一个百分比值。
+> * inherit	规定应该从父元素继承字体尺寸。
+> * 
 
 | 继承 | 初始值 | 版本       |
 | ---- | ------ | ---------- |
@@ -360,11 +480,16 @@
 
 ### 3.3 font-weight
 
-> font-weight: { 100-900 | bold |bolder | lighter | normal | inherit }
->
 > ***有些字体(还跟浏览器有一定关系)只支持有限的字体粗细(normal和bold)***
 >
-> 属性值: 100-900(数值越大, 字体越粗) | bold(粗体, 约等于700) | normal(细体, 约等于400) | bolder(比继承来的要粗一些) | lighter(比继承要细一些)
+> 属性值: 
+>
+> * normal	默认值。定义标准的字符。
+> * bold	定义粗体字符。
+> * bolder	定义更粗的字符。
+> * lighter	定义更细的字符。
+> * 100-900   定义由粗到细的字符。400 等同于 normal，而 700 等同于 bold。
+> * inherit	规定应该从父元素继承字体的粗细。
 
 | 继承 | 初始值 | 版本       |
 | ---- | ------ | ---------- |
@@ -372,9 +497,12 @@
 
 ### 3.4 font-style
 
-> font-style: { italic | normal | oblique | inherit }
+> 属性值:
 >
-> 属性值: italic,oblique(都是斜体的意思) | normal( 标准的字体样式)
+> * normal	默认值。浏览器显示一个标准的字体样式。
+> * italic	浏览器会显示一个斜体的字体样式。
+> * oblique	浏览器会显示一个倾斜的字体样式。
+> * inherit	规定应该从父元素继承字体样式。
 
 | 继承 | 初始值 | 版本      |
 | ---- | ------ | --------- |
@@ -382,27 +510,21 @@
 
 ### 3.5 font-variant
 
-> font-variant: { normal | small-caps | inherit }
->
 > 设置元素文本小型大写字母文本 -- 很少见
 >
-> small-caps: 显示小型大写字母的字体
+> 属性值: 
+>
+> * normal	默认值。浏览器会显示一个标准的字体。
+> * small-caps	浏览器会显示小型大写字母的字体。
+> * inherit	规定应该从父元素继承 font-variant 属性的值。
 
 | 继承 | 初始值 | 版本      |
 | ---- | ------ | --------- |
 | 是   | normal | CSS1,CSS2 |
 
-### 3.6 line-height
+### 3.6 font(连写属性)
 
-> line-height: { length | number | percentage | normal | inherit }
-
-| 继承 | 初始值 | 版本       |
-| ---- | ------ | ---------- |
-| 是   | normal | CSS1, CSS2 |
-
-### 3.7 font(连写属性)
-
-> font: { [font-style] [font-variant] [font-weight] [font-size]/[line-height] font-family(caption | icon | menu | message-box | small-caption | status-bar)| inherit }
+> 可设置的属性是（按顺序）： "font-style font-variant font-weight font-size/line-height font-family"
 >
 > ***font-size 和 font-family是必须指定的***
 
@@ -410,67 +532,280 @@
 | ---- | -------------------- | ---------- |
 | 是   | 基于每个属性的初始值 | CSS1, CSS2 |
 
-### 3.8 color
 
-> color: { color | inherit }
+
+****
+
+
+
+## 4 文本属性
+
+### 4.1 color
+
+> 属性值: 
+>
+> * *color_name*: 规定颜色值为颜色名称的颜色（比如 red）
+> * *hex_number*: 规定颜色值为十六进制值的颜色（比如 #ff0000）
+> * *rgb_number*: 规定颜色值为 rgb 代码的颜色（比如 rgb(255,0,0)）
+> * inherit: 规定应该从父元素继承颜色
 
 | 继承 | 初始值             | 版本         |
 | ---- | ------------------ | ------------ |
 | 是   | 依照浏览器渲染不同 | CSS1, CSS2.1 |
 
-### 3.9 letter-spacing: 字符间距
+### 4.2 line-height
 
-> letter-spacing: { length | normal | inherit }
+> 属性值:
 >
-> 属性值 接受负的长度值
+> *  normal:  默认。设置合理的行间距。 
+> *  *number*:  设置数字,此数字会与当前的字体尺寸相乘来设置行间距。
+> *  *length*: 设置固定的行间距。
+> * %:  基于当前字体尺寸的百分比行间距。 
+> *  inherit: 规定应该从父元素继承 line-height 属性的值。
 
 | 继承 | 初始值 | 版本       |
 | ---- | ------ | ---------- |
 | 是   | normal | CSS1, CSS2 |
 
-### 3.10 word-spacing: 单词的间距
 
-> word-spacing: { length | normal | inherit }
+
+### 4.3 letter-spacing: 字符间距
+
+> 属性值: 
 >
-> 属性值接受负的值
+> *  normal: 默认。规定字符间没有额外的空间。
+> *  *length*: 定义字符间的固定空间(允许使用负值)。
+> *  inherit: 规定应该从父元素继承 letter-spacing 属性的值。
 
-### 3.11 text-align
+| 继承 | 初始值 | 版本       |
+| ---- | ------ | ---------- |
+| 是   | normal | CSS1, CSS2 |
 
-> text-align: { center | justify | left | right | inherit }
+### 4.4 word-spacing: 单词的间距
+
+> 属性值: 
+>
+> *  normal: 默认。规定字符间没有额外的空间。
+> *  *length*: 定义字符间的固定空间(允许使用负值)。
+> *  inherit: 规定应该从父元素继承 letter-spacing 属性的值。
+
+### 4.5 text-align
+
+> 属性值: 
+>
+> * left 把文本排列到左边。默认值：由浏览器决定。
+> * right 	把文本排列到右边。
+> * center 	把文本排列到中间。
+> * justify 	实现两端对齐文本效果。
+> * inherit 	规定应该从父元素继承 text-align 属性的值。
 
 | 继承 | 初始值                | 版本       |
 | ---- | --------------------- | ---------- |
 | 是   | 跟direction属性值有关 | CSS1, CSS2 |
 
-### 3.12 text-decoration: 下划线、上划线等
+### 4.6 text-decoration: 下划线、上划线等
 
-> text-decoration: { 文本装饰样式 | none | inherit }
+> 属性值: 
 >
-> 属性值: line-through: 文本中间 | overline: 文本上方 | underline: 文本下方
+> * none	默认。定义标准的文本。
+> * underline	定义文本下的一条线。
+> * overline	定义文本上的一条线。
+> * line-through	定义穿过文本下的一条线。
+> * blink	定义闪烁的文本。
+> * inherit	规定应该从父元素继承 text-decoration 属性的值。
 
 | 继承 | 初始值 | 版本       |
 | ---- | ------ | ---------- |
 | 否   | none   | CSS1, CSS2 |
 
-### 3.12 text-indent: 第一个文本缩进量
+### 4.7 text-indent: 第一个文本缩进量
 
-> text-indent: { length | percentage | inherit }
+> 属性值: 
 >
-> 可以使用负值
+> * length	定义固定的缩进, 允许负值
+> * %	定义基于父元素宽度的百分比的缩进。
+> * inherit	规定应该从父元素继承 text-indent 属性的值。
 
 | 继承 | 初始值 | 版本       |
 | ---- | ------ | ---------- |
 | 是   | 0      | CSS1, CSS2 |
 
-### 3.13 text-transform: 控制字母大小写
+### 4.8 text-transform: 控制字母大小写
 
-> text-transform: { 见下面 | none | inherit }
+> 属性值: 
 >
-> 属性值: capitalize: 将首字母变成大写 | lowercase: 所有字母变成小写 | uppercase: 所有变成大写
+> * none	默认。定义带有小写字母和大写字母的标准的文本。
+> * capitalize	文本中的每个单词以大写字母开头。
+> * uppercase	定义仅有大写字母。
+> * lowercase	定义无大写字母，仅有小写字母。
+> *  inherit	规定应该从父元素继承 text-transform 属性的值。
 
 | 继承 | 初始值 | 版本       |
 | ---- | ------ | ---------- |
 | 是   | none   | CSS1, CSS2 |
+
+### 4.9 text-shadow
+
+> 语法: text-shadow: h-shadow v-shadow blur color;
+>
+> 属性值: 
+>
+> * h-shadow	必需。水平阴影的位置。允许负值。
+> * v-shadow	必需。垂直阴影的位置。允许负值。
+> * blur	可选。模糊的距离。
+> * color	可选。阴影的颜色
+
+| 继承 | 初始值 | 版本       |
+| ---- | ------ | ---------- |
+| 否   | none   | CSS2, CSS3 |
+
+### 4.10 vertical-align: 文本垂直对齐方式
+
+> vertical-align: { 其他 | none }
+>
+> 在表单元格中，这个属性会设置单元格框中的单元格内容的对齐方式。 
+>
+> 属性值: 
+>
+> 	* length: 使元素的基线对齐到父元素的基线之上的给定长度。可以是负数。
+> 	* percentage:  使元素的基线对齐到父元素的基线之上的给定百分比，该百分比是line-height属性的百分比。可以是负数。 
+> 	* baseline: ***将子box的基线与其父box的基线对齐. 如果该子box没有基线(例如图像), 那么会将该子box边距的底部边缘与其父元素的基线对齐.*** 
+> 	*  sub:  使元素的基线与父元素的下标基线对齐。 
+> 	* super:  使元素的基线与父元素的上标基线对齐。 
+> 	* text-top: 使元素的顶部与父元素的字体顶部对齐。
+> 	* text-bottom: 使元素的底部与父元素的字体底部对齐。
+> 	* middle: 使元素的中部与父元素的基线加上父元素x-height的一半对齐。
+> 	* top: 使元素及其后代元素的顶部与整行的顶部对齐。
+> 	* bottom: 使元素及其后代元素的底部与整行的底部对齐。
+
+| 继承 | 初始值   | 版本       |
+| ---- | -------- | ---------- |
+| 否   | baseline | CSS1, CSS2 |
+
+### 4.11 white-space: 控制对元素内部空白的处理
+
+> white-space: { normal | nowrap | pre | pre-line | pre-wrap | inherit }
+>
+> 空白: 空白字符、制表符、换行、回车和换页的统称。 ***通常客户端会将连续的空白字符折叠为一个空白字符***
+>
+> 属性值:
+>
+> 			* normal: 将连续的空白折叠为一个空白字符
+> 			* nowrap: 文本不会换行,文本会在在同一行上继续,直到遇到 \<br> 标签为止。
+> 			* pre: 空白会被浏览器保留。其行为方式类似 HTML 中的\<pre> 标签。
+> 			* pre-wrap: 保留空白符序列,但是正常地进行换行。
+> 			* pre-line: 合并空白符序列,但是保留换行符。
+
+| 继承 | 初始值 | 版本      |
+| ---- | ------ | --------- |
+| 是   | normal | CSS1,CSS2 |
+
+### 4.12 direction:  文本方向/书写方向。 
+
+> 属性值: 
+>
+> * ltr: 文本方向从左到右
+> * rtl: 文本方向从右到左
+> * inherit: 继承父元素
+>
+> 必须将unicode-bidi属性设置为embed值 或 override值
+
+| 继承 | 初始值 | 版本 |
+| ---- | ------ | ---- |
+| 是   | ltr    | CSS2 |
+
+### 4.13 unicode-bidi
+
+> 来设置或返回文本是否被重写，以便在同一文档中支持多种语言。 
+>
+> 属性值: 
+>
+> *  normal:  不使用附加的嵌入层面。 
+> * embed: 创建一个附加的嵌入层面。
+> *  bidi-override:  创建一个附加的嵌入层面。重新排序取决于 direction 属性。 
+> * inherit: 继承父元素
+
+| 继承 | 初始值 | 版本 |
+| ---- | ------ | ---- |
+| 否   | normal | CSS2 |
+
+## 5. 布局属性
+
+> 控制盒子的可见性、位置、行为
+
+### 5.1 display
+
+> ***可以通过控制此属性控制元素的box类型(也就是说, div元素也可以通过改变display元素来具有tbale元素的特性)***
+>
+> 属性值: 
+>
+> * none: 此元素不会被显示
+> * block: 块级元素, 独占一行
+> * inline: 默认. 内联元素, 元素前后没有换行符
+> * inline-block: 行内块元素(CSS2.1新增)
+> * list-item: 此元素会作为列表显示
+> * run-in: 此元素会根据上下文作为块级元素或内联元素显示
+> * table	此元素会作为块级表格来显示（类似 \<table>），表格前后带有换行符。
+> * inline-table	此元素会作为内联表格来显示（类似 \<table>），表格前后没有换行符。
+> * table-row-group	此元素会作为一个或多个行的分组来显示（类似 \<tbody>）。
+> * table-header-group	此元素会作为一个或多个行的分组来显示（类似\<thead>）。
+> * table-footer-group	此元素会作为一个或多个行的分组来显示（类似\<tfoot>）。
+> * table-row	此元素会作为一个表格行显示（类似 \<tr>）。
+> * table-column-group	此元素会作为一个或多个列的分组来显示（类似\<colgroup>）。
+> * table-column	此元素会作为一个单元格列显示（类似\<col>）
+> * table-cell	此元素会作为一个表格单元格显示（类似 \<td> 和\<th>）
+> * table-caption	此元素会作为一个表格标题显示（类似\<caption>）
+> * inherit	规定应该从父元素继承 display 属性的值。
+
+| 继承 | 初始值 | 版本         |
+| ---- | ------ | ------------ |
+| 否   | inline | CSS1, 2, 2.1 |
+
+### 5.2 position
+
+> 控制元素的位置,***带有position值而非static值得box被称为定位box, 在堆叠内容中的垂直位置是由z-index属性决定的***
+>
+> 属性值: 
+>
+> * absolute: 绝对定位, 相对于static定位以外的第一个父元素进行定位
+> * relative: 相对定位, 相对于其正常位置进行定位
+> * fixed: 生成固定定位的元素, 相对于浏览器窗口进行定位
+> * static: 默认值, 没有定位, 元素出现在正常的文档流中
+> * ***sticky: 粘性定位，该定位基于用户滚动的位置。它的行为就像 position:relative; 而当页面滚动超出目标区域时，它的表现就像 position:fixed;，它会固定在目标位置。注意: Internet Explorer, Edge 15 及更早 IE 版本不支持 sticky 定位。 Safari 需要使用 -webkit- prefix (查看以下实例)。***
+> * inherit: 父元素继承
+
+| 继承 | 初始值 | 版本 |
+| ---- | ------ | ---- |
+| 否   | static | CSS2 |
+
+### 5.3 top
+
+> 属性值: 
+>
+> * auto: 默认值. 通过浏览器计算上边缘的位置
+> * %: 以包含元素(相对于static定位以外的第一个父元素进行定位)为基准. 可负值
+> * length: 可负值
+> * inherit: 父元素继承
+
+| 继承 | 初始值 | 版本 |
+| ---- | ------ | ---- |
+| 否   | auto   | CSS2 |
+
+### 5.4 bottom
+
+> 
+
+| 继承 | 初始值 | 版本 |
+| ---- | ------ | ---- |
+| 否   | auto   | CSS2 |
+
+
+
+### 5.3 right
+
+| 继承 | 初始值 | 版本 |
+| ---- | ------ | ---- |
+| 否   | auto   | CSS2 |
 
 
 
