@@ -936,21 +936,152 @@
 
 ### 6.1 list-style-type
 
-> 
+> 指定列表中项目标记的类型
+>
+> ***列表标记的颜色与列表项color属性的计算值相同***
+>
+> 属性值: 
+>
+> * none	无标记。
+> * disc	默认。标记是实心圆。
+>   circle	标记是空心圆。
+> * square	标记是实心方块。
+> * decimal	标记是数字。
+> * decimal-leading-zero	0开头的数字标记。(01, 02, 03, 等。)
+> * lower-roman	小写罗马数字(i, ii, iii, iv, v, 等。)
+> * upper-roman	大写罗马数字(I, II, III, IV, V, 等。)
+> * lower-alpha	小写英文字母The marker is lower-alpha (a, b, c, d, e, 等。)
+> * upper-alpha	大写英文字母The marker is upper-alpha (A, B, C, D, E, 等。)
+> * lower-greek	小写希腊字母(alpha, beta, gamma, 等。)
+> * lower-latin	小写拉丁字母(a, b, c, d, e, 等。)
+> * upper-latin	大写拉丁字母(A, B, C, D, E, 等。)
+> * hebrew	传统的希伯来编号方式
+> * armenian	传统的亚美尼亚编号方式
+> * georgian	传统的乔治亚编号方式(an, ban, gan, 等。)
+> * cjk-ideographic	简单的表意数字
+> * hiragana	标记是：a, i, u, e, o, ka, ki, 等。（日文片假名）
+> * katakana	标记是：A, I, U, E, O, KA, KI, 等。（日文片假名）
+> * hiragana-iroha	标记是：i, ro, ha, ni, ho, he, to, 等。（日文片假名）
+> * katakana-iroha	标记是：I, RO, HA, NI, HO, HE, TO, 等。（日文片假名）
 
 | 继承 | 初始值 | 版本       |
 | ---- | ------ | ---------- |
 | 是   | disc   | CSS1, CSS2 |
 
+### 6.2 list-style-position
+
+> 指示如何相对于对象的内容绘制列表项标记。 
+>
+> 属性值: 
+>
+> * inside	列表项目标记放置在文本以内，且环绕文本根据标记对齐。
+> * outside	默认值。保持标记位于文本的左侧。列表项目标记放置在文本以外，且环绕文本不根据标记对齐。
+> * inherit	规定应该从父元素继承 list-style-position 属性的值。
+
+| 继承 | 初始值  | 版本 |
+| ---- | ------- | ---- |
+| 是   | outside | CSS1 |
+
+![list-style-position](./list-style-position.png 'list-style-position')
+
+### 6.3 list-style-image
+
+> ***将图像指定为列表(display属性值为list-item的元素)中项目的列表标记. 如果可以获取指定的图像, 那么该图像会代替所有由list-style-type属性指定的标记***
+>
+> 属性值:
+>
+> * URL	图像的路径。
+> * none	默认。无图形被显示。
+> * inherit	规定应该从父元素继承 list-style-image 属性的值。
+
+| 继承 | 初始值 | 版本 |
+| ---- | ------ | ---- |
+| 是   | none   | CSS1 |
+
+### 6.4 list-style
+
+> 可以设置的属性（规范顺序, 但不强制顺序）： list-style-type, list-style-position, list-style-image.
+>
+> 可以不设置其中的某个值，比如 "list-style:circle inside;" 也是允许的。未设置的属性会使用其默认值。
+
+| 继承 | 初始值       | 版本 |
+| ---- | ------------ | ---- |
+| 是   | 各属性初始值 | CSS1 |
 
 
 
+****
 
 
 
+## 7. 表属性
 
+> 控制表元素的布局和外观
 
+### 7.1 table-layout:  设置表格布局算法 
 
+> **指定用于对表或内联表进行显示(display属性被指定为table或inline-table的元素)的布局算法.**
+>
+> 属性值: 
+>
+> * auto 默认。列宽度由单元格内容设定
+> * fixed	列宽由表格宽度和列宽度设定。
+> * inherit	规定应该从父元素继承 table-layout 属性的值。
+
+| 继承 | 初始值 | 版本 |
+| ---- | ------ | ---- |
+| 否   | auto   | CSS2 |
+
+### 7.2 border-collapse:   设置表格的边框是否被合并为一个单一的边框 
+
+> **指定用于表或内联表(display属性被置顶位table 或 inline-table的元素)的边框模式**
+>
+> 属性值: 
+>
+> * collapse	如果可能，边框会合并为一个单一的边框。会忽略 border-spacing 和 empty-cells 属性
+> * separate	默认值。边框会被分开。不会忽略 border-spacing 和 empty-cells 属性
+> * inherit	规定应该从父元素继承 border-collapse 属性的值
+
+| 继承 | 初始值   | 版本         |
+| ---- | -------- | ------------ |
+| 是   | separate | CSS2, CSS2.1 |
+
+### 7.3 border-spacing:  设置相邻单元格的边框间的距离 
+
+> 属性值: 
+>
+> * length length	规定相邻单元的边框之间的距离。使用 px、cm 等单位。不允许使用负值。
+>   * 如果定义一个 length 参数，那么定义的是水平和垂直间距。
+>   * 如果定义两个 length 参数，那么第一个设置水平间距，而第二个设置垂直间距。
+> * inherit	指定应该从父元素继承border - spacing属性的值
+
+| 继承 | 初始值 | 版本 |
+| ---- | ------ | ---- |
+| 是   | 0      | CSS2 |
+
+### 7.4 empty-cells:  是否显示表格中的空单元格 
+
+> 属性值: 
+>
+> * hide	不在空单元格周围绘制边框。
+> * show	在空单元格周围绘制边框。默认。
+> * inherit	规定应该从父元素继承 empty-cells 属性的值。
+
+| 继承 | 初始值 | 版本 |
+| ---- | ------ | ---- |
+| 是   | show   | CSS2 |
+
+### 7.5 caption-side:  设置表格标题的位置
+
+> 属性值: 
+>
+> * top	默认值。把表格标题定位在表格之上。
+> * bottom	把表格标题定位在表格之下。
+> * inherit	规定应该从父元素继承 caption-side 属性的值。
+
+| 继承 | 初始值 | 版本         |
+| ---- | ------ | ------------ |
+| 否   | top    | CSS2, CSS2.1 |
 
 
 
