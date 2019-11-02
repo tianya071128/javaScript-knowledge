@@ -191,6 +191,33 @@ scrollByPages(pageCount); // 将元素的内容滚动指定的页面高度
 
 
 
+****
+
+
+
+## 3 DOM2 和 DOM3
+
+### 3.1 样式
+
+#### 1. 访问元素的样式
+
+> * style对象是CSSStyleDeclaration的示例, 包含HTML的style特性, 但不包含与外部样式表或嵌入样式表经层叠而来的样式
+>
+> * DOM2级样式 为style对象定义了一些属性 和 方法
+>
+>   ```javascript
+>   cssText // 通过它能够访问到 style 特性中的 CSS 代码。
+>   length: // 应用给元素的CSS属性的数量
+>   getPropertyCSSValue(propertyName)// 返回指定属性值得CSSValue对象
+>   getPropertyValue(propertyName) // 返回给定属性的字符串值
+>   item(index) // 返回给定位置的CSS属性的名称
+>   setProperty(propertyName,value,priority) // 将给定属性设置为相应的值, 并加上优先权标志(important或者一个空字符串)
+>   ```
+>
+> * 元素大小
+>
+>   > * 偏移量: 包括元素在屏幕上占用的所有可见的空间
+
 
 
 ## 7. DOM相关API
@@ -480,6 +507,113 @@ div.dataset.myname = "Michael";
 > 实际上, 为某个元素设置焦点也会导致浏览器滚动并显示出获得焦点的元素
 >
 > 详情见MDN
+
+### 元素样式 以及 大小
+
+* document.defaultView.getComputedStyle(element, [pseudoElt]): 获取当前元素的所有计算的样式, 包含从样式表层叠而来的样式
+
+  ```javascript
+  /**
+       * @param element: 用于获取计算样式的Element
+       * @param pseudoElt(可选): 指定一个要匹配的伪元素的字符串。必须对普通元素省略（或null）
+       * @return: 返回的style是一个实时的CSSStyleDeclaration 对象，当元素的样式更改时，它会自动更新本身。
+       */
+  // 返回值时一个对象, 包含元素的样式, 对象为只读对象, 不可写入
+  ```
+
+* 偏移量: 包括元素在屏幕上占用的所有可见的空间
+
+  ```javascript
+  // 都是只读属性, 不可写
+  offsetHeight // 元素的高度 + 水平滚动条 + 上下内边距 + 上下边框
+  offsetWidth: // 元素的宽度 + 垂直滚动条 + 左右内边距 + 左右边框
+  offsetLeft: // 元素的左外边距至包含元素的左内边框之间的像素距离
+  offsetTop: // 元素的上外边距至包含元素的上内边框之间的像素距离
+  offsetParent // 包含元素的引用, 不一定与parentNode的值相等 --只读属性，返回一个指向最近的（closest，指包含层级上的最近）包含该元素的定位元素。如果没有定位的元素，则 offsetParent 为最近的 table, td, th或body元素。当元素的 style.display 设置为 "none" 时，offsetParent 返回 null。
+  ```
+
+  ![偏移量](./偏移量.png '偏移量')
+
+* 客户区大小: 元素内容及其内边距所占据的空间大小
+
+  ```javascript
+  // 都是只读属性, 不可写
+  clientWidth // 元素的高度 + 上下内边距-- 不包含滚动条以及滚动的距离
+  clientHeight: // 元素的宽度 + 左右内边距 -- 不包含滚动条以及滚动的距离
+  
+  // 用来确定客户端客户区大小(可视区大小): 
+  function getViewport(){
+  	if (document.compatMode == "BackCompat"){
+  		return {
+  			width: document.body.clientWidth,
+  			height: document.body.clientHeight
+  		};
+  	} else {
+  		return {
+  			width:  						document.documentElement.clientWidth,
+  			height:
+            document.documentElement.clientHeight
+  		};
+  	}
+  }
+  ```
+
+  ![客户区](./客户区.png '客户区')
+
+* 滚动大小: 包含滚动内容的元素大小
+
+  ```javascript
+  
+  scrollHeight // 在没有滚动条的情况下, 元素内容的总高度 -- 只读属性
+  scrollWidth: // 在没有滚动条的情况下, 元素内容的总宽度-- 只读属性
+  scrollLeft: // 被隐藏在内容区域左侧的像素数. -- 可读写
+  scrollTop // 被隐藏在内容区域上方的像素数. -- 可读写
+  
+  // 确定文档的总高度(包括基于视口的最小高度), 
+  var docHeight = Math.max(document.documentElement.scrollHeight,
+  document.documentElement.clientHeight);
+  var docWidth = Math.max(document.documentElement.scrollWidth,
+  document.documentElement.clientWidth);
+  ```
+
+  ![滚动大小](./滚动大小.png '滚动大小')
+
+* 确定元素大小: 确定元素在页面中相对于视口的位置
+
+  ```javascript
+  // IE8-的起始坐标为(2, 2) == 有兼容性问题 
+  getBoundingClientRect()
+   /**
+       * @param none
+       * @return: TextRectangle对象
+       	rectObject.top：元素上边到视窗上边的距离;
+          rectObject.right：元素右边到视窗左边的距离;
+  		rectObject.bottom：元素下边到视窗上边的距离;
+          rectObject.left：元素左边到视窗左边的距离;
+       */
+  ```
+
+  ![元素大小](./元素大小.png '元素大小')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
