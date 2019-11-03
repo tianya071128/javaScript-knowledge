@@ -10,10 +10,11 @@
 
 * markdown
 * sass
+* css
 
 ## 计划列表
 
-* css 和 css3
+* css3
+* html 和 html5
 * 正则
-* html 和 heml5
 * BOM 和 DOM

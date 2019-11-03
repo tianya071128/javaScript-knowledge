@@ -244,3 +244,44 @@
 
 ## 第七章 CSS世界的层叠规则
 
+### 7.1 z-index只是CSS层叠规则中的一叶小舟
+
+* 随着 CSS3 新世界的到来，z-index 已经并非只对定位元素有效，flex 盒子的子元素也可以设置 z-index 属性，不过本书并不予以讨论。
+
+### 7.2 理解CSS世界的层叠上下文和层叠水平
+
+### 7.3 理解元素的层叠顺序
+
+![层叠顺序](./层叠顺序.png '层叠顺序')
+
+### 7.4 深入了解层叠上下文
+
+* 层叠上下文的创建: 
+
+  > * 天生派：页面根元素天生具有层叠上下文，称为根层叠上下文。
+  >
+  > * 正统派：z-index 值为数值的定位元素的传统“层叠上下文”。
+  >
+  > * 扩招派：其他 CSS3 属性。
+  >
+  >   > * 元素为 flex 布局元素（父元素 display:flex|inline-flex），同时 z-index
+  >   >   值不是 auto。
+  >   > * 元素的 opacity 值不是 1。
+  >   > * 元素的 transform 值不是 none。
+  >   > * 元素 mix-blend-mode 值不是 normal。
+  >   > * 元素的 filter 值不是 none。
+  >   > * 元素的 isolation 值是 isolate。
+  >   > * 元素的 will-change 属性值为上面 2～6 的任意一个（如 will-change:opacity、
+  >   >   will-chang:transform 等）。
+  >   > * 元素的-webkit-overflow-scrolling 设为 touch。
+
+![新层叠顺序](./新层叠顺序.png '新层叠顺序')
+
+
+
+****
+
+
+
+## 第八章: 强大的文本处理能力
+
