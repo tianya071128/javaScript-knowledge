@@ -172,3 +172,75 @@
 
 ## 第六章: 流的破坏与保护
 
+### 6.1 魔鬼属性float
+
+* CSS 设计的初衷就是表现如水流，富有弹性，
+
+* 浮动让元素块状化
+
+### 6.2 float的天然克星clear
+
+* clear 属性是让自身不能和前面的浮动元素相邻，注意这里“前面的”3 个字，也就是 clear 属性对“后面的”浮动元素是不闻不问的，直接使用 clear:both
+* clear 属性只有块级元素才有效的，
+
+### 6.3 CSS世界的结界——BFC
+
+* BFC: 块级格式化上下文 -- IFC: 内联格式化上下文
+
+* 如果一个元素具有 BFC，内部子元素再怎么翻江倒海、翻
+  云覆雨，都不会影响外部的元素。所以，BFC 元素是不可能发生 margin 重叠的，因为 margin重叠是会影响外面的元素的；BFC 元素也可以用来清除浮动的影响，因为如果不清除，子元素浮动则父元素高度塌陷，必然会影响后面元素布局和定位，这显然有违 BFC 元素的子元素不会
+  影响外部元素的设定。
+
+* > 触发BFC的条件
+  >
+  > * \<html>根元素；
+  > * float 的值不为 none；
+  > * overflow 的值为 auto、scroll 或 hidden；
+  > * display 的值为 table-cell、table-caption 和 inline-block 中的任何一个；
+  > * position 的值不为 relative 和 static。
+
+### 6.4 最佳结界overflow
+
+* 清除浮动的选择 -- 触发BFC
+* HTML 中有两个标签是默认可以产生滚动条的，一个是根元素\<html>，另一个是文本域\<textarea>。
+
+### 6.5 float的兄弟position: absolute
+
+* 包含块（containing block）这个概念实际上大家一直都有接触，就是元素用来计算和定位的一个框。比方说，width:50%，也就是宽度一半，那到底是哪个“元素”宽度的一半呢？注意，这里的这个“元素”实际上就是指的“包含块”。
+* 普通元素的百分比宽度是相对于父元素的 content box 宽度计算的，而绝对定位元素的宽度是相对于第一个
+  position 不为 static 的祖先元素计算的。***
+
+* > absolute绝对定位元素的与文档流元素差异:
+  >
+  > * 内联元素也可以作为“包含块”所在的元素；
+  > * “包含块”所在的元素不是父块级元素，而是最近的 position 不为 static 的祖先元素或根元素
+  > * 边界是 padding box 而不是 content box。(**文档流是content box**)
+
+* height:100%和 height:inherit 的区别。对于普通元素，两者确实没什么区别，但是对于绝对定位元素就不一样了。height:100%是第一个具有定位属性值的祖先元素的高度，而 height:inherit 则是单纯的父元素的高度继承，在某些场景下非常好用。
+
+### 6.6 absolute与overflow
+
+* **如果overflow 不是定位元素，同时绝对定位元素和 overflow 容器之间也没有定位元素，则overflow 无法对 absolute 元素进行剪裁**
+
+### 6.7 absolute与clip
+
+* clip属性: clip: rect(top,right, bottom, left), 用于将定位元素裁减(可用于固定定位的裁减)
+
+![clip](./clip.png 'clip')
+
+### 6.8 absolute的流体特性
+
+### 6.9 position: relative才是大哥
+
+### 6.10 position:fixed固定定位
+
+* position:fixed 固定定位元素的“包含块”是根元素，我们可以将其近似看成\<html>元素。
+
+
+
+****
+
+
+
+## 第七章 CSS世界的层叠规则
+
