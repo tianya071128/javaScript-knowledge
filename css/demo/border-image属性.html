@@ -1,0 +1,54 @@
+<!--
+ * @Descripttion: border-image属性练习
+ * @Author: 温祖彪
+ * @Date: 2019-11-05 20:51:04
+ * @LastEditTime: 2019-11-05 21:20:35
+ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      div {
+        width: 500px;
+        height: 500px;
+        padding: 0;
+        margin: 100px auto;
+        box-sizing: border-box;
+        background: red;
+        border: 100px solid transparent;
+        /* 
+          1. 首先需要设置边框, 边框图像才能出现
+          2. border-image-source: 边框图像位置
+          3. border-image-slice: 图片的裁剪位置（border-image-slice）
+                这个参数是没有单位的，或者说是默认单位就是像素(px)，并且支持百分比值(相对于边框图片的大小)，这里的位置可以是1到4个参数，和margin的理解方式一样，
+                分别表示上右下左，即第一个参数表示距离上面多少，第二个表示距离右边多少，依此类推，在对边框进行四刀切的时候，会分成九块，就是形成所谓的九宫格。
+          4. border-image-repeat: 一个参数则表示水平方向及垂直方向均使用此参数；二个参数的话则第一个参数表水平方向，第二个参数表示垂直方向。
+          --------------- 主要是上面是三个属性, 类似于背景图片 -----------------------
+          5. border-image-width: 
+              这个属性默认是边框的宽度，用来限制相应区域背景图的范围，
+              首先相应背景区域的图像会根据这个属性值进行缩放。然后再重复或平铺或拉伸。
+              在复合写法中应该位于 slice属性 和repeat属性中间 用“/”间隔
+              如：border-image:url(border.png) 27 / 6rem / repeat;
+              语法：border-image-width: [ <length> | <percentage> | <number> | auto ]{1,4}
+          6. border-image-outset: 
+              语法：border-image-outset: [ <length> | <number> ]{1,4}
+              相当于把原来的贴图位置向外延伸。不能为负值，试一下就知道。
+              在复合写法中应该位于 border-image-width 后面，用“/”间隔
+              如：border-image:url(border.png) 27 / 6rem / 1.5rem /repeat;
+              向外延伸1.5rem再贴图。。
+
+         */
+        border-image-source: url("../image/cai.png");
+        border-image-slice: 30 30;
+        border-image-repeat: repeat stretch;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box"></div>
+  </body>
+</html>
