@@ -1,0 +1,51 @@
+<!--
+ * @Descripttion: DOM0级事件处理程序
+ * @Author: 温祖彪
+ * @Date: 2019-11-06 14:19:27
+ * @LastEditTime: 2019-11-06 14:31:36
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    #box1 {
+      width: 500px;
+      height: 500px;
+      background: red;
+    }
+
+    #box2 {
+      width: 200px;
+      height: 200px;
+      background: #000;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="box1">
+    <div id="box2"></div>
+  </div>
+</body>
+
+</html>
+
+<script>
+  // DOM0级事件只会在事件冒泡阶段处理, 也就是说, 捕获是无效的
+  let box1 = document.getElementById('box1'),
+    box2 = document.getElementById('box2');
+  box1.onclick = function () {
+    console.log('这是父亲');
+  }
+  box2.onclick = function () {
+    console.log('这是儿子');
+  }
+  document.body.onclick = function () {
+    console.log('我是body元素');
+  }
+</script>

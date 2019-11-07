@@ -218,7 +218,9 @@ scrollByPages(pageCount); // 将元素的内容滚动指定的页面高度
 >
 >   > * 偏移量: 包括元素在屏幕上占用的所有可见的空间
 
+### 3.2 遍历
 
+#### 3.3 范围 
 
 ## 7. DOM相关API
 
@@ -365,8 +367,6 @@ scrollByPages(pageCount); // 将元素的内容滚动指定的页面高度
        */
   ```
 
-  
-
 * 特殊集合
 
   ```javascript
@@ -376,7 +376,8 @@ scrollByPages(pageCount); // 将元素的内容滚动指定的页面高度
   document.links// 包含文档中所有带 href特性的 <a> 元素。
   ```
 
-
+   
+  
 ### 取得元素特性
 
 * getAttribute(attributename ): 获取元素特性
@@ -595,9 +596,46 @@ div.dataset.myname = "Michael";
 
   ![元素大小](./元素大小.png '元素大小')
 
+### 节点遍历 及 范围
 
 
+*  节点遍历
 
+   ```javascript
+   /*
+     *  @param: root: 作为搜索起点的树中的节点
+     *  @param: whatToshow: 要访问哪些节点的数字代码
+     *  @param: filter: 是一个NodeFilter对象, 或者一个表示应该接受还是拒绝某种特定节点的函数
+     *  @param: entityReferenceExpansion: 要访问哪些节点的数字代码
+     *  @return: 返回一个NodeIterator实例, 包含root中返回filter条件的所有节点
+   */
+   var iterator = document.createNodeIterator(root, 		NodeFilter.SHOW_ELEMENT,
+   filter, false);
+   // 返回的iterator有两个主要方法: nextNode() 和 previousNode()
+   // 存在兼容性问题
+   ```
+
+   ```javascript
+   /*
+     *  @param: root: 作为搜索起点的树中的节点
+     *  @param: whatToshow: 要访问哪些节点的数字代码
+     *  @param: filter: 是一个NodeFilter对象, 或者一个表示应该接受还是拒绝某种特定节点的函数
+     *  @param: entityReferenceExpansion: 要访问哪些节点的数字代码
+     *  @return: 返回一个NodeIterator实例, 包含root中返回filter条件的所有节点
+   */
+   var walker = document.createTreeWalker(root, 		NodeFilter.SHOW_ELEMENT,
+   filter, false);
+   /* 返回的walker主要方法: 
+   	parentNode(): 遍历到当前节点的父节点
+   	firstChild(): 遍历到当前节点的第一个子节点
+   	lastChild(): 遍历到当前节点的最后一个子节点
+   	nextSibling(): 遍历到当前节点的下一个同辈节点
+   	previousSibling(): 遍历到当前节点的上一个同辈节点
+   	currentNode属性; 在上一次遍历中返回的节点
+   */
+   ```
+
+* 范围: document.createRange() -- 见MDN
 
 
 
