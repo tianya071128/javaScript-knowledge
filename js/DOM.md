@@ -533,7 +533,7 @@ div.dataset.myname = "Michael";
   offsetParent // 包含元素的引用, 不一定与parentNode的值相等 --只读属性，返回一个指向最近的（closest，指包含层级上的最近）包含该元素的定位元素。如果没有定位的元素，则 offsetParent 为最近的 table, td, th或body元素。当元素的 style.display 设置为 "none" 时，offsetParent 返回 null。
   ```
 
-  ![偏移量](./偏移量.png '偏移量')
+  ![偏移量](./image/偏移量.png '偏移量')
 
 * 客户区大小: 元素内容及其内边距所占据的空间大小
 
@@ -559,7 +559,7 @@ div.dataset.myname = "Michael";
   }
   ```
 
-  ![客户区](./客户区.png '客户区')
+  ![客户区](./image/客户区.png '客户区')
 
 * 滚动大小: 包含滚动内容的元素大小
 
@@ -577,7 +577,7 @@ div.dataset.myname = "Michael";
   document.documentElement.clientWidth);
   ```
 
-  ![滚动大小](./滚动大小.png '滚动大小')
+  ![滚动大小](./image/滚动大小.png '滚动大小')
 
 * 确定元素大小: 确定元素在页面中相对于视口的位置
 
@@ -594,7 +594,7 @@ div.dataset.myname = "Michael";
        */
   ```
 
-  ![元素大小](./元素大小.png '元素大小')
+  ![元素大小](./image/元素大小.png '元素大小')
 
 ### 节点遍历 及 范围
 
