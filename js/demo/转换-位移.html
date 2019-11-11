@@ -1,0 +1,97 @@
+<!--
+ * @Descripttion: 转换-位移
+ * @Author: 温祖彪
+ * @Date: 2019-11-11 23:29:08
+ * @LastEditTime: 2019-11-12 00:14:36
+ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      #font {
+        perspective: 1000;
+        -webkit-perspective: 1000;
+      }
+      p {
+        text-align: center;
+      }
+      .weiyi {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+        background-color: black;
+        /* 当设置了transform时, 就会生成层叠上下文, 即它下面的子元素最多根据此元素定位, 即这个元素为最外层的包含块 */
+        /* 设置了一个值就是设置X轴 */
+        transform: translate(10px, 10px);
+        /* 3d转换很重要的一个点, 就是需要设置.. */
+        transform: translateZ(10px);
+      }
+      .box {
+        width: 50px;
+        height: 50px;
+      }
+      #box {
+        width: 50%;
+        height: 50%;
+        position: absolute;
+      }
+      .xuanzhuan {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+        background-color: aqua;
+        transform: rotate(45deg);
+        /* 单独定义一个旋转, 相当于设定3d旋转, 但因为没有视觉效果, 所以会出现扁平的效果, 此时需要配合perspective属性 */
+        transform: rotateX(45deg);
+        transform: rotateY(45deg);
+        transform: rotateZ(45deg);
+      }
+      .suofang {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+        background-color: blueviolet;
+        /* 设置一个值: 宽高同时变化. 设置两个值: 第一个值为宽, 第二个值为高 */
+        transform: scale(5, 1.1);
+        transform: scaleX(5);
+        transform: scaleY(5);
+        transform: scaleZ(5);
+      }
+      .qingxie {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+        background-color: brown;
+        /* 没有3d倾斜 */
+        transform: skew(130deg);
+        transform: skewX(130deg);
+        transform: skewY(130deg);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="font">
+      <p>这是用来测试位移的盒子</p>
+      <div class="weiyi">
+        <div class="box">
+          <div id="box"></div>
+        </div>
+      </div>
+      <p>这是用来测试旋转的盒子</p>
+      <div class="xuanzhuan"></div>
+      <p>这是用来测试缩放的盒子</p>
+      <div class="suofang"></div>
+      <p>这是用来测试倾斜的盒子</p>
+      <div class="qingxie"></div>
+    </div>
+  </body>
+</html>
+
+<script>
+  // 包含块为.weiyi元素, 由此证明包含块是根据CSS世界所说的具有层叠上下文的元素
+  console.log(document.getElementById("box").offsetParent);
+</script>

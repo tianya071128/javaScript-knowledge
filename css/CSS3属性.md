@@ -373,7 +373,7 @@
 > 属性值:
 >
 > * length	轮廓与边框边缘的距离。允许负值
->   inherit	规定应从父元素继承 outline-offset 属性的值。
+>   	inherit	规定应从父元素继承 outline-offset 属性的值。
 
 | 继承 | 默认值 | 版本 |
 | ---- | ------ | ---- |
@@ -388,3 +388,77 @@
 > * nav-left	指定在何处使用左侧的箭头导航键进行导航
 > * nav-right	指定在何处使用右侧的箭头导航键进行导航
 > * nav-up	指定在何处使用箭头向上导航键时进行导航
+
+
+
+****
+
+
+
+## 第五部分 2D转换 和 3D转换
+
+### 5.1 transform: 转换属性
+
+#### 1. 位移	
+
+> 支持百分比: 百分比是基于自身的
+
+* translate(*x*,*y*)
+
+  > 当只填写一个值时, 为X轴位移
+
+* translate3d(*x*,*y*,*z*): 定义3D位移
+
+  > 需配合perspective属性使用
+
+* translateX(*x*)
+
+* translateY(*y*)
+
+* translateZ(*z*)
+
+#### 2. 旋转
+
+> 角度单位, 详情见CSS基础.md, 主要为deg
+
+* rotate(*angle*):  定义 2D 旋转，在参数中规定角度。 
+
+  > 2d旋转就是定义一个值
+
+* rotate3d(x,y,z,angle)	定义 3D 旋转。
+
+  > 需配合perspective属性使用
+
+* rotateX(angle)	定义沿着 X 轴的 3D 旋转。
+
+* rotateY(angle)	定义沿着 Y 轴的 3D 旋转。
+
+* rotateZ(angle)	定义沿着 Z 轴的 3D 旋转。
+
+#### 3. 缩放
+
+> 单位一般为number类型
+
+* scale(x[,y]?)	定义 2D 缩放转换。
+
+  > 设置一个值: 宽高同时变化. 设置两个值: 第一个值为宽, 第二个值为高
+
+* scale3d(x,y,z)	定义 3D 缩放转换。
+
+  >  需配合perspective属性使用
+
+* scaleX(x)	通过设置 X 轴的值来定义缩放转换。
+
+* scaleY(y)	通过设置 Y 轴的值来定义缩放转换。
+
+* scaleZ(z)	通过设置 Z 轴的值来定义 3D 缩放转换。
+
+#### 4. 倾斜
+
+> 角度单位, 详情见CSS基础.md, 主要为deg
+>
+> ***没有3d倾斜***
+
+* skew(x-angle,y-angle)	定义沿着 X 和 Y 轴的 2D 倾斜转换。
+* skewX(angle)	定义沿着 X 轴的 2D 倾斜转换。
+* skewY(angle)	定义沿着 Y 轴的 2D 倾斜转换。
