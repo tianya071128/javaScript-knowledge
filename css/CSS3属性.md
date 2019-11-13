@@ -424,12 +424,18 @@
 * rotate(*angle*):  定义 2D 旋转，在参数中规定角度。 
 
   > 2d旋转就是定义一个值
+  >
+  > 沿着原点旋转
 
 * rotate3d(x,y,z,angle)	定义 3D 旋转。
 
   > 需配合perspective属性使用
 
 * rotateX(angle)	定义沿着 X 轴的 3D 旋转。
+
+  > 当单独设置时, 就是相当于沿着X轴直接3D旋转
+  >
+  > 如果rotateX(90deg)的话, 就相当于隐藏元素
 
 * rotateY(angle)	定义沿着 Y 轴的 3D 旋转。
 
@@ -462,3 +468,98 @@
 * skew(x-angle,y-angle)	定义沿着 X 和 Y 轴的 2D 倾斜转换。
 * skewX(angle)	定义沿着 X 轴的 2D 倾斜转换。
 * skewY(angle)	定义沿着 Y 轴的 2D 倾斜转换。
+
+#### 5. 其他
+
+* none	定义不进行转换。
+* matrix(n,n,n,n,n,n)	定义 2D 转换，使用六个值的矩阵。
+* matrix3d(n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n)	定义 3D 转换，使用 16 个值的 4x4 矩阵。
+* perspective(n)	为 3D 转换元素定义透视视图。
+
+### 5.2 transform-origin: 调整原点
+
+> 更改一个元素变形的原点
+>
+> 2D转换元素可以改变元素的X和Y轴. 3D转换元素, 可以更改元素的Z轴
+>
+> 注意: ***使用此属性必须先使用transform属性***
+>
+> 默认值: 50% 50% 0
+>
+> 属性值: 方位值(left, center, right)、length、%（相对自身)
+
+### 5.3 backface-visibility: 背面是否可见
+
+>  定义当元素不面向屏幕时是否可见(例如3d旋转90度背面就会呈现在屏幕上)
+>
+> 属性值: 
+>
+> * visible	背面是可见的。
+> * hidden	背面是不可见的。
+
+### 5.4 3d变形相关属性
+
+* transform-style	规定被嵌套元素如何在 3D 空间中显示
+* perspective	规定 3D 元素的透视效果
+* perspective-origin	规定 3D 元素的底部位置。
+
+
+
+****
+
+
+
+##  第六部分 过渡
+
+### 6.1 transition-property: 应用过渡的属性
+
+> 必须结合transition-duration(过渡时间)属性, 否则持续时间为0
+>
+> **不要在auto属性上做动画**
+>
+> **插入元素(appendChild)或设置display:none/display:block后立即使用过渡,元素将视为没有开始状态，始终处于结束状态，解决办法：使用window.setTimeout,延迟执行**
+>
+> 属性值: 
+>
+> * none: 没有属性会获得过渡效果
+> * all: 所有属性都将获得过渡效果
+> * property: 应用过渡效果的CSS属性名称列表, 列表以逗号分隔(transition-property:width,height -- 这样会应用一样的过度时间,运动曲线等) -- **可应用的属性非常多**
+
+### 6.2 transition-duration: 过渡时间
+
+> 定义过渡时间
+>
+> 属性值:
+>
+> * time: 秒(s) 或 毫秒(ms)
+
+### 6.3 transition-timing-function: 过渡的速度函数
+
+>  指定切换效果的速度(过渡函数)
+>
+> 属性值: 
+>
+> * linear	规定以相同速度开始至结束的过渡效果（等于 cubic-bezier(0,0,1,1)）。
+> * ease	规定慢速开始，然后变快，然后慢速结束的过渡效果（cubic-bezier(0.25,0.1,0.25,1)）-- 默认值
+> * ease-in	规定以慢速开始的过渡效果（等于 cubic-bezier(0.42,0,1,1)）。
+> * ease-out	规定以慢速结束的过渡效果（等于 cubic-bezier(0,0,0.58,1)）。
+> * ease-in-out	规定以慢速开始和结束的过渡效果（等于 cubic-bezier(0.42,0,0.58,1)）。
+> * cubic-bezier(n,n,n,n)	在 cubic-bezier 函数中定义自己的值。可能的值是 0 至 1 之间的数值。
+
+### 6.4 transition-delay: 过渡开始需要等待的时间
+
+> 规定了过渡效果开始作用之前需要等待的时间
+>
+> 属性值:
+>
+> * time: 秒(s) 或 毫秒(ms)
+
+### 6.5 transition: 过渡
+
+> 语法: 
+>
+>  transition: *property duration timing-function delay*; 
+>
+> 注意: ***transition-duration属性必须指定, 否则持续时间为0, transition不会有任何效果***
+>
+> 可以指定多个CSS属性的过渡效果, 多个属性之间用逗号分隔

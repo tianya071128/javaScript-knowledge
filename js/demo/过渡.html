@@ -1,0 +1,63 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2019-11-13 22:04:32
+ * @LastEditTime: 2019-11-13 22:17:06
+ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      p {
+        text-align: center;
+      }
+      ul {
+        margin: 0 25%;
+        display: flex;
+      }
+      li {
+        height: 25px;
+        line-height: 25px;
+        overflow: hidden;
+        list-style: none;
+        flex: 1;
+      }
+      li div {
+        transition: background 3s, transform 3s;
+        background: red;
+      }
+      li:not(:last-of-type) {
+        margin-right: 5px;
+      }
+      li:hover div {
+        background: #fff;
+        transform: translateY(-50%);
+      }
+    </style>
+  </head>
+  <body>
+    <p>一个tab栏的过渡</p>
+    <ul>
+      <li>
+        <div>上面的文字<br />下面的文字</div>
+      </li>
+      <li>
+        <div>上面的文字<br />下面的文字</div>
+      </li>
+      <li>
+        <div>上面的文字<br />下面的文字</div>
+      </li>
+      <li>
+        <div>上面的文字<br />下面的文字</div>
+      </li>
+    </ul>
+  </body>
+</html>

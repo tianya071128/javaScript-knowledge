@@ -2,7 +2,7 @@
  * @Descripttion: 转换-位移
  * @Author: 温祖彪
  * @Date: 2019-11-11 23:29:08
- * @LastEditTime: 2019-11-12 00:14:36
+ * @LastEditTime: 2019-11-13 20:31:43
  -->
 <!DOCTYPE html>
 <html lang="en">
@@ -47,8 +47,9 @@
         transform: rotate(45deg);
         /* 单独定义一个旋转, 相当于设定3d旋转, 但因为没有视觉效果, 所以会出现扁平的效果, 此时需要配合perspective属性 */
         transform: rotateX(45deg);
-        transform: rotateY(45deg);
-        transform: rotateZ(45deg);
+        /* 定义一条轴旋转时, 就需要于沿着一条轴旋转, 如果rotateX(90deg)的话, 就相当于隐藏元素 */
+        transform: rotateY(90deg);
+        /* transform: rotateZ(45deg); */
       }
       .suofang {
         width: 100px;
