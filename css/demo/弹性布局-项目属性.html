@@ -1,0 +1,51 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2019-11-14 23:23:24
+ * @LastEditTime: 2019-11-15 00:08:30
+ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      ul {
+        width: 100%;
+        margin-top: 100px;
+        display: flex;
+        height: 300px;
+      }
+      li {
+        flex: 1;
+        background: red;
+        margin-right: 5px;
+        /* 利用这个属性就可以解决项目缩小的问题了啊 */
+        flex-shrink: 0;
+      }
+      div {
+        max-width: 10vw;
+      }
+    </style>
+  </head>
+  <body>
+    <ul>
+      <li></li>
+      <li>
+        <div>
+          asdfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffasdfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffasdfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffasdfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        </div>
+      </li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
+  </body>
+</html>

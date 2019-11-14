@@ -1,0 +1,77 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2019-11-14 22:51:31
+ * @LastEditTime: 2019-11-14 23:14:12
+ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      ul {
+        margin-top: 100px;
+        display: flex;
+        /* 项目之间的间隙是旁边的两倍 */
+        justify-content: space-around;
+        flex-wrap: wrap;
+        /* 因为align-itemss的默认值为tretch,如果项目未设置高度或设为auto，将占满整个容器的高度, 如果项目有换行, 则交叉轴上的项目会自动填充满高度(两行则对半分, 依次类推)*/
+        align-items: alite;
+        /* 定义多根轴线, 属性跟justify-content类似, 就是多了个默认值stretch, 自动填充满高度 */
+        align-content: space-around;
+        height: 300px;
+      }
+      li {
+        width: 30%;
+        background: red;
+      }
+      li:nth-of-type(3) {
+        z-index: -1;
+        /* 定位了以后, 脱离了标准流 */
+        /* top: 0; */
+        /* position: absolute; */
+      }
+      li:nth-of-type(3) div {
+        /* 包含块, 层叠上下文概念并不一致 */
+        width: 30%;
+        position: absolute;
+        z-index: 100;
+        top: 0;
+        left: 0;
+      }
+      li:nth-of-type(4) div {
+        /*
+          包含块, 层叠上下文概念并不一致
+          对于定位元素来讲, 包含块通常由position属性(或transform, will-change, filter有限的属性)确定, 此时很多百分比计算, 定位计算(尺寸和位置)都是根据包含块来确定的
+          层叠上下文, 形成条件很多, 可参考MDN, 通常会影响元素在Z轴上的位置(三维概念), 是根据层叠上下文优先级来确定
+         */
+        width: 30%;
+        position: absolute;
+        z-index: 100;
+        top: 0;
+        left: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <ul>
+      <li>1</li>
+      <li>2</li>
+      <li>
+        <div>3</div>
+      </li>
+      <li>
+        <div>4</div>
+      </li>
+      <li>5</li>
+    </ul>
+  </body>
+</html>
