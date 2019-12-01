@@ -2,7 +2,7 @@
  * @Descripttion: 
  * @Author: 温祖彪
  * @Date: 2019-11-30 23:22:35
- * @LastEditTime: 2019-11-30 23:53:50
+ * @LastEditTime: 2019-12-01 10:25:25
  -->
 <!DOCTYPE html>
 <html lang="en">
@@ -34,6 +34,7 @@
   let box = document.querySelector("#box");
   let d = document.documentElement;
   box.addEventListener("click", function(e) {
+    debugger;
     box.requestFullscreen();
     console.log(document.fullscreenElement);
   });
