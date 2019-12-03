@@ -67,3 +67,8 @@
 *  [MathML](https://developer.mozilla.org/zh-CN/docs/MathML) 
 
   >  允许直接嵌入数学公式。 
+
+*  [HTML5 入门](https://developer.mozilla.org/zh-CN/docs/Web/Guide/HTML/HTML5/Introduction_to_HTML5) 
+
+  >  本文介绍了如何标示在网页设计或 Web 应用程序中使用 HTML5 时碰到的问题。 
+
