@@ -36,7 +36,8 @@
 
   >  你现在可以使用 `navigator.registerProtocolHandler()` 方法把 web 应用程序注册成一个协议处理程序。 
 
-* 
+
+
 
 ## 多媒体
 
@@ -46,7 +47,13 @@
 
   > \<audio> 和 \<video> 元素嵌入并支持新的多媒体内容的操作。
 
+*  [WebRTC](https://developer.mozilla.org/zh-CN/docs/WebRTC) 
 
+  > 这项技术, 其中的RTC代表的是计时通信, 允许连接到其他人, 在浏览器中直接控制视频会议, 而不需要一个插件或是外部的应用程序
+
+*  [使用 Camera API](https://developer.mozilla.org/zh-CN/docs/DOM/Using_the_Camera_API) 
+
+  > 允许使用, 操作计算机摄像头, 并从中存储图像.
 
 ## 语义
 
@@ -72,3 +79,6 @@
 
   >  本文介绍了如何标示在网页设计或 Web 应用程序中使用 HTML5 时碰到的问题。 
 
+*  [HTML5 兼容的解析器](https://developer.mozilla.org/zh-CN/docs/HTML/HTML5/HTML5_Parser) 
+
+  >  用于把 HTML5 文档的字节转换成 DOM 的解释器，已经被扩展了，并且现在精确地定义了在所有情况下使用的行为，甚至当碰到无效的 HTML 这种情况。这就导致了 HTML5 兼容的浏览器之间极大的可预测性和互操作性。

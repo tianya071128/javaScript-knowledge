@@ -42,3 +42,8 @@ html5的解析器分析主要是从标签的语义进行，并且语义化标签
 
 别担心，你不需要改变您的网站上的任何东西,Web浏览器的开发商已经在为你做这些了！
 
+
+
+## 参考链接
+
+[MDN- HTML5入门](https://developer.mozilla.org/zh-CN/docs/Web/Guide/HTML/HTML5/Introduction_to_HTML5)
