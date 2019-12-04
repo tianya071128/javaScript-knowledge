@@ -2,6 +2,8 @@
 
 主要根据[MDN-H5教程]( https://developer.mozilla.org/zh-CN/docs/Web/Guide/HTML/HTML5 )来分类学习, 分为多个模块
 
+
+
 ## 性能 & 集成
 
 **提供了非常显著的性能优化和更有效的计算机硬件使用**
@@ -54,6 +56,12 @@
 *  [使用 Camera API](https://developer.mozilla.org/zh-CN/docs/DOM/Using_the_Camera_API) 
 
   > 允许使用, 操作计算机摄像头, 并从中存储图像.
+  
+*  **Track 和 WebVTT** 
+
+  >  \<track> 元素支持字幕和章节。WebVTT 一个文本轨道格式。
+
+
 
 ## 语义
 
@@ -82,3 +90,33 @@
 *  [HTML5 兼容的解析器](https://developer.mozilla.org/zh-CN/docs/HTML/HTML5/HTML5_Parser) 
 
   >  用于把 HTML5 文档的字节转换成 DOM 的解释器，已经被扩展了，并且现在精确地定义了在所有情况下使用的行为，甚至当碰到无效的 HTML 这种情况。这就导致了 HTML5 兼容的浏览器之间极大的可预测性和互操作性。
+
+
+
+## 2D/3D 绘图 & 效果
+
+**提供了一个更加分化范围的呈现选择**
+
+* [Canvas 教程](https://developer.mozilla.org/zh-CN/docs/Canvas_tutorial)
+
+  > 了解有关新的 \<canvas> 元素以及如何在火狐中绘制图像和其他对象。
+
+*  [HTML5 针对 \<canvas> 元素的文本 API](https://developer.mozilla.org/zh-CN/docs/Drawing_text_using_a_canvas) 
+
+  > HTML5 文本 API 现在由 \<canvas> 元素支持。
+
+*  [WebGL](https://developer.mozilla.org/zh-CN/docs/WebGL) 
+
+  > WebGL 通过引入了一套非常地符合 OpenGL ES 2.0 并且可以用在 HTML5 <canvas> 元素中的 API 给 Web 带来了 3D 图像功能。
+
+*  [SVG](https://developer.mozilla.org/zh-CN/docs/SVG) 
+
+  > 一个基于 XML 的可以直接嵌入到 HTML 中的矢量图像格式。
+
+
+
+## 通信
+
+*  [Web Sockets](https://developer.mozilla.org/zh-CN/docs/WebSockets) 
+
+  > 允许在页面和服务器之间建立持久连接并通过这种方法来交换非 HTML 数据
