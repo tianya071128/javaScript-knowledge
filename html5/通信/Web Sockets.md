@@ -204,3 +204,4 @@ switch (ws.readyState) {
 ## 第部分 参考资料
 
 * [阮一峰-WebSocket 教程](http://www.ruanyifeng.com/blog/2017/05/websocket.html)
+* [MDN-WebSockets](https://developer.mozilla.org/zh-CN/docs/Web/API/WebSockets_API)

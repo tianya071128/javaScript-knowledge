@@ -120,3 +120,7 @@
 *  [Web Sockets](https://developer.mozilla.org/zh-CN/docs/WebSockets) 
 
   > 允许在页面和服务器之间建立持久连接并通过这种方法来交换非 HTML 数据
+
+* [Server-sent events](https://developer.mozilla.org/zh-CN/docs/Server-sent_events/Using_server-sent_events)
+
+  > 允许服务器向客户端推送事件，而不是仅在响应客户端请求时服务器才能发送数据的传统范式。
