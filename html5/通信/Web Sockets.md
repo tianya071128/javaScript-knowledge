@@ -112,9 +112,94 @@ switch (ws.readyState) {
 
 ### 4. 方法
 
+* close(): 关闭连接
 
+  如果连接已经关闭, 则此方法不执行任何操作
 
+  ```javascript
+  /*
+  	* @name: 关闭 WebSockets 
+  	* @params: {Number?} 一个数字状态码, 解释了连接关闭的原因. 默认使用1005.
+  	* @params: {String?} 解释了连接关闭的原因. 这个UTF-8编码的字符串不能超过123个字节
+  	* @return: none
+  */
+  WebSocket.close(code?, reason?);
+  
+  /* 可能存在的异常
+     *  1. INVALID_ACCESS_ERR(一个无效的code)
+     *  2. SYNTAX_ERR(reason 字符串太长（超过123字节）)
+  */
+  ```
 
+* send(): 发送数据
+
+  ```javascript
+  /*
+  	* @name: 客户端向服务端发送数据
+  	* @params: {String | ArrayBuffer | Blob | ArrayBufferView} 用于传输至服务器的数据
+  	* @return: none
+  */
+  WebSocket.send(data);
+
+  /* 可能存在的异常
+     *  1. INVALID_STATE_ERR(当前连接未处于 OPEN 状态)
+     *  2. SYNTAX_ERR(数据是一个包含未配对代理(unpaired surrogates)的字符串。)
+  */
+  
+  /* 可传输的数据类型:
+  	* 1. USVString: 文本字符串。字符串将以 UTF-8 格式添加到缓冲区，并且 bufferedAmount 将加上该字符串以 UTF-8 格式编码时的字节数的值。
+  	* 2. ArrayBuffer: 您可以使用一有类型的数组对象发送底层二进制数据；其二进制数据内存将被缓存于缓冲区，bufferedAmount 将加上所需字节数的值。
+  	* 3. Blob: Blob 类型将队列 blob 中的原始数据以二进制中传输。 bufferedAmount 将加上原始数据的字节数的值。
+  	* 4.ArrayBufferView: 您可以以二进制帧的形式发送任何 JavaScript 类数组对象 ；其二进制数据内容将被队列于缓冲区中。值 bufferedAmount 将加上必要字节数的值。
+  */
+  ```
+  
+
+### 5. 事件
+
+* open: 连接成功
+
+  **指定连接成功后的事件**
+
+  ```javascript
+  ws.addEventListener('open', function (event) {
+    ws.send('Hello Server!');
+  });
+  ```
+
+* message: 接收数据
+
+  **接收到服务器数据的时候触发(会重复触发)**
+
+  ```javascript
+  ws.addEventListener("message", function(event) {
+    var data = event.data;
+    // 处理数据
+  });
+  ```
+
+* close: 连接关闭
+
+  **这个事件监听器将在 WebSocket 连接的readyState 变为 CLOSED时被调用, 也就是连接关闭时调用**
+
+  ```javascript
+  ws.addEventListener("close", function(event) {
+    var code = event.code;
+    var reason = event.reason;
+    var wasClean = event.wasClean;
+    // handle close event
+  });
+  ```
+
+* error: 连接失败
+
+  ```javascript
+  ws.addEventListener("error", function(event) {
+    // handle error event
+  });
+  ```
+
+  
 
 ## 第部分 参考资料
 
