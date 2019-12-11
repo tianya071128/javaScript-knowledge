@@ -8,23 +8,23 @@
 
 **提供了非常显著的性能优化和更有效的计算机硬件使用**
 
-* 拖放
+* [拖放](https://developer.mozilla.org/zh-CN/docs/DragDrop/Drag_and_Drop)
 
   > HTML5 的拖放 API 能够支持在网站内部和网站之间拖放项目。同时也提供了一个更简单的供扩展和基于 Mozilla 的应用程序使用的 API。
 
-* 全屏
+* [全屏 API](https://developer.mozilla.org/zh-CN/docs/DOM/Using_fullscreen_mode)
 
   > 为一个网页或者应用程序控制使用整个屏幕，而不显示浏览器界面。
 
-* HTML 焦点管理
+* [HTML 中的焦点管理](https://developer.mozilla.org/zh-CN/docs/HTML/Focus_management_in_HTML)
 
   > 支持新的 HTML5 activeElement 和 hasFocus 属性。
 
-* History API 
+* [History API](https://developer.mozilla.org/zh-CN/docs/DOM/Manipulating_the_browser_history)
 
   > 允许对浏览器历史记录进行操作。这对于那些交互地加载新信息的页面尤其有用。
 
-* contentEditable 属性：把你的网站改变成 wiki !
+* [contentEditable 属性：把你的网站改变成 wiki !](https://developer.mozilla.org/zh-CN/docs/HTML/Content_Editable)
 
   > HTML5 已经把 contentEditable 属性标准化了。了解更多关于这个特性的内容。
 
@@ -38,7 +38,9 @@
 
   >  你现在可以使用 `navigator.registerProtocolHandler()` 方法把 web 应用程序注册成一个协议处理程序。 
 
+* [XMLHttpRequest ](https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest) **Level 2**
 
+  > 允许异步读取页面的某些部分，允许其显示动态内容，根据时间和用户行为而有所不同。这是在 [Ajax](https://developer.mozilla.org/zh-CN/docs/AJAX)背后的技术。
 
 
 ## 多媒体
@@ -124,3 +126,7 @@
 * [Server-sent events](https://developer.mozilla.org/zh-CN/docs/Server-sent_events/Using_server-sent_events)
 
   > 允许服务器向客户端推送事件，而不是仅在响应客户端请求时服务器才能发送数据的传统范式。
+
+* [WebRTC](https://developer.mozilla.org/zh-CN/docs/WebRTC)
+
+  > 这项技术，其中的 RTC 代表的是即时通信，允许连接到其他人，直接在浏览器中控制视频会议，而不需要一个插件或是外部的应用程序。
