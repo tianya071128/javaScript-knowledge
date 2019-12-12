@@ -24,6 +24,8 @@
 
 **如果您的通信流程需要从服务器接收事件或消息数据, 可以选择SSE, 对于全双工的通信, WebSocket 则可能是更好的选择**
 
+
+
 ### 一. 构造函数
 
 ****
@@ -95,11 +97,395 @@ xhr.send(null);
 | "json"                                | 是一个 JavaScript 对象. 这个对象是通过将接受到的数据类型视为 JSON 解析得到的 |
 | "text"                                | 是包含在 DOMString 对象中的文本                              |
 | "moz-chunked-arraybuffer"(不是标准的) | 与`"arraybuffer"`相似，但是数据会被接收到一个流中。使用此响应类型时，响应中的值仅在 `progress` 事件的处理程序中可用，并且只包含上一次响应 `progress` 事件以后收到的数据，而不是自请求发送以来收到的所有数据。 |
-| "ms-stream"                           | `response` 是下载流的一部分；此响应类型仅允许下载请求，并且仅受Internet Explorer支持。 |
+| "ms-stream"(不是标准的)               | `response` 是下载流的一部分；此响应类型仅允许下载请求，并且仅受Internet Explorer支持。 |
 
 
 
 #### 3. response: 响应类型(只读)
 
 **返回的类型可以是 [`ArrayBuffer`](https://developer.mozilla.org/zh-CN/docs/Web/API/ArrayBuffer) 、 [`Blob`](https://developer.mozilla.org/zh-CN/docs/Web/API/Blob) 、 [`Document`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document) 、 JavaScript [`Object`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object) 或 [`DOMString`](https://developer.mozilla.org/zh-CN/docs/Web/API/DOMString) 。取决于 responseType 属性设置的值**
+
+响应的类型如下所示(**与responseType一致**):
+
+| 值                                    | 描述                                                         |
+| ------------------------------------- | ------------------------------------------------------------ |
+| ""                                    | 与设置为 "text" 相同, 是默认类型 (实际上是 [`DOMString`](https://developer.mozilla.org/zh-CN/docs/Web/API/DOMString)(相当于String) ) |
+| "arraybuffer"                         | 是一个包含二进制数据的 JavaScript [`ArrayBuffer`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer) |
+| "blob"                                | 是一个包含二进制数据的 [`Blob`](https://developer.mozilla.org/zh-CN/docs/Web/API/Blob) 对象 |
+| "document"                            | 是一个[HTML](https://developer.mozilla.org/en-US/docs/Glossary/HTML) [`Document`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document) 或 [XML](https://developer.mozilla.org/en-US/docs/Glossary/XML) [`XMLDocument`](https://developer.mozilla.org/zh-CN/docs/Web/API/XMLDocument), 这取决于接受到的数据的 MIME 类型 |
+| "json"                                | 是一个 JavaScript 对象. 这个对象是通过将接受到的数据类型视为 JSON 解析得到的 |
+| "text"                                | 是包含在 DOMString 对象中的文本                              |
+| "moz-chunked-arraybuffer"(不是标准的) | 与`"arraybuffer"`相似，但是数据会被接收到一个流中。使用此响应类型时，响应中的值仅在 `progress` 事件的处理程序中可用，并且只包含上一次响应 `progress` 事件以后收到的数据，而不是自请求发送以来收到的所有数据。 |
+| "ms-stream"(不是标准的)               | `response` 是下载流的一部分；此响应类型仅允许下载请求，并且仅受Internet Explorer支持。 |
+
+```javascript
+let xhr = new XMLHttpRequest();
+      xhr.responseType = "arraybuffer";
+      xhr.open("GET", "/url/api/system/system-dic/listAll");
+      xhr.onload = function(e) {
+        /*
+          	onabort: null
+			onerror: null
+			onload: ƒ (e)
+			onloadend: null
+			onloadstart: null
+			onprogress: null
+			onreadystatechange: null
+			ontimeout: null
+			readyState: 4
+			response: ArrayBuffer(65) {}
+			responseText: (...)
+			responseType: "arraybuffer"
+			responseURL: "http://localhost:8080/url/api/system/system-dic/listAll"
+			responseXML: (...)
+			status: 200
+			statusText: "OK"
+			timeout: 0
+			upload: XMLHttpRequestUpload {onloadstart: null, onprogress: null, onabort: null, onerror: null, onload: null, …}
+			withCredentials: false
+          */
+        console.log(xhr);
+      };
+      xhr.send(null);
+```
+
+
+
+#### 4. responseText: 请求响应(DOMString)(只读)
+
+**处理的是 DOMString 数据, 是返回的纯文本的值**
+
+**当responseType为"text" 或者 ""时, 此属性才会存储着后端返回的数据**
+
+```javascript
+// 当 xhr.responseType = "json",  
+// xhr.responseText: 报错信息(未能从“XMLHttpRequest”读取“responseText”属性：仅当对象的“responseType”为“”或“text”（为“json”）时才可访问该值。)
+
+// 当 xhr.responseType="text" 或为默认值 "",
+// xhr.responseText: {"msg":"您不允许访问该资源，请重新登录","ret":401}
+```
+
+
+
+#### 5. responseXML: 请求响应(Document)(只读)
+
+**处理的是Document数据, 如果请求未成功, 尚未发送, 或者检索的数据无法正确解析为 XML 或 HTML, 则为null**
+
+**默认是当作“text / xml” 来解析。当 responseType 设置为 “document” 并且请求已异步执行时，响应将被当作 “text / html” 来解析。responseXML 对于任何其他类型的数据以及 data: URLs 为 null**
+
+```javascript
+// 当 xhr.responseXML = "json",  
+// xhr.responseXML: 报错信息(无法从“XMLHttpRequest”读取“responseXML”属性：仅当对象的“responseType”为“”或“document”（为“json”）时，才可访问该值。)
+
+// 当 xhr.responseType="document",
+// xhr.responseXML: null(解析错误)
+```
+
+
+
+
+
+#### 6. responseURL: 响应序列化URL(只读)
+
+**返回响应的序列化URL, 如果URL为空则返回空字符串. 如果URL有锚点, 则位于URL#后面的内容会被删除. 如果URL有重定向,  responseURL 的值回事经过多次重定向后的最终URL**
+
+```javascript
+xhr.responseURL = 'http://localhost:8080/url/api/system/system-dic/listAll'
+```
+
+
+
+#### 7. status: 响应状态码(只读)
+
+**返回响应中的数字状态码, 在请求完成前, status的值为0. 值得注意的是, 如果 XMLHttpRequest 出错, 浏览器返回的 status 也为0**
+
+**status码是标准的 HTTP status codes. 如果服务器响应中没有明确指定 status 码, XMLHttpRequest.status 将会默认为200**
+
+```javascript
+var xhr = new XMLHttpRequest();
+console.log('UNSENT', xhr.status);
+
+xhr.open('GET', '/server', true);
+console.log('OPENED', xhr.status);
+
+xhr.onprogress = function () {
+  console.log('LOADING', xhr.status);
+};
+
+xhr.onload = function () {
+  console.log('DONE', xhr.status);
+};
+
+xhr.send(null);
+
+/**
+ * 输出如下：
+ *
+ * UNSENT（未发送） 0
+ * OPENED（已打开） 0
+ * LOADING（载入中） 200
+ * DONE（完成） 200
+ */
+```
+
+
+
+#### 8. statusText: 响应状态(DOMString)(只读)
+
+**不同于 status 属性的区别, 这个属性包含了返回状态对应的文本信息, 例如 "OK" 或是 "Not Found".**
+
+**如果服务器未明确指定一个状态文本信息, 则 statusText 的值将会被自动赋值为 "OK"**
+
+```javascript
+var xhr = new XMLHttpRequest();
+console.log('0 UNSENT', xhr.statusText);
+
+xhr.open('GET', '/server', true);
+console.log('1 OPENED', xhr.statusText);
+
+xhr.onprogress = function () {
+  console.log('3 LOADING', xhr.statusText);
+};
+
+xhr.onload = function () {
+  console.log('4 DONE', xhr.statusText);
+};
+
+xhr.send(null);
+
+/**
+ * 输出如下:
+ *
+ * 0 UNSENT
+ * 1 OPENED
+ * 3 LOADING OK
+ * 4 DONE OK
+ */
+```
+
+
+
+#### 9. upload: 上传过程(只读)
+
+**返回一个 XMLHttpRequestUpload 对象, 用来表示上传的进度. **
+
+
+
+#### 10. timeout: 超时时间(可读写)
+
+**表示请求的最大请求时间(毫秒), 若超出该时间, 则请求会自动结束**
+
+**是一个无符号长整型数, 默认值为0, 意味着没有超时, 当超时发生, timeout 事件将会被触发**
+
+**在 IE 中, 超时属性可能只能在调用 open() 方法之后且在调用 send() 方法之前设置**
+
+```javascript
+var xhr = new XMLHttpRequest();
+xhr.open('GET', '/server', true);
+
+xhr.timeout = 2000; // 超时时间，单位是毫秒
+
+xhr.onload = function () {
+  // 请求完成。在此进行处理。
+  // 超时不会触发这个事件  
+};
+
+xhr.ontimeout = function (e) {
+  // XMLHttpRequest 超时。在此做某事。
+};
+
+xhr.send(null);
+
+```
+
+
+
+#### 11. withCredentials: 跨域请求是否带有授权信息(cookie 或 授权 header 头)
+
+**是一个布尔值, 它指示了是否该使用类似cookies,authorization headers(头部授权)或者TLS客户端证书这一类资格证书来创建一个跨站点访问控制（cross-site `Access-Control`）请求。**
+
+**注意:　在同一个站点下（就是没有产生跨域）使用withCredentials 属性是无效的, 这个指示也会被用做响应中 cookies 被忽视的标示. **
+
+如果在发送来自其他域的XMLHttpRequest请求之前，未设置withCredentials 为true，那么就不能为它自己的域设置cookie值。而通过设置withCredentials 为true获得的第三方cookies，将会依旧享受同源策略，因此不能被通过document.cookie或者从头部相应请求的脚本等访问。
+
+**注意: 永远不会影响到同源请求**
+
+**注意: 不同域下的XmlHttpRequest 响应，不论其Access-Control- header 设置什么值，都无法为它自身站点设置cookie值，除非它在请求之前将withCredentials 设为true。**
+
+````javascript
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'http://example.com/', true);
+xhr.withCredentials = true;
+xhr.send(null);
+````
+
+
+
+#### 12. 非标准属性
+
+| 属性                 | 描述                                                         |
+| -------------------- | ------------------------------------------------------------ |
+| channel              | nsIChannel，对象在执行请求时使用的通道。                     |
+| mozAnon              | 一个布尔值，如果为真，请求将在没有cookie和身份验证header头的情况下发送。 |
+| mozSystem            | 一个布尔值，如果为真，则在请求时不会强制执行同源策略。       |
+| mozBackgroundRequest | 一个布尔值，它指示对象是否是后台服务器端的请求。             |
+
+
+
+### 三. 方法
+
+****
+
+#### 1.  open(): 初始化一个请求.
+
+**注意: 为已激活的请求调用此方法( open()  已被调用) 相当于调用 abort()**
+
+```javascript
+/**
+     * @name: 初始化一个请求
+     * @param {String} 要使用的 HTTP 方法(GET, POST, PUT...), 对于非 HTTP(S) URL 被忽略
+     * @param {String} 要发送请求的URL
+     * @param {Boolean?} 请求模式, true(默认值, 异步模式) | false(同步模式)
+     * @param {any?} 可选的用户名用于认证用途；默认为null。
+	 * @param {any?} 可选的密码用于认证用途，默认为null。
+     */
+xhrReq.open(method, url, async?, user?, password?);
+```
+
+
+
+#### 2. setResponseHeader(): 设置 HTTP 请求头的值
+
+**此方法必须在 open() 和 send() 之间调用. 如果多次对同一请求头赋值, 只会生成一个合并了多个值得请求头**
+
+**自定义一些 header 属性进行跨域请求时, 可能会遇到 "not allowed by Access-Control-Allow-Headers in preflight response" 你可能需要在你的服务器端设置 "Access-Control-Allow-Headers**
+
+```javascript
+/**
+	* @name: 设置 HTTP 请求头的值
+	* @param: {String} 属性的名称
+	* @param: {String} 属性的值
+**/
+xhr.setRequestHeader(header, value);
+```
+
+
+
+#### 3. getResponseHeader(): 返回指定响应头的字符串
+
+**如果响应尚未收到或响应中不存在该响应, 则返回 null**
+
+**必须要指定响应头名称, 也就是必须要有一个参数, 可通过 getAllResponseHeaders() 获取全部可获取的响应头**
+
+**如果在返回头中有多个一样的名称, 那么返回的值就会使用逗号和空号分隔的字符串.  搜索标题名称是不区分大小写的。**
+
+```javascript
+/**
+	* @name: 获取 HTTP 请求头的值
+	* @param: {String} 响应头名称
+	* @return: 指定响应头内容, 如果响应尚未收到, 或者响应中不存在, 则返回 null
+**/
+xhr.getRequestHeader(name);
+```
+
+
+
+#### 4. getAllResponseHeaders(): 返回所有用 CRLF 分隔的响应头
+
+**注意： 对于复合请求 （ multipart requests ），这个方法返回当前请求的头部，而不是最初的请求的头部。**
+
+```javascript
+/**
+	* @name: 获取 HTTP 请求头的值
+	* @return: 返回所有的响应头，以 CRLF 分割的字符串，或者 null 如果没有收到任何响应。
+**/
+xhr.getAllResponseHeaders();
+
+/*
+返回示例:
+cache-control: no-cache, no-store, max-age=0, must-revalidate
+connection: close
+content-type: application/json;charset=UTF-8
+date: Thu, 12 Dec 2019 14:53:35 GMT
+expires: 0
+pragma: no-cache
+transfer-encoding: chunked
+vary: Origin, Access-Control-Request-Method, Access-Control-Request-Headers
+x-content-type-options: nosniff
+x-powered-by: Express
+x-xss-protection: 1; mode=block	
+*/
+```
+
+
+
+#### 5. send(): 发送请求
+
+**用于发送 HTTP 请求, 如果是异步请求(默认为异步请求), 则此方法会在请求发送后立即返回；如果是同步请求，则此方法直到响应到达后才会返回。**
+
+```javascript
+/**
+	* @name: 发送请求
+	* @param: {any?} 请求方法为 GET 或者 HEAD 时, 应该讲请求主题设置为 null. 请求方法为其他方法时, 其参数将作为请求主体发送至服务器
+**/
+xhr.send(data?);
+/*
+数据类型: 
+1. ArrayBuffer
+2. ArrayBufferView
+3. Blob
+4. Document
+5. DOMString(也就是String)
+6. FormData
+注意: 
+应该在发送请求即调用 send() 方法之前使用 setRequestHeader() 方法设置 Content-Type 头部来指定请求主体的数据流的 MIME 类型
+*/
+```
+
+
+
+#### 6. abort(): 中止请求
+
+**如果请求已被发出, abort() 方法将终止该请求. 当一个请求被终止, 它的readyStete 属性将被置为0**
+
+```javascript
+/**
+	* @name: 中止请求(会回到 open()[打开请求状态之前] )
+**/
+xhr.abort();
+```
+
+
+
+#### 7. overrideMimeType():重写由服务器返回的 MIME 类型
+
+**指定一个 MIME 类型用于替代服务器指定的类型, 使服务器响应信息中传输的数据按照该指定 MIME 类型处理. 例如强制使流方式处理为"text/xml"类型处理时会被使用到，即使服务器在响应头中并没有这样指定.**
+
+**此方法必须在 send 方法之前调用才有效**
+
+**如果服务器没有指定一个Content-Type 头, XMLHttpRequest 默认MIME类型为"text/xml". 如果接受的数据不是有效的XML，将会出现格”格式不正确“的错误。你能够通过调用 overrideMimeType() 指定各种类型来避免这种情况。**
+
+```javascript
+/**
+	* @name: 重写响应 MIME 类型
+	* @param: {MIME类型} 指定具体的 MIME 类型去代替服务器指定的 MIME 类型. 如果服务器没有指定类型, 那么默认为 "text/xml"
+**/
+xhr.overrideMimeType(mimeType)
+```
+
+
+
+#### 8. 非标准方法
+
+| 方法           | 描述                                                         |
+| -------------- | ------------------------------------------------------------ |
+| init()         | 在 C++ 代码中初始化一个 XHR 对象。                           |
+| openRequest()  | 初始化一个请求. 这个方法用于本地代码; 如果用JavaScript 代码来初始化请求，使用 open()代替. 可参考 open() 的文档。 |
+| sendAsBinary() | send() 方法的变体，用来发送二进制数据。                      |
+
+
+
+### 四. 事件
+
+****
 
