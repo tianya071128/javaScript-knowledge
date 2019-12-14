@@ -4,13 +4,66 @@
 
 
 
-## 第一部分 请求类型
+## 第一部分 请求方法(同步 or 异步)
 
 请求方式有两种: **异步模式 或 同步模式**, 由 XMLHttpRequest 对象的 open() 方法的第三个参数 async 的值决定的, false为同步, true为异步, 具体见最后一部分
 
 **一般而言, 基本上都是使用异步模式的**
 
 **注意:** XMLHttpRequest 构造函数并不仅限于 XML 文档. 之所以使用 XML 开头是因为在其诞生之时, 原先用于异步数据交换的主要格式便是 XML.
+
+
+
+## 第二部分 处理响应
+
+W3C规范定义了 XHR 对象的集中类型的响应属性. 这些属性告诉客户端关于 XMLHttpRequest 返回状态的重要信息
+
+### 一. 分析并操作 responseXML属性
+
+当将 xhr.responseType 设置为 'document'  时, 会试图将响应数据解析为 XML 或 HTML 格式内容,  当解析失败时, responseXML 属性会为null, 解析成功时, responseXML 属性将会是一个由 XML 文档解析而来的 DOM 对象, 此处不深究(在实际运用中, 已经很少运用 XML 格式来传递数据) 
+
+
+
+### 二. 解析和操作包含 HTML 文档的 responseText 属性
+
+如果使用 XMLHttpRequest  从远端获取一个 HTML 页面(这比较少见), 可以通过字符串形式存放在 responseText 属性中, 或者是 存放在 responseXML 属性中
+
+
+
+### 三. 处理二进制数据
+
+使用 xhr对象 一般用来发送和接收文本数据, 但是也可以发送和接受二进制内容
+
+**自从 responseType(arraybuffer, blob等) 属性目前支持大量附加的内容类型后, 已经出现了很多的现代技术, 他们使得发送和接收二进制数据变得更加容易.**
+
+* 具体参考: [MDN - 发送和接收二进制数据](https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest/Sending_and_Receiving_Binary_Data)
+
+
+
+## 第三部分 绕过缓存
+
+**当使用 GET 请求方式时, 首先会从缓存中读取内容, 绕过缓存的方法(跨浏览器方法):       给 URL 添加时间戳**
+
+**因为本地缓存都是以 URL 作为索引的, 这样就可以使每个请求都是唯一的, 也就可以这样来绕开缓存.**
+
+```javascript
+var oReq = new XMLHttpRequest();
+
+oReq.open("GET", url + ((/\?/).test(url) ? "&" : "?") + (new Date()).getTime());
+oReq.send(null);
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -101,7 +154,7 @@ xhr.send(null);
 
 
 
-#### 3. response: 响应类型(只读)
+#### 3. response: 响应数据(只读)
 
 **返回的类型可以是 [`ArrayBuffer`](https://developer.mozilla.org/zh-CN/docs/Web/API/ArrayBuffer) 、 [`Blob`](https://developer.mozilla.org/zh-CN/docs/Web/API/Blob) 、 [`Document`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document) 、 JavaScript [`Object`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object) 或 [`DOMString`](https://developer.mozilla.org/zh-CN/docs/Web/API/DOMString) 。取决于 responseType 属性设置的值**
 
@@ -268,6 +321,18 @@ xhr.send(null);
 #### 9. upload: 上传过程(只读)
 
 **返回一个 XMLHttpRequestUpload 对象, 用来表示上传的进度. **
+
+**这个对象类似于 XMLHttpRequestUpload, 专门用来表示上传过程, 可用来实现上传过程中的相关事件**
+
+| 事件          | 相应属性的信息类型               |
+| ------------- | -------------------------------- |
+| `onloadstart` | 获取开始                         |
+| `onprogress`  | 数据传输进行中                   |
+| `onabort`     | 获取操作终止                     |
+| `onerror`     | 获取失败                         |
+| `onload`      | 获取成功                         |
+| `ontimeout`   | 获取操作在用户规定的时间内未完成 |
+| `onloadend`   | 获取完成（不论成功与否）         |
 
 
 
@@ -487,5 +552,108 @@ xhr.overrideMimeType(mimeType)
 
 ### 四. 事件
 
+**下列事件可在  XMLHttpRequest 对象中触发, 同时大部分事件(具体见 upload属性)也可在 xhr.upload 返回 XMLHttpRequestUpload(代表上传过程)中调用 **
+
 ****
+
+#### 1. readystatechange: 当 readyState 状态变化时调用
+
+**会在 XMLHttpRequest 的 readyState 属性发生改变时调用(不该用于同步的 requests 对象**
+
+```javascript
+xhr.onreadystatechange = function () {
+  if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+    // 在这里说明调用成功了
+    console.log(xhr.responseText)
+  }
+}
+```
+
+
+
+#### 2. load: 请求成功完成时调用
+
+```javascript
+xhr.addEventListener('load', function(e) {
+    // 在这里说明调用成功了, xhr.readyState === 4
+})
+```
+
+
+
+#### 3. loadstart: 开始传送数据时触发
+
+**开始传送数据时触发, 只会触发一次**
+
+```javascript
+xhr.addEventListener("loadstart", function(e) {
+  // 在 response 状态为1(调用了 send() 方法, 已经开始建立连接, 但是 response 还是为1
+  console.log("开始传送数据时", xhr.response);
+});
+```
+
+
+
+#### 4. progress: 下载和上传的传输周期触发
+
+**周期性触发, 可用来实现进度条(具体发送数据在 event 中)**
+
+****
+
+```javascript
+xhr.addEventListener("progress", function(e) {
+   // e.loaded: 在周期性调用中接受到了多少信息
+   // e.total: 该请求一共多少信息 
+   console.log("周期性发送数据", e);
+});
+```
+
+
+
+#### 5. loadend: 请求结束时触发
+
+**当请求结束时触发, 无论请求成功(load) 还是失败(abort 或 error)**
+
+**需要注意的是，没有方法可以确切的知道 `loadend` 事件接收到的信息是来自何种条件引起的操作终止；但是你可以在所有传输结束的时候使用这个事件处理。**
+
+```javascript
+xhr.addEventListener("loadend", function(e) {
+   // 无论请求成功还是失败都会调用, 但是这里不是很好区分成功原因 或 失败原因吧
+   console.log("请求结束", xhr);
+});
+```
+
+
+
+#### 6. abort: 当请求停止时触发
+
+**当请求终止时 abort 事件被触发, 例如调用了 abort() 方法**
+
+```javascript
+xhr.addEventListener("abort", function(e) {
+   console.log("请求停止", xhr);
+});
+```
+
+
+
+#### 7.  timeout: 请求超时时触发
+
+**当请求时间超出预定时间而终止请求时发出**
+
+```javascript
+xhr.addEventListener("timeout", function(e) {
+   console.log("请求超时", xhr);
+});
+```
+
+
+
+#### 8. error: 请求错误时触发
+
+```javascript
+xhr.addEventListener("error", function(e) {
+   console.log("请求错误", xhr);
+});
+```
 
