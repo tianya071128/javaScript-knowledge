@@ -704,3 +704,9 @@ xhr.addEventListener("error", function(e) {
 });
 ```
 
+
+
+## 参考文档
+
+[MDN-XMLHttpRequest](https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest)
+
