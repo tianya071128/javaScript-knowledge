@@ -61,15 +61,56 @@ oReq.send(null);
 
 * 使用&拼接参数 附加到URL
 
+  > ` ?foo=bar&baz=The%20first%20line.%0AThe%20second%20line`
 
+### 二. POST 或 DELETE 等请求方法
 
+* 编码类型: `application/x-www-form-urlencoded(默认)`
 
+  ```javascript
+  Content-Type: application/x-www-form-urlencoded
+  
+  foo=bar&baz=The+first+line.%0D%0AThe+second+line.%0D%0A
+  ```
 
+* 编码类型: `text/plain`
 
+  ```javascript
+  Content-Type: text/plain
+  
+  foo=bar
+  baz=The first line.
+  The second line.
+  ```
 
+* 编码类型: `multipart/form-data`
 
+  ```javascript
+  Content-Type: multipart/form-data; boundary=---------------------------314911788813839
+  
+  -----------------------------314911788813839
+  Content-Disposition: form-data; name="foo"
+  
+  bar
+  -----------------------------314911788813839
+  Content-Disposition: form-data; name="baz"
+  
+  The first line.
+  The second line.
+  
+  -----------------------------314911788813839--
+  
+  ```
 
+* 编码类型: `application/json`
 
+  ```javascript
+  Content-Type: application/json
+  
+  {"foo": "bar", "baz": "The first line"}
+  ```
+
+  
 
 
 
