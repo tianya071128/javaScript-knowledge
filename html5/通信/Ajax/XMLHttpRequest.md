@@ -708,5 +708,6 @@ xhr.addEventListener("error", function(e) {
 
 ## 参考文档
 
-[MDN-XMLHttpRequest](https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest)
+* [MDN-XMLHttpRequest](https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest)
 
+* [MDN-使用 XMLHttpRequest](https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest)
