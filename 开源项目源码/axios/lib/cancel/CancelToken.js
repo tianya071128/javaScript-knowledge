@@ -1,16 +1,22 @@
-'use strict';
+/*
+ * @Descripttion:
+ * @Author: 温祖彪
+ * @Date: 2019-12-25 20:59:25
+ * @LastEditTime: 2019-12-25 23:05:45
+ */
+"use strict";
 
-var Cancel = require('./Cancel');
+var Cancel = require("./Cancel");
 
 /**
- * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ * `CancelToken` 是一个可用于请求取消操作的对象。
  *
  * @class
  * @param {Function} executor The executor function.
  */
 function CancelToken(executor) {
-  if (typeof executor !== 'function') {
-    throw new TypeError('executor must be a function.');
+  if (typeof executor !== "function") {
+    throw new TypeError("executor must be a function.");
   }
 
   var resolvePromise;

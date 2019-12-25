@@ -2,11 +2,11 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2019-12-18 21:29:18
- * @LastEditTime: 2019-12-20 22:42:57
+ * @LastEditTime: 2019-12-25 22:53:27
  */
-'use strict';
+"use strict";
 
-var bind = require('./helpers/bind');
+var bind = require("./helpers/bind");
 
 /*global toString:true*/
 
@@ -21,7 +21,7 @@ var toString = Object.prototype.toString;
  * @returns {boolean} True if value is an Array, otherwise false
  */
 function isArray(val) {
-  return toString.call(val) === '[object Array]';
+  return toString.call(val) === "[object Array]";
 }
 
 /**
@@ -31,7 +31,7 @@ function isArray(val) {
  * @returns {boolean} True if the value is undefined, otherwise false
  */
 function isUndefined(val) {
-  return typeof val === 'undefined';
+  return typeof val === "undefined";
 }
 
 /**
@@ -46,7 +46,7 @@ function isBuffer(val) {
     !isUndefined(val) &&
     val.constructor !== null &&
     !isUndefined(val.constructor) &&
-    typeof val.constructor.isBuffer === 'function' &&
+    typeof val.constructor.isBuffer === "function" &&
     val.constructor.isBuffer(val)
   );
 }
@@ -59,7 +59,7 @@ function isBuffer(val) {
  */
 function isArrayBuffer(val) {
   // 利用 toString 测试
-  return toString.call(val) === '[object ArrayBuffer]';
+  return toString.call(val) === "[object ArrayBuffer]";
 }
 
 /**
@@ -70,7 +70,7 @@ function isArrayBuffer(val) {
  */
 function isFormData(val) {
   // 利用 instanceof 测试
-  return typeof FormData !== 'undefined' && val instanceof FormData;
+  return typeof FormData !== "undefined" && val instanceof FormData;
 }
 
 /**
@@ -81,7 +81,7 @@ function isFormData(val) {
  */
 function isArrayBufferView(val) {
   var result;
-  if (typeof ArrayBuffer !== 'undefined' && ArrayBuffer.isView) {
+  if (typeof ArrayBuffer !== "undefined" && ArrayBuffer.isView) {
     result = ArrayBuffer.isView(val);
   } else {
     result = val && val.buffer && val.buffer instanceof ArrayBuffer;
@@ -96,7 +96,7 @@ function isArrayBufferView(val) {
  * @returns {boolean} True if value is a String, otherwise false
  */
 function isString(val) {
-  return typeof val === 'string';
+  return typeof val === "string";
 }
 
 /**
@@ -106,7 +106,7 @@ function isString(val) {
  * @returns {boolean} True if value is a Number, otherwise false
  */
 function isNumber(val) {
-  return typeof val === 'number';
+  return typeof val === "number";
 }
 
 /**
@@ -116,7 +116,7 @@ function isNumber(val) {
  * @returns {boolean} 如果值是 Object，则为True，否则为false
  */
 function isObject(val) {
-  return val !== null && typeof val === 'object';
+  return val !== null && typeof val === "object";
 }
 
 /**
@@ -126,7 +126,7 @@ function isObject(val) {
  * @returns {boolean} True if value is a Date, otherwise false
  */
 function isDate(val) {
-  return toString.call(val) === '[object Date]';
+  return toString.call(val) === "[object Date]";
 }
 
 /**
@@ -137,7 +137,7 @@ function isDate(val) {
  */
 function isFile(val) {
   // 直接通过 val的 Class
-  return toString.call(val) === '[object File]';
+  return toString.call(val) === "[object File]";
 }
 
 /**
@@ -148,7 +148,7 @@ function isFile(val) {
  */
 function isBlob(val) {
   // 利用 val 中内部属性[[Class]]
-  return toString.call(val) === '[object Blob]';
+  return toString.call(val) === "[object Blob]";
 }
 
 /**
@@ -158,7 +158,7 @@ function isBlob(val) {
  * @returns {boolean} 如果值是 Function ，则为True，否则为false
  */
 function isFunction(val) {
-  return toString.call(val) === '[object Function]';
+  return toString.call(val) === "[object Function]";
 }
 
 /**
@@ -179,7 +179,7 @@ function isStream(val) {
  */
 function isURLSearchParams(val) {
   return (
-    typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams
+    typeof URLSearchParams !== "undefined" && val instanceof URLSearchParams
   );
 }
 
@@ -190,7 +190,7 @@ function isURLSearchParams(val) {
  * @returns {String} The String freed of excess whitespace
  */
 function trim(str) {
-  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+  return str.replace(/^\s*/, "").replace(/\s*$/, "");
 }
 
 /**
@@ -210,14 +210,14 @@ function trim(str) {
  */
 function isStandardBrowserEnv() {
   if (
-    typeof navigator !== 'undefined' &&
-    (navigator.product === 'ReactNative' ||
-      navigator.product === 'NativeScript' ||
-      navigator.product === 'NS')
+    typeof navigator !== "undefined" &&
+    (navigator.product === "ReactNative" ||
+      navigator.product === "NativeScript" ||
+      navigator.product === "NS")
   ) {
     return false;
   }
-  return typeof window !== 'undefined' && typeof document !== 'undefined';
+  return typeof window !== "undefined" && typeof document !== "undefined";
 }
 
 /**
@@ -234,12 +234,12 @@ function isStandardBrowserEnv() {
  */
 function forEach(obj, fn) {
   // 如果没有提供任何价值，请不要费心(检测是否为 null 或者 undefined)
-  if (obj === null || typeof obj === 'undefined') {
+  if (obj === null || typeof obj === "undefined") {
     return;
   }
 
   // 如果还没有可写的东西，就强制一个数组
-  if (typeof obj !== 'object') {
+  if (typeof obj !== "object") {
     // eslint 使用 注释
     /*eslint no-param-reassign:0*/
     obj = [obj];
@@ -282,7 +282,7 @@ function forEach(obj, fn) {
 function merge(/* obj1, obj2, obj3, ... */) {
   var result = {};
   function assignValue(val, key) {
-    if (typeof result[key] === 'object' && typeof val === 'object') {
+    if (typeof result[key] === "object" && typeof val === "object") {
       result[key] = merge(result[key], val);
     } else {
       result[key] = val;
@@ -296,19 +296,19 @@ function merge(/* obj1, obj2, obj3, ... */) {
 }
 
 /**
- * Function equal to merge with the difference being that no reference
- * to original objects is kept.
+ * 函数等于合并，其区别是没有引用
+ * 保留到原始对象
  *
  * @see merge
- * @param {Object} obj1 Object to merge
+ * @param {Object} obj1 要合并的对象
  * @returns {Object} Result of all merge properties
  */
 function deepMerge(/* obj1, obj2, obj3, ... */) {
   var result = {};
   function assignValue(val, key) {
-    if (typeof result[key] === 'object' && typeof val === 'object') {
+    if (typeof result[key] === "object" && typeof val === "object") {
       result[key] = deepMerge(result[key], val);
-    } else if (typeof val === 'object') {
+    } else if (typeof val === "object") {
       result[key] = deepMerge({}, val);
     } else {
       result[key] = val;
@@ -322,16 +322,16 @@ function deepMerge(/* obj1, obj2, obj3, ... */) {
 }
 
 /**
- * Extends object a by mutably adding to it the properties of object b.
+ * 通过可变地向对象a添加对象b的属性来扩展对象a。
  *
- * @param {Object} a The object to be extended
- * @param {Object} b The object to copy properties from
- * @param {Object} thisArg The object to bind function to
- * @return {Object} The resulting value of object a
+ * @param {Object} a 要扩展的对象
+ * @param {Object} b 要从中复制属性的对象
+ * @param {Object} thisArg 要将函数绑定到的对象
+ * @return {Object} 对象a的结果值
  */
 function extend(a, b, thisArg) {
   forEach(b, function assignValue(val, key) {
-    if (thisArg && typeof val === 'function') {
+    if (thisArg && typeof val === "function") {
       a[key] = bind(val, thisArg);
     } else {
       a[key] = val;
