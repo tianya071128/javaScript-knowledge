@@ -1,8 +1,8 @@
 /*
- * @Descripttion:
+ * @Descripttion: Axios 实例构造器
  * @Author: 温祖彪
  * @Date: 2019-12-25 20:59:25
- * @LastEditTime: 2019-12-25 22:46:32
+ * @LastEditTime: 2019-12-26 21:30:42
  */
 "use strict";
 
@@ -22,7 +22,9 @@ function Axios(instanceConfig) {
   this.defaults = instanceConfig;
 
   this.interceptors = {
+    // 创建请求拦截器实例
     request: new InterceptorManager(),
+    // 创建响应拦截器实例
     response: new InterceptorManager()
   };
 }

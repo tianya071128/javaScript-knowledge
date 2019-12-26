@@ -1,4 +1,4 @@
-# XMLHttpRequest
+# setRequestHeaderXMLHttpRequest
 
 **发送一个 HTTP 请求, 需要创建一个 XMLHttpRequest 对象, 打开一个URL, 最后发送请求. **
 
@@ -466,7 +466,7 @@ xhrReq.open(method, url, async?, user?, password?);
 
 
 
-#### 2. setResponseHeader(): 设置 HTTP 请求头的值
+#### 2. setRequestHeader(): 设置 HTTP 请求头的值
 
 **此方法必须在 open() 和 send() 之间调用. 如果多次对同一请求头赋值, 只会生成一个合并了多个值得请求头**
 

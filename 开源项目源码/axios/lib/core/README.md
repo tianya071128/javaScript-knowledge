@@ -1,7 +1,16 @@
+<!--
+ * @Descripttion:
+ * @Author: 温祖彪
+ * @Date: 2019-12-25 20:59:25
+ * @LastEditTime: 2019-12-26 21:31:22
+ -->
+
 # axios // core
 
-The modules found in `core/` should be modules that are specific to the domain logic of axios. These modules would most likely not make sense to be consumed outside of the axios module, as their logic is too specific. Some examples of core modules are:
+在 `核心`中发现的模块应该是特定于域逻辑的模块。这些模块最有可能在 AXIOS 模块之外被消耗，因为它们的逻辑过于具体。核心模块的一些示例如下：
 
-- Dispatching requests
-- Managing interceptors
-- Handling config
+-发送请求
+
+-管理拦截器
+
+-处理配置

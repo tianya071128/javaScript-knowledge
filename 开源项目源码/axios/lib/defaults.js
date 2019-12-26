@@ -2,39 +2,39 @@
  * @Descripttion: 默认配置项
  * @Author: 温祖彪
  * @Date: 2019-12-18 21:29:18
- * @LastEditTime: 2019-12-20 22:44:04
+ * @LastEditTime: 2019-12-26 22:36:32
  */
-'use strict';
+"use strict";
 
-var utils = require('./utils');
-var normalizeHeaderName = require('./helpers/normalizeHeaderName');
+var utils = require("./utils");
+var normalizeHeaderName = require("./helpers/normalizeHeaderName");
 
 var DEFAULT_CONTENT_TYPE = {
-  'Content-Type': 'application/x-www-form-urlencoded'
+  "Content-Type": "application/x-www-form-urlencoded"
 };
 
 // 设置请求头
 function setContentTypeIfUnset(headers, value) {
   if (
     !utils.isUndefined(headers) &&
-    utils.isUndefined(headers['Content-Type'])
+    utils.isUndefined(headers["Content-Type"])
   ) {
-    headers['Content-Type'] = value;
+    headers["Content-Type"] = value;
   }
 }
 
 // 创建默认的 adapter 选项函数
 function getDefaultAdapter() {
   var adapter;
-  if (typeof XMLHttpRequest !== 'undefined') {
+  if (typeof XMLHttpRequest !== "undefined") {
     // 浏览器环境中使用 XHR
-    adapter = require('./adapters/xhr');
+    adapter = require("./adapters/xhr");
   } else if (
-    typeof process !== 'undefined' &&
-    Object.prototype.toString.call(process) === '[object process]'
+    typeof process !== "undefined" &&
+    Object.prototype.toString.call(process) === "[object process]"
   ) {
-    // node中使用 HTTP (node中不解析)
-    adapter = require('./adapters/http');
+    // node中使用 HTTP (node部分不分析源码)
+    adapter = require("./adapters/http");
   }
   return adapter;
 }
@@ -50,8 +50,8 @@ var defaults = {
   transformRequest: [
     function transformRequest(data, headers) {
       // 应该是设置请求头
-      normalizeHeaderName(headers, 'Accept');
-      normalizeHeaderName(headers, 'Content-Type');
+      normalizeHeaderName(headers, "Accept");
+      normalizeHeaderName(headers, "Content-Type");
       // 判断类型是否为下列一种
       if (
         utils.isFormData(data) ||
@@ -72,7 +72,7 @@ var defaults = {
         // 设置请求头 Content-Type: application/x-www-form-urlencoded;charset=utf-8
         setContentTypeIfUnset(
           headers,
-          'application/x-www-form-urlencoded;charset=utf-8'
+          "application/x-www-form-urlencoded;charset=utf-8"
         );
         // data.toString() (new URLSearchParams([["foo", 1],["bar", 2]]).toString() => foo=1&bar=2)
         return data.toString();
@@ -80,7 +80,7 @@ var defaults = {
       // 判断是否为 Object
       if (utils.isObject(data)) {
         // 设置请求头 Content-Type: application/json;charset=utf-8
-        setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+        setContentTypeIfUnset(headers, "application/json;charset=utf-8");
         return JSON.stringify(data);
       }
       return data;
@@ -91,7 +91,7 @@ var defaults = {
   transformResponse: [
     function transformResponse(data) {
       /*eslint no-param-reassign:0*/
-      if (typeof data === 'string') {
+      if (typeof data === "string") {
         try {
           // 如果响应数据为字符串的话, 将其反序列化
           data = JSON.parse(data);
@@ -109,9 +109,9 @@ var defaults = {
    */
   timeout: 0,
   // `xsrfCookieName` 是用作 xsrf token 的值的cookie的名称 -- 这两个选项不是很明白
-  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfCookieName: "XSRF-TOKEN",
   // `xsrfHeaderName` 是承载 xsrf token 的值的 HTTP 头的名称 -- 这两个选项不是很明白
-  xsrfHeaderName: 'X-XSRF-TOKEN',
+  xsrfHeaderName: "X-XSRF-TOKEN",
 
   // `maxContentLength` 定义允许的响应内容的最大尺寸(-1 应该为不限制, )
   maxContentLength: -1,
@@ -127,15 +127,15 @@ var defaults = {
 // 默认 headers
 defaults.headers = {
   common: {
-    Accept: 'application/json, text/plain, */*'
+    Accept: "application/json, text/plain, */*"
   }
 };
 
-utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+utils.forEach(["delete", "get", "head"], function forEachMethodNoData(method) {
   defaults.headers[method] = {};
 });
 
-utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+utils.forEach(["post", "put", "patch"], function forEachMethodWithData(method) {
   defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
 });
 
