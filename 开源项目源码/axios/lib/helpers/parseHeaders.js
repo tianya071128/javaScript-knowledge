@@ -1,3 +1,9 @@
+/*
+ * @Descripttion: 将 headers 解析为对象
+ * @Author: sueRimn
+ * @Date: 2019-12-27 12:17:22
+ * @LastEditTime : 2019-12-30 15:03:19
+ */
 'use strict';
 
 var utils = require('./../utils');
@@ -12,7 +18,7 @@ var ignoreDuplicateOf = [
 ];
 
 /**
- * Parse headers into an object
+ * 将 headers 解析为对象
  *
  * ```
  * Date: Wed, 27 Aug 2014 08:58:49 GMT
@@ -21,8 +27,8 @@ var ignoreDuplicateOf = [
  * Transfer-Encoding: chunked
  * ```
  *
- * @param {String} headers Headers needing to be parsed
- * @returns {Object} Headers parsed into an object
+ * @param {String} headers 需要分析的 Headers 
+ * @returns {Object} 解析为 Headers 对象
  */
 module.exports = function parseHeaders(headers) {
   var parsed = {};

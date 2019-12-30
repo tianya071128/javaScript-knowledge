@@ -1,14 +1,15 @@
 'use strict';
 
 /**
- * Update an Error with the specified config, error code, and response.
+ * 使用指定的配置、错误代码和响应更新错误.
+ * 将一些配置信息等等放在 error 上
  *
- * @param {Error} error The error to update.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The error.
+ * @param {Error} error 要更新的错误.
+ * @param {Object} config 配置.
+ * @param {string} [code] 错误代码（例如，“ECONNABORTED”）.
+ * @param {Object} [request] 请求.
+ * @param {Object} [response] 响应.
+ * @returns {Error} 创建的错误.
  */
 module.exports = function enhanceError(error, config, code, request, response) {
   error.config = config;
@@ -20,7 +21,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   error.response = response;
   error.isAxiosError = true;
 
-  error.toJSON = function() {
+  error.toJSON = function () {
     return {
       // Standard
       message: this.message,

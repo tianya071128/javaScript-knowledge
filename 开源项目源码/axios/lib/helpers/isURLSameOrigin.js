@@ -1,3 +1,9 @@
+/*
+ * @Descripttion: 
+ * @Author: sueRimn
+ * @Date: 2019-12-27 12:17:22
+ * @LastEditTime: 2019-12-30 15:41:13
+ */
 'use strict';
 
 var utils = require('./../utils');
@@ -6,8 +12,8 @@ var isValidXss = require('./isValidXss');
 module.exports = (
   utils.isStandardBrowserEnv() ?
 
-  // Standard browser envs have full support of the APIs needed to test
-  // whether the request URL is of the same origin as current location.
+    // 标准浏览器环境完全支持测试所需的api
+    // 请求URL是否与当前位置的来源相同.
     (function standardBrowserEnv() {
       var msie = /(msie|trident)/i.test(navigator.userAgent);
       var urlParsingNode = document.createElement('a');
@@ -27,7 +33,7 @@ module.exports = (
         }
 
         if (msie) {
-        // IE needs attribute set twice to normalize properties
+          // IE needs attribute set twice to normalize properties
           urlParsingNode.setAttribute('href', href);
           href = urlParsingNode.href;
         }
@@ -60,11 +66,11 @@ module.exports = (
       return function isURLSameOrigin(requestURL) {
         var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
         return (parsed.protocol === originURL.protocol &&
-            parsed.host === originURL.host);
+          parsed.host === originURL.host);
       };
     })() :
 
-  // Non standard browser envs (web workers, react-native) lack needed support.
+    // Non standard browser envs (web workers, react-native) lack needed support.
     (function nonStandardBrowserEnv() {
       return function isURLSameOrigin() {
         return true;

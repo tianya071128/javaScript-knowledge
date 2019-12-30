@@ -1,3 +1,9 @@
+/*
+ * @Descripttion: 
+ * @Author: sueRimn
+ * @Date: 2019-12-27 12:17:22
+ * @LastEditTime : 2019-12-30 14:35:29
+ */
 'use strict';
 
 var utils = require('./../utils');
@@ -14,24 +20,28 @@ function encode(val) {
 }
 
 /**
- * Build a URL by appending params to the end
+ * 通过在末尾附加参数来构建 URL
  *
- * @param {string} url The base of the url (e.g., http://www.google.com)
- * @param {object} [params] The params to be appended
- * @returns {string} The formatted url
+ * @param {string} url url 的基础（例如，http://www.google.com）
+ * @param {object} [params] 要附加的参数
+ * @returns {string} 格式化的 url
  */
 module.exports = function buildURL(url, params, paramsSerializer) {
   /*eslint no-param-reassign:0*/
+  // 不需要序列化参数返回原url
   if (!params) {
     return url;
   }
 
   var serializedParams;
   if (paramsSerializer) {
+    // `paramsSerializer` 是一个负责 `params` 序列化的函数(如果存在的话, 直接调用方法)
     serializedParams = paramsSerializer(params);
   } else if (utils.isURLSearchParams(params)) {
+    // 确定值是否为 URLSearchParams 对象 -- 则直接调用 toString() 方法获取参数
     serializedParams = params.toString();
   } else {
+    // 默认方法
     var parts = [];
 
     utils.forEach(params, function serialize(val, key) {
