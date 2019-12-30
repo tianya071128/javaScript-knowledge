@@ -1,3 +1,9 @@
+/*
+ * @Descripttion: 
+ * @Author: sueRimn
+ * @Date: 2019-12-27 12:17:22
+ * @LastEditTime: 2019-12-30 15:40:00
+ */
 'use strict';
 
 var utils = require('./../utils');
@@ -5,7 +11,7 @@ var utils = require('./../utils');
 module.exports = (
   utils.isStandardBrowserEnv() ?
 
-  // Standard browser envs support document.cookie
+    // 标准浏览器环境支持document.cookie
     (function standardBrowserEnv() {
       return {
         write: function write(name, value, expires, path, domain, secure) {
@@ -42,12 +48,12 @@ module.exports = (
       };
     })() :
 
-  // Non standard browser env (web workers, react-native) lack needed support.
+    // 非标准浏览器env（web workers，react native）缺少所需的支持.
     (function nonStandardBrowserEnv() {
       return {
-        write: function write() {},
+        write: function write() { },
         read: function read() { return null; },
-        remove: function remove() {}
+        remove: function remove() { }
       };
     })()
 );

@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2019-12-18 21:29:18
- * @LastEditTime: 2019-12-25 22:53:27
+ * @LastEditTime : 2019-12-30 15:36:39
  */
 "use strict";
 
@@ -194,10 +194,10 @@ function trim(str) {
 }
 
 /**
- * Determine if we're running in a standard browser environment
+ * 确定我们是否在标准浏览器环境中运行
  *
- * This allows axios to run in a web worker, and react-native.
- * Both environments support XMLHttpRequest, but not fully standard globals.
+ * 这允许在一个Web工作者中运行，并响应本地.
+ * 两种环境都支持 XMLHttpRequest，但不支持完全标准的全局参数.
  *
  * web workers:
  *  typeof window -> undefined
