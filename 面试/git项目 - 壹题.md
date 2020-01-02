@@ -1,36 +1,30 @@
 # 目录
 
-* [第 1 题: 写 React / Vue 项目时为什么要在列表组件中写 key，其作用是什么？](#第 1 题: 写 React / Vue 项目时为什么要在列表组件中写 key，其作用是什么？)
-* [第 2 题: ['1', '2', '3'].map(parseInt) what & why ?](#第 2 题: ['1', '2', '3'].map(parseInt) what & why ?)
-* [第 3 题: 什么是防抖和节流？有什么区别？如何实现？](#第 3 题: 什么是防抖和节流？有什么区别？如何实现？)
-* [第 4 题: 介绍下 Set、Map、WeakSet 和 WeakMap 的区别？](#第 4 题: 介绍下 Set、Map、WeakSet 和 WeakMap 的区别？)
-
-
+- [第 1 题: 写 React / Vue 项目时为什么要在列表组件中写 key，其作用是什么？](#第-1-题:-写-React-/-Vue-项目时为什么要在列表组件中写-key，其作用是什么？)
+- [第 2 题: ['1', '2', '3'].map(parseInt) what & why ?](<#第-2-题:-['1',-'2',-'3'].map(parseInt)-what-&-why-?>)
+- [第 3 题: 什么是防抖和节流？有什么区别？如何实现？](#第-3-题:-什么是防抖和节流？有什么区别？如何实现？)
+- [第 4 题: 介绍下 Set、Map、WeakSet 和 WeakMap 的区别？](#第-4-题:-介绍下-Set、Map、WeakSet-和-WeakMap-的区别？)
 
 ## 第 1 题: 写 React / Vue 项目时为什么要在列表组件中写 key，其作用是什么？
 
 > vue 和 react 都是采用 diff 算法来对比新旧虚拟节点，从而更新节点。通过 key 可以将节点复用(diff 算法不懂, 暂不深究)
 
-
-
 ## 第 2 题: ['1', '2', '3'].map(parseInt) what & why ?
 
 > ```javascript
 > // [1, NaN, NaN]
-> console.log( ['1', '2', '3'].map(parseInt) )
+> console.log(['1', '2', '3'].map(parseInt));
 > ```
 >
-> map方法的回调是会接收三个参数: 当前值, 索引, 数组本身
+> map 方法的回调是会接收三个参数: 当前值, 索引, 数组本身
 >
-> parseInt方法接收两个参数: 要被处理的值, 解析基数
+> parseInt 方法接收两个参数: 要被处理的值, 解析基数
 >
-> 这个运行过程为: 
+> 这个运行过程为:
 >
-> 1. parseInt("1", 0) // //radix为0时，且string参数不以“0x”和“0”开头时，按照10为基数处理。这个时候返回1
-> 2.  parseInt('2', 1) //基数为1（1进制）表示的数中，最大值小于2，所以无法解析，返回NaN 
-> 3.  parseInt('3', 2) //基数为2（2进制）表示的数中，最大值小于3，所以无法解析，返回NaN 
-
-
+> 1. parseInt("1", 0) // //radix 为 0 时，且 string 参数不以“0x”和“0”开头时，按照 10 为基数处理。这个时候返回 1
+> 2. parseInt('2', 1) //基数为 1（1 进制）表示的数中，最大值小于 2，所以无法解析，返回 NaN
+> 3. parseInt('3', 2) //基数为 2（2 进制）表示的数中，最大值小于 3，所以无法解析，返回 NaN
 
 ## 第 3 题: 什么是防抖和节流？有什么区别？如何实现？
 
@@ -40,46 +34,44 @@
 >
 > ```javascript
 > function debounce(fn, time = 100) {
->     // 严谨来讲, 这里应该对参数进行验证
->     
->     let timer = null; // 定时器
->     return function () {
->         if (timer) clearTimeout(timer); // 每次触发防抖函数, 就需要将之前的定时器清除
->         timer = setTimeout((...arg) => {
->             // 使用 apply 保持 fn 回调函数内部的 this 指针正确, 并将其参数传递给 fn 回调
->             fn.apply(this, arg);
->         }, time)
->     }
+>   // 严谨来讲, 这里应该对参数进行验证
+>
+>   let timer = null; // 定时器
+>   return function() {
+>     if (timer) clearTimeout(timer); // 每次触发防抖函数, 就需要将之前的定时器清除
+>     timer = setTimeout((...arg) => {
+>       // 使用 apply 保持 fn 回调函数内部的 this 指针正确, 并将其参数传递给 fn 回调
+>       fn.apply(this, arg);
+>     }, time);
+>   };
 > }
 > ```
->
-> 
 >
 > 节流: 高频事件触发, 但在 n 秒内只会执行一次, 节流会稀释函数的执行频率
 >
-> 场景:  mousemove ,  scroll 等等持续触发事件
+> 场景: mousemove , scroll 等等持续触发事件
 >
 > ```javascript
 > function throttle(fn, time = 100) {
->     // 严谨来讲, 这里应该对参数进行验证
->     
->     let canRun = false; // 标记是否在执行函数
->     return function (...arg) {
->         if (canRun) return;
->         canRun = true;
->         // 放在外面执行是为了先一步执行, 不要等到 time 时间后在执行
->         fn.apply(this, arg);
->         
->         setTimeout(() => {
->             canRun = false;
->         }, time)
->     }
+>   // 严谨来讲, 这里应该对参数进行验证
+>
+>   let canRun = false; // 标记是否在执行函数
+>   return function(...arg) {
+>     if (canRun) return;
+>     canRun = true;
+>     // 放在外面执行是为了先一步执行, 不要等到 time 时间后在执行
+>     fn.apply(this, arg);
+>
+>     setTimeout(() => {
+>       canRun = false;
+>     }, time);
+>   };
 > }
 > ```
 
-
-
 ## 第 4 题: 介绍下 Set、Map、WeakSet 和 WeakMap 的区别？
+
+
 
 
 
