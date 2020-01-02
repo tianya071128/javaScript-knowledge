@@ -1,0 +1,51 @@
+<!--
+ * @Descripttion: 
+ * @Author: sueRimn
+ * @Date: 2020-01-02 10:59:00
+ * @LastEditTime : 2020-01-02 11:33:27
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+
+</html>
+
+<script>
+  let createIterator = function* () {
+    yield 1;
+    yield 2;
+    yield 3;
+  },
+    iterator = createIterator()
+
+  iterator.next()
+  iterator.next()
+
+  for (const item of iterator) {
+    // 这里就只会打印 3 
+    // 原因: 这个迭代器已经被调用了两次
+    console.log(item)
+  }
+
+  // 方法简写方式
+  let iterator2 = {
+    * createIterator() {
+      yield 1;
+      yield 1;
+      yield 1;
+      yield 1;
+    }
+  }
+
+  console.log(iterator2.createIterator())
+</script>
