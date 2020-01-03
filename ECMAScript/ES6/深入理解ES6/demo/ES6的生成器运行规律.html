@@ -1,0 +1,54 @@
+<!--
+ * @Descripttion: 
+ * @Author: sueRimn
+ * @Date: 2020-01-03 12:07:01
+ * @LastEditTime : 2020-01-03 12:15:17
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+
+</html>
+
+<script>
+  function* createIterator() {
+    console.log('开始调用');
+
+    let first = yield 1;
+
+    console.log('第一个 yield 已经调用');
+
+    let second = yield first + 2; // 4 + 2
+
+    console.log('第二个 yield 已经调用')
+
+    yield second + 3; // 5 + 3
+
+    console.log('这里还会触发吗? -- 答案是会的')
+  }
+
+  // 在这里, 只是生成一个迭代器, 生成器函数内部是不会被调用任何一句代码的
+  let iterator = createIterator();
+
+  // 第一次 next() 会打印 '开始调用', 执行到 yield 语句停止, 并且将 yield 语句的返回值返回出来
+  console.log(iterator.next());
+
+  // 第二次 next() 会打印 '第一个 yield 已经调用', 执行到第二个 yield 语句, next(4) 参数 4 就会被 yield (语句) 的结果值
+  console.log(iterator.next(4));
+
+  // 第三次 next() 会打印 '第二个 yield 已经调用', 执行到第三个 yield 语句, next(5) 参数 5 就会被 yield (语句) 的结果值
+  console.log(iterator.next(5));
+
+  // 第四次 next() 会打印 '这里还会触发吗? -- 答案是会的', 执行完整个生成器函数, 没有发现 yield 语句, next()就会返回 { value: undefind, done: true }
+  console.log(iterator.next(5));
+</script>
