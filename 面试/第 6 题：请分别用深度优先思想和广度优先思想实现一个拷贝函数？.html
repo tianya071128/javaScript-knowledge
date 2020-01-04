@@ -1,0 +1,36 @@
+<!--
+ * @Descripttion: 
+ * @Author: sueRimn
+ * @Date: 2020-01-04 17:38:52
+ * @LastEditTime : 2020-01-04 17:49:03
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+
+</html>
+
+<script>
+  // 获取类型
+  let getType = (item) => Object.prototype.toString.call(item).slice(8, -1);
+
+  // 深度优先 - 深拷贝函数
+  let DFSdeepClone = (source, map = new Map()) => {
+    // 解决环状结构数据
+    if (map.has(source)) {
+      return map.get(source);
+    }
+
+    const obj = 
+  }
+</script>

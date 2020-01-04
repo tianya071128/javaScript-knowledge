@@ -5,6 +5,7 @@
 - [第 3 题: 什么是防抖和节流？有什么区别？如何实现？](#第-3-题:-什么是防抖和节流？有什么区别？如何实现？)
 - [第 4 题: 介绍下 Set、Map、WeakSet 和 WeakMap 的区别？](#第-4-题:-介绍下-Set、Map、WeakSet-和-WeakMap-的区别？)
 - [第 5 题：介绍下深度优先遍历和广度优先遍历，如何实现？](#第-5 题：介绍下深度优先遍历和广度优先遍历，如何实现？)
+- [第 6 题：请分别用深度优先思想和广度优先思想实现一个拷贝函数？](#第-6-题：请分别用深度优先思想和广度优先思想实现一个拷贝函数？)
 
 ## 第 1 题: 写 React / Vue 项目时为什么要在列表组件中写 key，其作用是什么？
 
@@ -94,6 +95,119 @@
 
 
 ## 第 5 题：介绍下深度优先遍历和广度优先遍历，如何实现？
+
+以 DOM 遍历为例
+
+```javascript
+// HTML 结构
+<body>
+  <div class="class-1">
+    <div class="class-1-1"></div>
+    <div class="class-1-2">
+      <div class="class-1-2-1"></div>
+      <div class="class-1-2-2"></div>
+    </div>
+    <div class="class-1-3"></div>
+  </div>
+  <div class="class-2">
+    <div class="class-2-1"></div>
+  </div>
+  <div class="class-3">
+    <div class="class-3-1">
+      <div class="class-3-1-1"></div>
+    </div>
+  </div>
+</body>
+
+// js
+let node = document.body;
+
+  // 深度优先遍历方法
+  let deepTraversal1 = (node, nodeList = []) => {
+    if (node === null) return;
+
+    nodeList.push(node);
+    let nodes = node.children;
+    for (const item of nodes) {
+      deepTraversal1(item, nodeList);
+    }
+    return nodeList;
+  }
+  console.log(deepTraversal1(node));
+
+
+  let deepTraversal2 = (node) => {
+    if (node === null) return;
+    let nodeList = [];
+    nodeList.push(node);
+
+    let nodes = node.children;
+    for (const item of nodes) {
+      nodeList.concat(deepTraversal2(item));
+    }
+
+    return nodeList;
+  }
+  console.log(deepTraversal1(node));
+
+  // 非递归
+  let deepTraversal3 = (node) => {
+    if (node === null) return;
+    let nodeList = [],
+      stack = [];
+    stack.push(node);
+    while (stack.length) {
+      let item = stack.pop(),
+        nodes = item.children;
+      nodeList.push(item);
+
+      for (let index = nodes.length - 1; index >= 0; index--) {
+        stack.push(nodes[index]);
+      }
+    }
+
+    return nodeList
+  }
+  console.log(deepTraversal3(node));
+
+  // 生成器和迭代器
+  let deepTraversal4 = function* (node) {
+    if (node === null) {
+      return;
+    }
+    yield node
+    let nodes = node.children;
+
+    for (const item of nodes) {
+      yield* deepTraversal4(item);
+    }
+  }
+  console.log([...deepTraversal4(node)]);
+
+  // 2. 广度优先
+  let widthTraversal2 = (node) => {
+    if (node === null) return;
+    let nodeList = [],
+      stack = [];
+    stack.push(node);
+    while (stack.length) {
+      let item = stack.shift(),
+        nodes = item.children;
+      nodeList.push(item);
+
+      for (const item of nodes) {
+        stack.push(item);
+      }
+    }
+
+    return nodeList
+  }
+  console.log(widthTraversal2(node));
+```
+
+
+
+### 第 6 题：请分别用深度优先思想和广度优先思想实现一个拷贝函数？)
 
 
 

@@ -1,0 +1,122 @@
+<!--
+ * @Descripttion: 
+ * @Author: sueRimn
+ * @Date: 2020-01-04 11:14:57
+ * @LastEditTime : 2020-01-04 11:52:34
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <div class="class-1">
+    <div class="class-1-1"></div>
+    <div class="class-1-2">
+      <div class="class-1-2-1"></div>
+      <div class="class-1-2-2"></div>
+    </div>
+    <div class="class-1-3"></div>
+  </div>
+  <div class="class-2">
+    <div class="class-2-1"></div>
+  </div>
+  <div class="class-3">
+    <div class="class-3-1">
+      <div class="class-3-1-1"></div>
+    </div>
+  </div>
+</body>
+
+</html>
+
+<script>
+  let node = document.body;
+
+  // 深度优先遍历方法
+  let deepTraversal1 = (node, nodeList = []) => {
+    if (node === null) return;
+
+    nodeList.push(node);
+    let nodes = node.children;
+    for (const item of nodes) {
+      deepTraversal1(item, nodeList);
+    }
+    return nodeList;
+  }
+  console.log(deepTraversal1(node));
+
+
+  let deepTraversal2 = (node) => {
+    if (node === null) return;
+    let nodeList = [];
+    nodeList.push(node);
+
+    let nodes = node.children;
+    for (const item of nodes) {
+      nodeList.concat(deepTraversal2(item));
+    }
+
+    return nodeList;
+  }
+  console.log(deepTraversal1(node));
+
+  // 非递归
+  let deepTraversal3 = (node) => {
+    if (node === null) return;
+    let nodeList = [],
+      stack = [];
+    stack.push(node);
+    while (stack.length) {
+      let item = stack.pop(),
+        nodes = item.children;
+      nodeList.push(item);
+
+      for (let index = nodes.length - 1; index >= 0; index--) {
+        stack.push(nodes[index]);
+      }
+    }
+
+    return nodeList
+  }
+  console.log(deepTraversal3(node));
+
+  // 生成器和迭代器
+  let deepTraversal4 = function* (node) {
+    if (node === null) {
+      return;
+    }
+    yield node
+    let nodes = node.children;
+
+    for (const item of nodes) {
+      yield* deepTraversal4(item);
+    }
+  }
+  console.log([...deepTraversal4(node)]);
+
+  // 2. 广度优先
+  let widthTraversal2 = (node) => {
+    if (node === null) return;
+    let nodeList = [],
+      stack = [];
+    stack.push(node);
+    while (stack.length) {
+      let item = stack.shift(),
+        nodes = item.children;
+      nodeList.push(item);
+
+      for (const item of nodes) {
+        stack.push(item);
+      }
+    }
+
+    return nodeList
+  }
+  console.log(widthTraversal2(node));
+</script>
