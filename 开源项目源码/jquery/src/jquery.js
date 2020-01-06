@@ -1,3 +1,10 @@
+/*
+ * @Descripttion:
+ * @Author: 温祖彪
+ * @Date: 2020-01-06 20:45:05
+ * @LastEditTime: 2020-01-06 21:52:59
+ */
+// 核心文件
 import jQuery from "./core.js";
 
 import "./selector.js";
