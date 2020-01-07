@@ -6,6 +6,14 @@
 - [第 4 题: 介绍下 Set、Map、WeakSet 和 WeakMap 的区别？](#第-4-题:-介绍下-Set、Map、WeakSet-和-WeakMap-的区别？)
 - [第 5 题：介绍下深度优先遍历和广度优先遍历，如何实现？](#第-5 题：介绍下深度优先遍历和广度优先遍历，如何实现？)
 - [第 6 题：请分别用深度优先思想和广度优先思想实现一个拷贝函数？](#第-6-题：请分别用深度优先思想和广度优先思想实现一个拷贝函数？)
+- [第 7 题：ES5/ES6 的继承除了写法以外还有什么区别？](#第-7-题：ES5/ES6-的继承除了写法以外还有什么区别？)
+- [第 8 题：setTimeout、Promise、Async/Await 的区别](#第-8-题：setTimeout、Promise、Async/Await 的区别)
+- [第 9 题：Async/Await 如何通过同步的方式实现异步](#第-9-题：Async/Await-如何通过同步的方式实现异步)
+- [第 10 题：异步笔试题](#第-10-题：异步笔试题)
+
+
+
+
 
 ## 第 1 题: 写 React / Vue 项目时为什么要在列表组件中写 key，其作用是什么？
 
@@ -207,25 +215,143 @@ let node = document.body;
 
 
 
-### 第 6 题：请分别用深度优先思想和广度优先思想实现一个拷贝函数？)
+## 第 6 题：请分别用深度优先思想和广度优先思想实现一个拷贝函数？
 
 
 
+## 第 7 题：ES5/ES6 的继承除了写法以外还有什么区别？
+
+根据书籍《深入理解ES6》中所述， ES5/ES6 的继承处理写法以外大致还有以下几点
+
+1. 会自动继承静态成员, 也就是说, 类的构造函数也会被继承, 派生类.\__proto__ === 基类,
+
+   而在 ES5 中, 构造器函数.\__proto__ === Function.prototype
+
+   ```javascript
+   class Rectangle {
+       constructor(length, width) {
+           this.length = length;
+           this.width = width;
+   }
+       getArea() {
+           return this.length * this.width;
+   }
+       static create(length, width) {
+           return new Rectangle(length, width);
+       }
+   }
+   
+   class Square extends Rectangle {
+       constructor(length) {
+           // 与 Rectangle.call(this, length, length) 相同
+           super(length, length);
+       }
+   }
+   
+   class Square2 extends Square {
+       constructor(length) {
+           // 与 Rectangle.call(this, length, length) 相同
+           super(length, length);
+       }
+   }
+   ```
+
+   打印结果: 
+
+   ![image-20200106142823782](C:\Users\Administrator\Desktop\md\面试\image\ES6类继承.png)
+
+2. **在 ES5 的传统继承中, `this` 的值会先被派生类( 例如 `MyArray` ) 创建, 随后基类构造器(例如 `Array.apply()` 方法)才被调用. 这意味着 `this` 一开始就是 `MyArray` 的实例, 之后才使用了 `Array` 的附加属性对其进行了装饰**
+
+   **在 ES6 基于类的继承中, `this` 的值会先被基类(`Array`)创建, 随后才被派生类的构造器(`MyArray`)所修改. 结果是 `this` 初始就拥有作为基类的内置对象的所有功能, 并能正确接受与之关联的所有功能**
+
+   ```javascript
+   // 在 ES5 中尝试继承数组
+   function MyArray() {
+   	Array.apply(this, arguments);
+   }
+   
+   MyArray.prototype = Object.create(Array.prototype, {
+   	constructor: {
+   		value: MyArray,
+   		writable: true,
+   		configurable: true,
+   		enumerable: true
+   	}
+   });
+   
+   // MyArray 实例上的 lengt 属性以及数值属性, 其行为与内置数组并不一致, 因为这些功能并未被涵盖在 Array.apply() 或 数组原型中
+   var colors = new MyArray();
+   colors[0] = "red";
+   console.log(colors.length); // 0
+   
+   colors.length = 0;
+   console.log(colors[0]); // "red"
+   
+   // ES6的继承内置对象
+   class MyArray extends Array {
+       // 空代码块
+   }
+   // 行为与正规数组一直
+   var colors = new MyArray();
+   colors[0] = "red";
+   console.log(colors.length); // 1
+   colors.length = 0;
+   console.log(colors[0]); // undefined
+   ```
 
 
 
+## 第 8 题：setTimeout、Promise、Async/Await 的区别
 
 
 
+## 第 9 题：Async/Await 如何通过同步的方式实现异步
 
 
 
+## 第 10 题：异步笔试题
 
+```javascript
+// 下面代码的运行结果
+async function async1() {
+    console.log('async1 start');
+    await async2();
+    console.log('async1 end');
+}
+async function async2() {
+    console.log('async2');
+}
+console.log('script start');
+setTimeout(function() {
+    console.log('setTimeout');
+}, 0)
+async1();
+new Promise(function(resolve) {
+    console.log('promise1');
+    resolve();
+    // 自己改了一下
+    console.log('还会执行吗?');
+}).then(function() {
+    console.log('promise2');
+});
+console.log('script end');
+```
 
+解析答案: 
 
+srcipt start --> async1 start --> async2 --> promise1 --> script end --> async1 end --> promise2 --> setTimeout
 
+主要考察: 事件循环(Event Loop)
 
-
+> 宏任务:  
+>
+> (macro)task（又称之为宏任务）:  script(整体代码)、setTimeout、setInterval、I/O、UI交互事件、postMessage、MessageChannel、setImmediate(Node.js 环境) 
+>
+> 微任务:
+>
+>  microtask（又称为微任务） : Promise.then、MutaionObserver、process.nextTick(Node.js 环境)
+>
+> 主要参考[git-答案解析](https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/7)
 
 
 
