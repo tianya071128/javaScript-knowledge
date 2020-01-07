@@ -10,6 +10,9 @@
 - [第 8 题：setTimeout、Promise、Async/Await 的区别](#第-8-题：setTimeout、Promise、Async/Await 的区别)
 - [第 9 题：Async/Await 如何通过同步的方式实现异步](#第-9-题：Async/Await-如何通过同步的方式实现异步)
 - [第 10 题：异步笔试题](#第-10-题：异步笔试题)
+- [第 11 题：算法手写题](#第-11-题：算法手写题)
+- [第 12 题：JS 异步解决方案的发展历程以及优缺点。](#第-12-题：JS 异步解决方案的发展历程以及优缺点。)
+- [第 13 题：Promise 构造函数是同步执行还是异步执行，那么 then 方法呢？](#第-13-题：Promise-构造函数是同步执行还是异步执行，那么-then-方法呢？)
 
 
 
@@ -352,6 +355,157 @@ srcipt start --> async1 start --> async2 --> promise1 --> script end --> async1 
 >  microtask（又称为微任务） : Promise.then、MutaionObserver、process.nextTick(Node.js 环境)
 >
 > 主要参考[git-答案解析](https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/7)
+
+
+
+## 第 11 题：算法手写题
+
+> 已知如下数组：
+>
+> var arr = [ [1, 2, 2], [3, 4, 5, 5], [6, 7, 8, 9, [11, 12, [12, 13, [14] ] ] ], 10];
+>
+> 编写一个程序将数组扁平化去并除其中重复部分数据，最终得到一个升序且不重复的数组
+
+```javascript
+// 自己实现的 -- 使用了 ES6 的快速去重方法
+function sort(arr) {
+    let flat = (arr2) => {
+        let itemList = [];
+        for(let item of arr2) {
+            if (Array.isArray(item)) {
+                itemList = arrList.concat(flat(item));
+            } else {
+                itemList.push(item);
+            }
+        }
+        return itemList
+    }
+    return [...new Set(a(arr))].sort((a, b) => a - b);
+}
+sort([ [1, 2, 2], [3, 4, 5, 5], [6, 7, 8, 9, [11, 12, [12, 13, [14] ] ] ], 10])
+
+// 使用 flat() 方法
+Array.from(new Set(arr.flat(Infinity))).sort((a,b)=>{ return a-b})
+
+// 基本数据类型 OK, 其他类型会出错
+[...new Set(String(arr).split(','))].sort((a, b) => a - b).map(Number)
+```
+
+
+
+## 第 12 题：JS 异步解决方案的发展历程以及优缺点。
+
+发展历程:
+
+1. 回调函数 (callback)
+
+   > 优点: 解决了同步的问题, 不阻塞主线程执行
+   >
+   > 缺点: 
+   >
+   > 1. 多层嵌套回调时, 会导致回调地狱, 代码不易理解并且难以调试
+   > 2. 嵌套过深的话, 很难处理错误
+   > 3. 嵌套代码耦合性太高, 难以控制操作, 如果调用其他库的 API, 回调不易控制(控制反转)
+   >
+   > ```javascript
+   > ajax('XXX1', () => {
+   >     // callback 函数体
+   >     ajax('XXX2', () => {
+   >         // callback 函数体
+   >         ajax('XXX3', () => {
+   >             // callback 函数体
+   >         })
+   >     })
+   > })
+   > ```
+
+2. Promise
+
+   > 优点: 解决了回调地狱的问题 
+   >
+   > 缺点: 
+   >
+   > 1. 无法取消 Promise. 一旦定义了 then() 方法, 后面就无法取消这个 Promise
+   >
+   > ```javascript
+   > ajax('XXX1')
+   >   .then(res => {
+   >       // 操作逻辑
+   >       return ajax('XXX2')
+   >   }).then(res => {
+   >       // 操作逻辑
+   >       return ajax('XXX3')
+   >   }).then(res => {
+   >       // 操作逻辑
+   >   })
+   > ```
+
+3. Generator
+
+   > 优点:  **可以控制函数的执行**，可以配合 co 函数库使用 
+   >
+   > ```javascript
+   > function *fetch() {
+   >     yield ajax('XXX1', () => {})
+   >     yield ajax('XXX2', () => {})
+   >     yield ajax('XXX3', () => {})
+   > }
+   > let it = fetch()
+   > let result1 = it.next()
+   > let result2 = it.next()
+   > let result3 = it.next()
+   > ```
+
+4. Async/awiat
+
+   >  Generator 函数的语法糖, 简化了 Generator 处理异步的操作
+   >
+   > 优点: 代码清晰, 以同步代码形式处理异步
+   >
+   > 缺点: 错误处理不方便
+   >
+   > ```javascript
+   > async function test() {
+   >   // 以下代码没有依赖性的话，完全可以使用 Promise.all 的方式
+   >   // 如果有依赖性的话，其实就是解决回调地狱的例子了
+   >   await fetch('XXX1')
+   >   await fetch('XXX2')
+   >   await fetch('XXX3')
+   > }
+   > ```
+
+
+
+## 第 13 题：Promise 构造函数是同步执行还是异步执行，那么 then 方法呢？
+
+```javascript
+const promise = new Promise((resolve, reject) => {
+  console.log(1);
+  resolve(5);
+  console.log(2);
+}).then(val => {
+  console.log(val);
+});
+
+promise.then(() => {
+  console.log(3);
+});
+
+console.log(4);
+
+setTimeout(function() {
+  console.log(6);
+});
+
+```
+
+执行结果: 124536;
+
+由结果而知: Promise 构造函数是同步执行的, 而 then 方法是异步执行的, 而且 then 方法是事件循环(Event Loop)的微任务, 而 setTimeout 是宏任务, 所以 5,3 在 6 之前打印.
+
+
+
+
 
 
 
