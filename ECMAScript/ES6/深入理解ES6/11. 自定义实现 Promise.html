@@ -1,0 +1,275 @@
+<!--
+ * @Descripttion: 
+ * @Author: sueRimn
+ * @Date: 2020-01-09 15:43:10
+ * @LastEditTime : 2020-01-09 17:56:26
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+
+</html>
+
+<script>
+  class Promise {
+    constructor(executor) {
+      // 初始化状态
+      this.state = 'pending';
+      // 成功的值
+      this.value = undefined;
+      // 失败的值
+      this.reason = undefined;
+
+      // 由于可以重复调用 then 方法, 也就在 state 状态变化后都要调用, 此时用数组存储起来
+      // 成功数组
+      this.onResolvedCallbacks = [];
+      // 失败数组
+      this.onRejectedCallbacks = [];
+
+      // 标识是否调用了 resolve 或 reject 方法
+      this.called = false;
+
+      // 成功
+      let resolve = (value, flag) => {
+        // resolve 调用一次后, state状态改变, 再次调用 resolve 默认失败 -- 状态一定确定, 就不可更改
+        if (this.state === 'pending' && !this.called || flag) {
+          this.called = true;
+
+          resolveValuePromise.call(this, value, resolve, reject);
+        }
+      };
+      // 失败
+      let reject = (reason, flag) => {
+        // reject 调用一次, state状态改变, 再次调用 reject 默认失败 -- 状态一定确定, 就不可更改
+        if (this.state === 'pending' && !this.called || flag) {
+          // resolve 调用后, state 转化为失败态
+          this.state = 'rejected';
+          // 存储失败的值
+          this.reason = reason;
+
+          // 一旦 reject 状态变化, 调用失败态数组的函数
+          this.onRejectedCallbacks.forEach(fn => fn());
+        }
+      };
+      // 如果 executor 调用出现错误, 则直接执行 reject
+      try {
+        executor(resolve, reject);
+      } catch (e) {
+        reject(e);
+      }
+    }
+
+    // 实例方法 catch -- 基于 then 方法很好实现
+    catch(onRejected) {
+      this.then(null, onRejected);
+    }
+
+    // 实例方法 then 方法
+    then(onFulfilled, onRejected) {
+      // onFulfilled 如果不是函数，就忽略 onFulfilled，直接返回 value
+      onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : value => value;
+      // onRejected 如果不是函数，就忽略 onRejected，直接扔出错误
+      onRejected = typeof onRejected === 'function' ? onRejected : err => { throw err };
+
+      // 解决链式调用的方法, 返回一个 Promise 
+      let promise2 = new Promise((resolve, reject) => {
+        // 当状态已经改变为 fulfilled 或 rejected 时, 直接调用传入的方法
+        if (this.state === 'fulfilled') {
+          // 异步
+          setTimeout(() => {
+            try {
+              // 状态为 'fulfilled' 执行 onFulfilled 方法
+              let x = onFulfilled(this.value);
+
+              // resolvePromise函数，处理自己return的promise和默认的promise2的关系
+              resolvePromise(promise2, x, resolve, reject);
+            } catch (e) {
+              reject(e);
+            }
+          }, 0)
+        }
+
+        if (this.state === 'rejected') {
+          // 异步
+          setTimeout(() => {
+            try {
+              // 状态为 'rejected' 执行 onRejected 方法
+              let x = onRejected(this.reason);
+
+              // resolvePromise函数，处理自己return的promise和默认的promise2的关系
+              resolvePromise(promise2, x, resolve, reject);
+            } catch (e) {
+              reject(e);
+            }
+          }, 0)
+        }
+
+        // 当状态为 pending 时, 此时将回调函数存储在数组中
+        if (this.state === 'pending') {
+          // 将 onFulfilled 成功态回调函数存入在成功态数组中
+          this.onResolvedCallbacks.push(() => {
+            // 异步
+            setTimeout(() => {
+              try {
+                let x = onFulfilled(this.value);
+
+                // resolvePromise函数，处理自己return的promise和默认的promise2的关系
+                resolvePromise(promise2, x, resolve, reject);
+              } catch (e) {
+                reject(e);
+              }
+            }, 0)
+
+          });
+
+          // 将 onRejected 失败态回调函数存入在失败态数组中
+          this.onRejectedCallbacks.push(() => {
+            // 异步
+            setTimeout(() => {
+              try {
+                let x = onRejected(this.reason);
+
+                // resolvePromise函数，处理自己return的promise和默认的promise2的关系
+                resolvePromise(promise2, x, resolve, reject);
+              } catch (e) {
+                reject(e);
+              }
+            }, 0)
+
+          });
+        }
+      })
+
+      // 返回promise，完成链式
+      return promise2;
+    }
+  }
+
+  function resolvePromise(promise2, x, resolve, reject) {
+    // 循环引用报错
+    /*
+      let p = new Promise(resolve => {
+        resolve(0);
+      });
+      var p2 = p.then(data => {
+        // 循环引用，自己等待自己完成，一辈子完不成
+        return p2;
+      })
+    */
+    if (x === promise2) {
+      // reject报错
+      return reject(new TypeError('Chaining cycle detected for promise'));
+    }
+
+    // 防止多次调用 -- 成功和失败只能调用一个 所以设定一个called来防止多次调用
+    let called;
+    // x不是null 且x是对象或者函数
+    if (x != null && (typeof x === 'object' || typeof x === 'function')) {
+      try {
+        // A+规定，声明then = x的then方法
+        let then = x.then;
+
+        if (typeof then === 'function') {
+          then.call(x, y => {
+            // 成功和失败只能调用一次
+            if (called) return;
+            called = true;
+            // resolve 的结果依然是 promise 那就继续解析
+            resolvePromise(promise2, y, resove, reject);
+          }, err => {
+            // 成功和失败只能调用一个
+            if (called) return;
+            called = true;
+            reject(err);// 失败了就失败了
+          });
+        } else {
+          // 直接调用成功状态
+          resolve(x);
+        }
+      } catch (e) {
+        if (called) return;
+        called = true;
+        // 取 then 出错了那就不要在继续执行了
+        reject(x);
+      }
+    } else {
+      resolve(x);
+    }
+  }
+
+  function resolveValuePromise(value, resolve, reject) {
+    if (value === this) {
+      reject(new TypeError('Chaining cycle detected for promise'), true)
+    }
+    // 防止多次调用 -- 成功和失败只能调用一个 所以设定一个called来防止多次调用
+    let called;
+
+    // x不是null 且x是对象或者函数
+    if (value != null && (typeof value === 'object' || typeof value === 'function')) {
+      try {
+        // A+规定，声明then = x的then方法
+        let then = value.then;
+
+        if (typeof then === 'function') {
+          then.call(value, y => {
+            debugger;
+            // 成功和失败只能调用一次
+            if (called) return;
+            called = true;
+            // resolve 的结果依然是 promise 那就继续解析
+            resolve(y, true);
+          }, err => {
+            // 成功和失败只能调用一个
+            if (called) return;
+            called = true;
+            reject(err, true);// 失败了就失败了
+          });
+          return;
+        }
+      } catch (e) {
+        if (called) return;
+        called = true;
+        // 取 then 出错了那就不要在继续执行了
+        reject(value, true);
+        return;
+      }
+    }
+
+    // resolve 调用后, state 转化为成功态
+    this.state = 'fulfilled';
+    // 存储成功的值
+    this.value = value;
+
+    // 一旦 resolve 状态变化, 调用成功数组的函数
+    this.onResolvedCallbacks.forEach(fn => fn());
+  }
+
+  // 静态成员 Promise.resolve
+  Promise.resolve = function (val) {
+    return new Promise((resolve, reject) => {
+      resolve(val);
+    })
+  }
+
+  // 静态成员 Promise.reject
+  Promise.reject = function (val) {
+    return new Promise((resolve, reject) => {
+      reject(val);
+    })
+  }
+
+
+  let p = Promise.reject(420);
+  let p2 = Promise.resolve(p);
+  p2.then(value => console.log(value), err => console.log(1, err));
+</script>
