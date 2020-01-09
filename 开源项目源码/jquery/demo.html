@@ -2,7 +2,7 @@
  * @Descripttion: 
  * @Author: 温祖彪
  * @Date: 2020-01-06 22:37:29
- * @LastEditTime: 2020-01-06 22:38:57
+ * @LastEditTime: 2020-01-09 21:28:36
  -->
 <!DOCTYPE html>
 <html lang="en">
@@ -33,5 +33,9 @@
 </html>
 
 <script>
-  $(function() {});
+  $(function() {
+    console.log($(".box"));
+    console.log($(".box").end());
+    console.log(Object.prototype.toString.call($(".box")));
+  });
 </script>

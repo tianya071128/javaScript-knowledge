@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-01-06 20:45:05
- * @LastEditTime: 2020-01-06 22:46:01
+ * @LastEditTime: 2020-01-09 23:01:00
  */
 import arr from "./var/arr.js";
 import getProto from "./var/getProto.js";
@@ -145,6 +145,8 @@ jQuery.fn = jQuery.prototype = {
 };
 
 // 在 jQuer 函数上添加静态成员, 并且通过 jQuery.fn(引用的就是 jQuery.prototype ) 向 jQuery.prototype 添加方法
+// jQuery.extend: 扩展jQuery对象本身。用来在jQuery命名空间上增加新函数。 -- 当为一个参数时, 扩展 jQuery 本身, 当为多个参数对象时, 用于将一个或多个对象的内容合并到目标对象(类似于混入)
+// jQeury.fn.extend: 扩展 jQuery 元素集来提供新的方法（通常用来制作插件）
 jQuery.extend = jQuery.fn.extend = function() {
   var options,
     name,
@@ -157,48 +159,49 @@ jQuery.extend = jQuery.fn.extend = function() {
     length = arguments.length,
     deep = false;
 
-  // Handle a deep copy situation
+  // 处理深度复制的情况
   if (typeof target === "boolean") {
     deep = target;
 
-    // Skip the boolean and the target
+    // 跳过布尔值和目标
     target = arguments[i] || {};
     i++;
   }
 
-  // Handle case when target is a string or something (possible in deep copy)
+  // 当目标是字符串或其他内容时，跳过布尔值和 targetHandle 大小写（在deep copy中可能）
   if (typeof target !== "object" && typeof target !== "function") {
     target = {};
   }
 
-  // Extend jQuery itself if only one argument is passed
+  // 如果只传递了一个参数，则扩展 jQuery 本身
   if (i === length) {
     target = this;
     i--;
   }
 
   for (; i < length; i++) {
-    // Only deal with non-null/undefined values
+    // 仅处理非空/未定义的值
     if ((options = arguments[i]) != null) {
-      // Extend the base object
+      // 扩展基对象
       for (name in options) {
         copy = options[name];
 
-        // Prevent Object.prototype pollution
-        // Prevent never-ending loop
+        // 防止 Object.prototype 污染
+        // 防止永无止境的循环
         if (name === "__proto__" || target === copy) {
           continue;
         }
 
-        // Recurse if we're merging plain objects or arrays
+        // 如果合并纯对象或数组，则递归
         if (
           deep &&
           copy &&
           (jQuery.isPlainObject(copy) || (copyIsArray = Array.isArray(copy)))
         ) {
+          // 目标是否存在该属性
           src = target[name];
 
-          // Ensure proper type for the source value
+          // 确保源值的类型正确
           if (copyIsArray && !Array.isArray(src)) {
             clone = [];
           } else if (!copyIsArray && !jQuery.isPlainObject(src)) {
@@ -208,10 +211,10 @@ jQuery.extend = jQuery.fn.extend = function() {
           }
           copyIsArray = false;
 
-          // Never move original objects, clone them
+          // 不要移动原始对象，克隆它们
           target[name] = jQuery.extend(deep, clone, copy);
 
-          // Don't bring in undefined values
+          // 不要引入未定义的值
         } else if (copy !== undefined) {
           target[name] = copy;
         }
@@ -219,40 +222,44 @@ jQuery.extend = jQuery.fn.extend = function() {
     }
   }
 
-  // Return the modified object
+  // 返回修改后的对象
   return target;
 };
 
+// 添加 jQuery 静态成员
 jQuery.extend({
-  // Unique for each copy of jQuery on the page
+  // 页面上 jQuery 的每个副本都是唯一的
   expando: "jQuery" + (version + Math.random()).replace(/\D/g, ""),
 
-  // Assume jQuery is ready without the ready module
+  // 假设 jQuery 在没有 ready 模块的情况下已经就绪
   isReady: true,
 
+  // 抛出错误方法
   error: function(msg) {
     throw new Error(msg);
   },
 
   noop: function() {},
 
+  // 判断是否为全局对象(Object).
   isPlainObject: function(obj) {
     var proto, Ctor;
 
-    // Detect obvious negatives
-    // Use toString instead of jQuery.type to catch host objects
+    // 检测明显的阴性
+    // 使用 toString 而不是 jQuery.type 捕获宿主对象
     if (!obj || toString.call(obj) !== "[object Object]") {
       return false;
     }
 
+    // 获取对象原型
     proto = getProto(obj);
 
-    // Objects with no prototype (e.g., `Object.create( null )`) are plain
+    // 没有原型的对象（例如，`Object.create（null）`）是普通的
     if (!proto) {
       return true;
     }
 
-    // Objects with prototype are plain iff they were constructed by a global Object function
+    // 具有原型的对象是简单的，如果它们是由全局对象函数构造的
     Ctor = hasOwn.call(proto, "constructor") && proto.constructor;
     return (
       typeof Ctor === "function" &&
@@ -260,6 +267,7 @@ jQuery.extend({
     );
   },
 
+  // 判断是否为空对象
   isEmptyObject: function(obj) {
     var name;
 
@@ -269,16 +277,19 @@ jQuery.extend({
     return true;
   },
 
-  // Evaluates a script in a global context
+  // 在全局上下文中运行 script
   globalEval: function(code, options) {
     DOMEval(code, { nonce: options && options.nonce });
   },
 
+  // 通用遍历方法，可用于遍历对象和数组。
+  // 回调函数拥有两个参数：第一个为对象的成员或数组的索引，第二个为对应变量或内容。如果需要退出 each 循环可使回调函数返回 false，其它返回值将被忽略。
   each: function(obj, callback) {
     var length,
       i = 0;
 
     if (isArrayLike(obj)) {
+      // 遍历数组
       length = obj.length;
       for (; i < length; i++) {
         if (callback.call(obj[i], i, obj[i]) === false) {
@@ -296,7 +307,7 @@ jQuery.extend({
     return obj;
   },
 
-  // Retrieve the text value of an array of DOM nodes
+  // 检索 DOM 节点数组的文本值
   text: function(elem) {
     var node,
       ret = "",
@@ -447,6 +458,7 @@ jQuery.each(
   }
 );
 
+// 判断是否为数组或类数组
 function isArrayLike(obj) {
   var length = !!obj && obj.length,
     type = toType(obj);
