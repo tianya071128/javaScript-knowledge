@@ -5,18 +5,14 @@
 - [第 3 题: 什么是防抖和节流？有什么区别？如何实现？](#第-3-题:-什么是防抖和节流？有什么区别？如何实现？)
 - [第 4 题: 介绍下 Set、Map、WeakSet 和 WeakMap 的区别？](#第-4-题:-介绍下-Set、Map、WeakSet-和-WeakMap-的区别？)
 - [第 5 题：介绍下深度优先遍历和广度优先遍历，如何实现？](#第-5 题：介绍下深度优先遍历和广度优先遍历，如何实现？)
-- [第 6 题：请分别用深度优先思想和广度优先思想实现一个拷贝函数？](#第-6-题：请分别用深度优先思想和广度优先思想实现一个拷贝函数？)
 - [第 7 题：ES5/ES6 的继承除了写法以外还有什么区别？](#第-7-题：ES5/ES6-的继承除了写法以外还有什么区别？)
-- [第 8 题：setTimeout、Promise、Async/Await 的区别](#第-8-题：setTimeout、Promise、Async/Await 的区别)
-- [第 9 题：Async/Await 如何通过同步的方式实现异步](#第-9-题：Async/Await-如何通过同步的方式实现异步)
 - [第 10 题：异步笔试题](#第-10-题：异步笔试题)
 - [第 11 题：算法手写题](#第-11-题：算法手写题)
 - [第 12 题：JS 异步解决方案的发展历程以及优缺点。](#第-12-题：JS 异步解决方案的发展历程以及优缺点。)
 - [第 13 题：Promise 构造函数是同步执行还是异步执行，那么 then 方法呢？](#第-13-题：Promise-构造函数是同步执行还是异步执行，那么-then-方法呢？)
-
-
-
-
+- [第 14 题：情人节福利题，如何实现一个 new](#第-14-题：情人节福利题，如何实现一个-new)
+- [第 21 题：有以下 3 个判断数组的方法，请分别介绍它们之间的区别和优劣](#第 21 题：有以下 3 个判断数组的方法，请分别介绍它们之间的区别和优劣)
+- [第 22 题：介绍下重绘和回流（Repaint & Reflow），以及如何进行优化](#第 22 题：介绍下重绘和回流（Repaint & Reflow），以及如何进行优化)
 
 ## 第 1 题: 写 React / Vue 项目时为什么要在列表组件中写 key，其作用是什么？
 
@@ -218,7 +214,7 @@ let node = document.body;
 
 
 
-## 第 6 题：请分别用深度优先思想和广度优先思想实现一个拷贝函数？
+
 
 
 
@@ -301,14 +297,6 @@ let node = document.body;
    colors.length = 0;
    console.log(colors[0]); // undefined
    ```
-
-
-
-## 第 8 题：setTimeout、Promise、Async/Await 的区别
-
-
-
-## 第 9 题：Async/Await 如何通过同步的方式实现异步
 
 
 
@@ -505,11 +493,61 @@ setTimeout(function() {
 
 
 
+## 第 14 题：情人节福利题，如何实现一个 new
+
+```javascript
+function _new(fn, ...arg) {
+	if (typeof fn !== 'function') {
+        throw '第一个参数必须为函数'
+    }
+    // new 作用: 返回一个对象, 并且该对象的 __proto__ 为构造函数的 prototype
+    let newObj = Object.create(fn.prototype);
+    // new 作用: 调用构造函数, 并且构造函数内部的 this 指针为 new 创建的对象
+    let result = fn.apply(newObj, arg);
+    // new 作用: 当构造函数返回一个复杂类型数据时, new 就会舍弃 new 创建的对象, 使用构造函数返回的对象
+    if (typeof result === 'function' || (typeof result === 'object') && result != null)
+        return result;
+    // new 作用: 返回 new 创建对象
+    return newObj;
+}
+```
 
 
 
+## 第 21 题：有以下 3 个判断数组的方法，请分别介绍它们之间的区别和优劣
+
+> Object.prototype.toString.call() 、 instanceof 以及 Array.isArray()
+
+> 准确性来讲: 
+>
+> 1. **Object.prototype.toString.call()**: 数组是 [object Array], 跨框架( iframes )时也是准确, 但是在 ES6 中, 如果重置了知名符号 Symbol.toStringTag 时就不准确
+>
+>    ```javascript
+>    var realarray=[]
+>    realarray[Symbol.toStringTag]='Wen'
+>    Object.prototype.toString.call(realarray) // [object Wen]
+>    ```
+>
+> 2. **instanceof**:  `instanceof` 的内部机制是通过判断对象的原型链中是不是能找到类型的 `prototype`。 **这种方式不准确, 因为原型是可以修改的, 并且跨框架( iframes )时不准确**
+>
+>    ```javascript
+>    // 修改原型
+>    var arr = {};
+>    Object.setPrototypeOf(arr, Object.prototype);
+>    arr instanceof Array; // false 
+>    
+>    // 跨框架
+>    var iframe = document.createElement('iframe');
+>    document.body.appendChild(iframe);
+>    xArray = window.frames[window.frames.length-1].Array;
+>    var arr = new xArray(1,2,3); // [1,2,3]
+>    
+>    arr instanceof Array; // false
+>    ```
+>
+> 3. Array.isArray(): ES5 新增方法, 方法稳定性最好, 但是只能检测是否为数组
 
 
 
-
+## 第 22 题：介绍下重绘和回流（Repaint & Reflow），以及如何进行优化
 
