@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-01-06 20:45:05
- * @LastEditTime: 2020-01-09 23:01:00
+ * @LastEditTime : 2020-01-11 14:34:11
  */
 import arr from "./var/arr.js";
 import getProto from "./var/getProto.js";
@@ -25,7 +25,7 @@ import toType from "./core/toType.js";
 var version = "@VERSION",
   rhtmlSuffix = /HTML$/i,
   // 定义 jQuery 的本地副本
-  jQuery = function(selector, context) {
+  jQuery = function (selector, context) {
     // jQuery 对象实际上只是 init 构造函数 'enhanced'
     // 如果调用 jQuery，则需要 init（如果不包括，则允许抛出错误）
     return new jQuery.fn.init(selector, context);
@@ -46,7 +46,7 @@ jQuery.fn = jQuery.prototype = {
   /*
 		$('li').toArray(); ==> [<li id="foo">, <li id="bar">]
 	*/
-  toArray: function() {
+  toArray: function () {
     return slice.call(this);
   },
 
@@ -55,7 +55,7 @@ jQuery.fn = jQuery.prototype = {
 		<img src="test1.jpg"/> <img src="test2.jpg"/>
 		$("img").get(0); ==> [ <img src="test1.jpg"/> ]
 	*/
-  get: function(num) {
+  get: function (num) {
     // 当没有传递参数时, 或者传递为 null 时, 返回全部元素
     if (num == null) {
       return slice.call(this);
@@ -67,7 +67,7 @@ jQuery.fn = jQuery.prototype = {
 
   // 获取一个元素数组并将其推到堆栈上
   // (返回新的匹配元素集)
-  pushStack: function(elems) {
+  pushStack: function (elems) {
     // 构建新的 jQuery 匹配元素集 -- this.constructor() 会调用 jQuery() 方法, 从而调用 jQuery.fn.init() 方法, 构建一个空元素的 jQuery 元素集
     // 在通过 jQuery.merge() 方法, 将参数 elems 元素或元素集添加到空元素的 jQuery 元素集上
     var ret = jQuery.merge(this.constructor(), elems);
@@ -80,65 +80,65 @@ jQuery.fn = jQuery.prototype = {
   },
 
   // 对匹配集中的每个元素执行回调.
-  each: function(callback) {
+  each: function (callback) {
     // 这些方法会在其他地方添加
     return jQuery.each(this, callback);
   },
 
   // 将一组元素转换成其他数组（不论是否是元素数组）
-  map: function(callback) {
+  map: function (callback) {
     return this.pushStack(
-      jQuery.map(this, function(elem, i) {
+      jQuery.map(this, function (elem, i) {
         return callback.call(elem, i, elem);
       })
     );
   },
 
   // 选取一个匹配的子集
-  slice: function() {
+  slice: function () {
     // slice.apply(this, arguments) => 利用 Array.prototype.slice 方法来装换为数组, 并且截取数组
     // this.pushStack() => 将截取后的数组转化为 jQuery 元素集
     return this.pushStack(slice.apply(this, arguments));
   },
 
   // 获取第一个元素
-  first: function() {
+  first: function () {
     return this.eq(0);
   },
 
   // 获取最后个元素
-  last: function() {
+  last: function () {
     return this.eq(-1);
   },
 
   // 获取奇数项
-  even: function() {
+  even: function () {
     return this.pushStack(
       // jQuery.greq(): 使用过滤函数过滤数组元素。
-      jQuery.grep(this, function(_elem, i) {
+      jQuery.grep(this, function (_elem, i) {
         return (i + 1) % 2;
       })
     );
   },
 
   // 获取奇数项
-  odd: function() {
+  odd: function () {
     return this.pushStack(
-      jQuery.grep(this, function(_elem, i) {
+      jQuery.grep(this, function (_elem, i) {
         return i % 2;
       })
     );
   },
 
   // 获取当前链式操作中第 i 个jQuery对象，返回jQuery对象
-  eq: function(i) {
+  eq: function (i) {
     var len = this.length,
       j = +i + (i < 0 ? len : 0);
     return this.pushStack(j >= 0 && j < len ? [this[j]] : []);
   },
 
   // 回到最近的一个"破坏性"操作之前
-  end: function() {
+  end: function () {
     // 如果之前没有破坏性操作，则返回一个空集
     return this.prevObject || this.constructor();
   }
@@ -147,7 +147,7 @@ jQuery.fn = jQuery.prototype = {
 // 在 jQuer 函数上添加静态成员, 并且通过 jQuery.fn(引用的就是 jQuery.prototype ) 向 jQuery.prototype 添加方法
 // jQuery.extend: 扩展jQuery对象本身。用来在jQuery命名空间上增加新函数。 -- 当为一个参数时, 扩展 jQuery 本身, 当为多个参数对象时, 用于将一个或多个对象的内容合并到目标对象(类似于混入)
 // jQeury.fn.extend: 扩展 jQuery 元素集来提供新的方法（通常用来制作插件）
-jQuery.extend = jQuery.fn.extend = function() {
+jQuery.extend = jQuery.fn.extend = function () {
   var options,
     name,
     src,
@@ -235,14 +235,14 @@ jQuery.extend({
   isReady: true,
 
   // 抛出错误方法
-  error: function(msg) {
+  error: function (msg) {
     throw new Error(msg);
   },
 
-  noop: function() {},
+  noop: function () { },
 
   // 判断是否为全局对象(Object).
-  isPlainObject: function(obj) {
+  isPlainObject: function (obj) {
     var proto, Ctor;
 
     // 检测明显的阴性
@@ -268,7 +268,7 @@ jQuery.extend({
   },
 
   // 判断是否为空对象
-  isEmptyObject: function(obj) {
+  isEmptyObject: function (obj) {
     var name;
 
     for (name in obj) {
@@ -278,16 +278,16 @@ jQuery.extend({
   },
 
   // 在全局上下文中运行 script
-  globalEval: function(code, options) {
+  globalEval: function (code, options) {
     DOMEval(code, { nonce: options && options.nonce });
   },
 
   // 通用遍历方法，可用于遍历对象和数组。
   // 回调函数拥有两个参数：第一个为对象的成员或数组的索引，第二个为对应变量或内容。如果需要退出 each 循环可使回调函数返回 false，其它返回值将被忽略。
-  each: function(obj, callback) {
+  each: function (obj, callback) {
     var length,
       i = 0;
-
+    // 判断是否为数组或类数组
     if (isArrayLike(obj)) {
       // 遍历数组
       length = obj.length;
@@ -308,46 +308,54 @@ jQuery.extend({
   },
 
   // 检索 DOM 节点数组的文本值
-  text: function(elem) {
+  text: function (elem) {
     var node,
       ret = "",
       i = 0,
       nodeType = elem.nodeType;
 
     if (!nodeType) {
-      // If no nodeType, this is expected to be an array
+      // 如果没有 nodeType，则这应该是一个数组
       while ((node = elem[i++])) {
-        // Do not traverse comment nodes
+        // 不遍历注释节点
         ret += jQuery.text(node);
       }
     } else if (nodeType === 1 || nodeType === 9 || nodeType === 11) {
-      // Use textContent for elements
-      // innerText usage removed for consistency of new lines (jQuery #11153)
+      // nodeType: 1(一个 元素 节点) | 9(一个 Document 节点。) | 11(一个 DocumentFragment 节点)
+      // 对元素使用textContent
+      // 为保持新行的一致性，删除了innerText用法（jQuery#11153）
       if (typeof elem.textContent === "string") {
         return elem.textContent;
       } else {
-        // Traverse its children
+        // 遍历它的子对象 -- 有意思的递归, 递归有多种实现方式, 不止于 while 和 函数
         for (elem = elem.firstChild; elem; elem = elem.nextSibling) {
           ret += jQuery.text(elem);
         }
       }
     } else if (nodeType === 3 || nodeType === 4) {
+      // nodeType: 3(Element 或者 Attr 中实际的  文字) | 4(一个 CDATASection，例如 <!CDATA[[ … ]]>。)
       return elem.nodeValue;
     }
 
-    // Do not include comment or processing instruction nodes
+    // 不包括注释或处理指令节点
 
     return ret;
   },
 
-  // results is for internal usage only
-  makeArray: function(arr, results) {
+  // results 仅供内部使用
+  // 将一个类似数组的对象转换为真正的数组对象。
+  makeArray: function (arr, results) {
+    // 当只传递一个参数 arr 时, 此时为转化
+    // 当传递二个参数 arr results 时, 将 arr 添加进 results
     var ret = results || [];
 
     if (arr != null) {
+      // Object() 可用于将基本数据类型转化为对象, 复杂数据类型直接返回
       if (isArrayLike(Object(arr))) {
+        // 将 arr 合并到 ret 中
         jQuery.merge(ret, typeof arr === "string" ? [arr] : arr);
       } else {
+        // 不是类数组的话, 就直接将其添加到 ret 上
         push.call(ret, arr);
       }
     }
@@ -355,22 +363,25 @@ jQuery.extend({
     return ret;
   },
 
-  inArray: function(elem, arr, i) {
+  // 在数组中查找指定值并返回它的索引值（如果没有找到，则返回-1）
+  inArray: function (elem, arr, i) {
     return arr == null ? -1 : indexOf.call(arr, elem, i);
   },
 
-  isXMLDoc: function(elem) {
+  // 判断一个DOM节点是否位于XML文档中，或者其本身就是XML文档
+  isXMLDoc: function (elem) {
     var namespace = elem.namespaceURI,
       docElem = (elem.ownerDocument || elem).documentElement;
 
-    // Assume HTML when documentElement doesn't yet exist, such as inside
-    // document fragments.
+    // 当文档元素不存在时，假设HTML，例如内部
+    // 文档片段.
     return !rhtmlSuffix.test(
       namespace || (docElem && docElem.nodeName) || "HTML"
     );
   },
 
-  merge: function(first, second) {
+  // 合并两个数组内容到第一个数组
+  merge: function (first, second) {
     var len = +second.length,
       j = 0,
       i = first.length;
@@ -379,20 +390,22 @@ jQuery.extend({
       first[i++] = second[j];
     }
 
+    // 因为有些类数组的 length 可能不是自动随着 first 数组变化, 所以此时可以手动调整
     first.length = i;
 
     return first;
   },
 
-  grep: function(elems, callback, invert) {
+  // 过滤并返回满足指定函数的数组元素
+  grep: function (elems, callback, invert) {
     var callbackInverse,
       matches = [],
       i = 0,
       length = elems.length,
       callbackExpect = !invert;
 
-    // Go through the array, only saving the items
-    // that pass the validator function
+    // 遍历数组，只保存项目
+    // 通过验证函数的
     for (; i < length; i++) {
       callbackInverse = !callback(elems[i], i);
       if (callbackInverse !== callbackExpect) {
@@ -403,14 +416,15 @@ jQuery.extend({
     return matches;
   },
 
-  // arg is for internal usage only
-  map: function(elems, callback, arg) {
+  // arg 仅供内部使用
+  // 指定函数处理数组中的每个元素(或对象的每个属性)，并将处理结果封装为新的数组返回
+  map: function (elems, callback, arg) {
     var length,
       value,
       i = 0,
       ret = [];
 
-    // Go through the array, translating each of the items to their new values
+    // 遍历数组，将每个项转换为它们的新值
     if (isArrayLike(elems)) {
       length = elems.length;
       for (; i < length; i++) {
@@ -421,7 +435,7 @@ jQuery.extend({
         }
       }
 
-      // Go through every key on the object,
+      // 遍历 Object 上每个 key,
     } else {
       for (i in elems) {
         value = callback(elems[i], i, arg);
@@ -432,28 +446,29 @@ jQuery.extend({
       }
     }
 
-    // Flatten any nested arrays
+    // 展平任何嵌套数组
     return flat(ret);
   },
 
-  // A global GUID counter for objects
+  // 对象的全局 GUID 计数器
   guid: 1,
 
-  // jQuery.support is not used in Core but other projects attach their
-  // properties to it so it needs to exist.
+  // 核心中没有使用 jQuery.support，但其他项目附加了
+  // 属性，因此它需要存在。.
   support: support
 });
 
 if (typeof Symbol === "function") {
+  // jQuery.fn 默认采用数组的 Symbol.iterator 
   jQuery.fn[Symbol.iterator] = arr[Symbol.iterator];
 }
 
-// Populate the class2type map
+// 填充 class2type 映射
 jQuery.each(
   "Boolean Number String Function Array Date RegExp Object Error Symbol".split(
     " "
   ),
-  function(_i, name) {
+  function (_i, name) {
     class2type["[object " + name + "]"] = name.toLowerCase();
   }
 );

@@ -13,6 +13,7 @@
 - [第 14 题：情人节福利题，如何实现一个 new](#第-14-题：情人节福利题，如何实现一个-new)
 - [第 21 题：有以下 3 个判断数组的方法，请分别介绍它们之间的区别和优劣](#第 21 题：有以下 3 个判断数组的方法，请分别介绍它们之间的区别和优劣)
 - [第 22 题：介绍下重绘和回流（Repaint & Reflow），以及如何进行优化](#第 22 题：介绍下重绘和回流（Repaint & Reflow），以及如何进行优化)
+- [第 26 题: 介绍模块化发展历程](#第 26 题: 介绍模块化发展历程)
 
 ## 第 1 题: 写 React / Vue 项目时为什么要在列表组件中写 key，其作用是什么？
 
@@ -550,4 +551,10 @@ function _new(fn, ...arg) {
 
 
 ## 第 22 题：介绍下重绘和回流（Repaint & Reflow），以及如何进行优化
+
+> [重绘和重排(回流)](https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/24)
+
+## 第 26 题: 介绍模块化发展历程
+
+> 见 [模块化发展](https://www.processon.com/view/link/5c8409bbe4b02b2ce492286a#map)
 
