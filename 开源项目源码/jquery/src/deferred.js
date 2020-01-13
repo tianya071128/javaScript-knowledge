@@ -3,124 +3,124 @@ import slice from "./var/slice.js";
 
 import "./callbacks.js";
 
-function Identity( v ) {
+function Identity(v) {
 	return v;
 }
-function Thrower( ex ) {
+function Thrower(ex) {
 	throw ex;
 }
 
-function adoptValue( value, resolve, reject, noValue ) {
+function adoptValue(value, resolve, reject, noValue) {
 	var method;
 
 	try {
 
 		// Check for promise aspect first to privilege synchronous behavior
-		if ( value && typeof( method = value.promise ) === "function" ) {
-			method.call( value ).done( resolve ).fail( reject );
+		if (value && typeof (method = value.promise) === "function") {
+			method.call(value).done(resolve).fail(reject);
 
-		// Other thenables
-		} else if ( value && typeof( method = value.then ) === "function" ) {
-			method.call( value, resolve, reject );
+			// Other thenables
+		} else if (value && typeof (method = value.then) === "function") {
+			method.call(value, resolve, reject);
 
-		// Other non-thenables
+			// Other non-thenables
 		} else {
 
 			// Control `resolve` arguments by letting Array#slice cast boolean `noValue` to integer:
 			// * false: [ value ].slice( 0 ) => resolve( value )
 			// * true: [ value ].slice( 1 ) => resolve()
-			resolve.apply( undefined, [ value ].slice( noValue ) );
+			resolve.apply(undefined, [value].slice(noValue));
 		}
 
-	// For Promises/A+, convert exceptions into rejections
-	// Since jQuery.when doesn't unwrap thenables, we can skip the extra checks appearing in
-	// Deferred#then to conditionally suppress rejection.
-	} catch ( value ) {
-		reject( value );
+		// For Promises/A+, convert exceptions into rejections
+		// Since jQuery.when doesn't unwrap thenables, we can skip the extra checks appearing in
+		// Deferred#then to conditionally suppress rejection.
+	} catch (value) {
+		reject(value);
 	}
 }
 
-jQuery.extend( {
+jQuery.extend({
 
-	Deferred: function( func ) {
+	Deferred: function (func) {
 		var tuples = [
 
-				// action, add listener, callbacks,
-				// ... .then handlers, argument index, [final state]
-				[ "notify", "progress", jQuery.Callbacks( "memory" ),
-					jQuery.Callbacks( "memory" ), 2 ],
-				[ "resolve", "done", jQuery.Callbacks( "once memory" ),
-					jQuery.Callbacks( "once memory" ), 0, "resolved" ],
-				[ "reject", "fail", jQuery.Callbacks( "once memory" ),
-					jQuery.Callbacks( "once memory" ), 1, "rejected" ]
-			],
+			// action, add listener, callbacks,
+			// ... .then handlers, argument index, [final state]
+			["notify", "progress", jQuery.Callbacks("memory"),
+				jQuery.Callbacks("memory"), 2],
+			["resolve", "done", jQuery.Callbacks("once memory"),
+				jQuery.Callbacks("once memory"), 0, "resolved"],
+			["reject", "fail", jQuery.Callbacks("once memory"),
+				jQuery.Callbacks("once memory"), 1, "rejected"]
+		],
 			state = "pending",
 			promise = {
-				state: function() {
+				state: function () {
 					return state;
 				},
-				always: function() {
-					deferred.done( arguments ).fail( arguments );
+				always: function () {
+					deferred.done(arguments).fail(arguments);
 					return this;
 				},
-				catch: function( fn ) {
-					return promise.then( null, fn );
+				catch: function (fn) {
+					return promise.then(null, fn);
 				},
 
 				// Keep pipe for back-compat
-				pipe: function( /* fnDone, fnFail, fnProgress */ ) {
+				pipe: function ( /* fnDone, fnFail, fnProgress */) {
 					var fns = arguments;
 
-					return jQuery.Deferred( function( newDefer ) {
-						jQuery.each( tuples, function( _i, tuple ) {
+					return jQuery.Deferred(function (newDefer) {
+						jQuery.each(tuples, function (_i, tuple) {
 
 							// Map tuples (progress, done, fail) to arguments (done, fail, progress)
-							var fn = typeof fns[ tuple[ 4 ] ] === "function" &&
-								fns[ tuple[ 4 ] ];
+							var fn = typeof fns[tuple[4]] === "function" &&
+								fns[tuple[4]];
 
 							// deferred.progress(function() { bind to newDefer or newDefer.notify })
 							// deferred.done(function() { bind to newDefer or newDefer.resolve })
 							// deferred.fail(function() { bind to newDefer or newDefer.reject })
-							deferred[ tuple[ 1 ] ]( function() {
-								var returned = fn && fn.apply( this, arguments );
-								if ( returned && typeof returned.promise === "function" ) {
+							deferred[tuple[1]](function () {
+								var returned = fn && fn.apply(this, arguments);
+								if (returned && typeof returned.promise === "function") {
 									returned.promise()
-										.progress( newDefer.notify )
-										.done( newDefer.resolve )
-										.fail( newDefer.reject );
+										.progress(newDefer.notify)
+										.done(newDefer.resolve)
+										.fail(newDefer.reject);
 								} else {
-									newDefer[ tuple[ 0 ] + "With" ](
+									newDefer[tuple[0] + "With"](
 										this,
-										fn ? [ returned ] : arguments
+										fn ? [returned] : arguments
 									);
 								}
-							} );
-						} );
+							});
+						});
 						fns = null;
-					} ).promise();
+					}).promise();
 				},
-				then: function( onFulfilled, onRejected, onProgress ) {
+				then: function (onFulfilled, onRejected, onProgress) {
 					var maxDepth = 0;
-					function resolve( depth, deferred, handler, special ) {
-						return function() {
+					function resolve(depth, deferred, handler, special) {
+						return function () {
 							var that = this,
 								args = arguments,
-								mightThrow = function() {
+								mightThrow = function () {
 									var returned, then;
 
 									// Support: Promises/A+ section 2.3.3.3.3
 									// https://promisesaplus.com/#point-59
 									// Ignore double-resolution attempts
-									if ( depth < maxDepth ) {
+									if (depth < maxDepth) {
 										return;
 									}
 
-									returned = handler.apply( that, args );
+									returned = handler.apply(that, args);
 
 									// Support: Promises/A+ section 2.3.1
 									// https://promisesaplus.com/#point-48
-									if ( returned === deferred.promise() ) {
-										throw new TypeError( "Thenable self-resolution" );
+									if (returned === deferred.promise()) {
+										throw new TypeError("Thenable self-resolution");
 									}
 
 									// Support: Promises/A+ sections 2.3.3.1, 3.5
@@ -132,22 +132,22 @@ jQuery.extend( {
 										// Support: Promises/A+ section 2.3.4
 										// https://promisesaplus.com/#point-64
 										// Only check objects and functions for thenability
-										( typeof returned === "object" ||
-											typeof returned === "function" ) &&
+										(typeof returned === "object" ||
+											typeof returned === "function") &&
 										returned.then;
 
 									// Handle a returned thenable
-									if ( typeof then === "function" ) {
+									if (typeof then === "function") {
 
 										// Special processors (notify) just wait for resolution
-										if ( special ) {
+										if (special) {
 											then.call(
 												returned,
-												resolve( maxDepth, deferred, Identity, special ),
-												resolve( maxDepth, deferred, Thrower, special )
+												resolve(maxDepth, deferred, Identity, special),
+												resolve(maxDepth, deferred, Thrower, special)
 											);
 
-										// Normal processors (resolve) also hook into progress
+											// Normal processors (resolve) also hook into progress
 										} else {
 
 											// ...and disregard older resolution values
@@ -155,55 +155,55 @@ jQuery.extend( {
 
 											then.call(
 												returned,
-												resolve( maxDepth, deferred, Identity, special ),
-												resolve( maxDepth, deferred, Thrower, special ),
-												resolve( maxDepth, deferred, Identity,
-													deferred.notifyWith )
+												resolve(maxDepth, deferred, Identity, special),
+												resolve(maxDepth, deferred, Thrower, special),
+												resolve(maxDepth, deferred, Identity,
+													deferred.notifyWith)
 											);
 										}
 
-									// Handle all other returned values
+										// Handle all other returned values
 									} else {
 
 										// Only substitute handlers pass on context
 										// and multiple values (non-spec behavior)
-										if ( handler !== Identity ) {
+										if (handler !== Identity) {
 											that = undefined;
-											args = [ returned ];
+											args = [returned];
 										}
 
 										// Process the value(s)
 										// Default process is resolve
-										( special || deferred.resolveWith )( that, args );
+										(special || deferred.resolveWith)(that, args);
 									}
 								},
 
 								// Only normal processors (resolve) catch and reject exceptions
 								process = special ?
 									mightThrow :
-									function() {
+									function () {
 										try {
 											mightThrow();
-										} catch ( e ) {
+										} catch (e) {
 
-											if ( jQuery.Deferred.exceptionHook ) {
-												jQuery.Deferred.exceptionHook( e,
-													process.stackTrace );
+											if (jQuery.Deferred.exceptionHook) {
+												jQuery.Deferred.exceptionHook(e,
+													process.stackTrace);
 											}
 
 											// Support: Promises/A+ section 2.3.3.3.4.1
 											// https://promisesaplus.com/#point-61
 											// Ignore post-resolution exceptions
-											if ( depth + 1 >= maxDepth ) {
+											if (depth + 1 >= maxDepth) {
 
 												// Only substitute handlers pass on context
 												// and multiple values (non-spec behavior)
-												if ( handler !== Thrower ) {
+												if (handler !== Thrower) {
 													that = undefined;
-													args = [ e ];
+													args = [e];
 												}
 
-												deferred.rejectWith( that, args );
+												deferred.rejectWith(that, args);
 											}
 										}
 									};
@@ -212,24 +212,24 @@ jQuery.extend( {
 							// https://promisesaplus.com/#point-57
 							// Re-resolve promises immediately to dodge false rejection from
 							// subsequent errors
-							if ( depth ) {
+							if (depth) {
 								process();
 							} else {
 
 								// Call an optional hook to record the stack, in case of exception
 								// since it's otherwise lost when execution goes async
-								if ( jQuery.Deferred.getStackHook ) {
+								if (jQuery.Deferred.getStackHook) {
 									process.stackTrace = jQuery.Deferred.getStackHook();
 								}
-								window.setTimeout( process );
+								window.setTimeout(process);
 							}
 						};
 					}
 
-					return jQuery.Deferred( function( newDefer ) {
+					return jQuery.Deferred(function (newDefer) {
 
 						// progress_handlers.add( ... )
-						tuples[ 0 ][ 3 ].add(
+						tuples[0][3].add(
 							resolve(
 								0,
 								newDefer,
@@ -241,7 +241,7 @@ jQuery.extend( {
 						);
 
 						// fulfilled_handlers.add( ... )
-						tuples[ 1 ][ 3 ].add(
+						tuples[1][3].add(
 							resolve(
 								0,
 								newDefer,
@@ -252,7 +252,7 @@ jQuery.extend( {
 						);
 
 						// rejected_handlers.add( ... )
-						tuples[ 2 ][ 3 ].add(
+						tuples[2][3].add(
 							resolve(
 								0,
 								newDefer,
@@ -261,31 +261,31 @@ jQuery.extend( {
 									Thrower
 							)
 						);
-					} ).promise();
+					}).promise();
 				},
 
 				// Get a promise for this deferred
 				// If obj is provided, the promise aspect is added to the object
-				promise: function( obj ) {
-					return obj != null ? jQuery.extend( obj, promise ) : promise;
+				promise: function (obj) {
+					return obj != null ? jQuery.extend(obj, promise) : promise;
 				}
 			},
 			deferred = {};
 
 		// Add list-specific methods
-		jQuery.each( tuples, function( i, tuple ) {
-			var list = tuple[ 2 ],
-				stateString = tuple[ 5 ];
+		jQuery.each(tuples, function (i, tuple) {
+			var list = tuple[2],
+				stateString = tuple[5];
 
 			// promise.progress = list.add
 			// promise.done = list.add
 			// promise.fail = list.add
-			promise[ tuple[ 1 ] ] = list.add;
+			promise[tuple[1]] = list.add;
 
 			// Handle state
-			if ( stateString ) {
+			if (stateString) {
 				list.add(
-					function() {
+					function () {
 
 						// state = "resolved" (i.e., fulfilled)
 						// state = "rejected"
@@ -294,45 +294,45 @@ jQuery.extend( {
 
 					// rejected_callbacks.disable
 					// fulfilled_callbacks.disable
-					tuples[ 3 - i ][ 2 ].disable,
+					tuples[3 - i][2].disable,
 
 					// rejected_handlers.disable
 					// fulfilled_handlers.disable
-					tuples[ 3 - i ][ 3 ].disable,
+					tuples[3 - i][3].disable,
 
 					// progress_callbacks.lock
-					tuples[ 0 ][ 2 ].lock,
+					tuples[0][2].lock,
 
 					// progress_handlers.lock
-					tuples[ 0 ][ 3 ].lock
+					tuples[0][3].lock
 				);
 			}
 
 			// progress_handlers.fire
 			// fulfilled_handlers.fire
 			// rejected_handlers.fire
-			list.add( tuple[ 3 ].fire );
+			list.add(tuple[3].fire);
 
 			// deferred.notify = function() { deferred.notifyWith(...) }
 			// deferred.resolve = function() { deferred.resolveWith(...) }
 			// deferred.reject = function() { deferred.rejectWith(...) }
-			deferred[ tuple[ 0 ] ] = function() {
-				deferred[ tuple[ 0 ] + "With" ]( this === deferred ? undefined : this, arguments );
+			deferred[tuple[0]] = function () {
+				deferred[tuple[0] + "With"](this === deferred ? undefined : this, arguments);
 				return this;
 			};
 
 			// deferred.notifyWith = list.fireWith
 			// deferred.resolveWith = list.fireWith
 			// deferred.rejectWith = list.fireWith
-			deferred[ tuple[ 0 ] + "With" ] = list.fireWith;
-		} );
+			deferred[tuple[0] + "With"] = list.fireWith;
+		});
 
 		// Make the deferred a promise
-		promise.promise( deferred );
+		promise.promise(deferred);
 
 		// Call given func if any
-		if ( func ) {
-			func.call( deferred, deferred );
+		if (func) {
+			func.call(deferred, deferred);
 		}
 
 		// All done!
@@ -340,7 +340,7 @@ jQuery.extend( {
 	},
 
 	// Deferred helper
-	when: function( singleValue ) {
+	when: function (singleValue) {
 		var
 
 			// count of uncompleted subordinates
@@ -350,43 +350,43 @@ jQuery.extend( {
 			i = remaining,
 
 			// subordinate fulfillment data
-			resolveContexts = Array( i ),
-			resolveValues = slice.call( arguments ),
+			resolveContexts = Array(i),
+			resolveValues = slice.call(arguments),
 
 			// the master Deferred
 			master = jQuery.Deferred(),
 
 			// subordinate callback factory
-			updateFunc = function( i ) {
-				return function( value ) {
-					resolveContexts[ i ] = this;
-					resolveValues[ i ] = arguments.length > 1 ? slice.call( arguments ) : value;
-					if ( !( --remaining ) ) {
-						master.resolveWith( resolveContexts, resolveValues );
+			updateFunc = function (i) {
+				return function (value) {
+					resolveContexts[i] = this;
+					resolveValues[i] = arguments.length > 1 ? slice.call(arguments) : value;
+					if (!(--remaining)) {
+						master.resolveWith(resolveContexts, resolveValues);
 					}
 				};
 			};
 
 		// Single- and empty arguments are adopted like Promise.resolve
-		if ( remaining <= 1 ) {
-			adoptValue( singleValue, master.done( updateFunc( i ) ).resolve, master.reject,
-				!remaining );
+		if (remaining <= 1) {
+			adoptValue(singleValue, master.done(updateFunc(i)).resolve, master.reject,
+				!remaining);
 
 			// Use .then() to unwrap secondary thenables (cf. gh-3000)
-			if ( master.state() === "pending" ||
-				typeof( resolveValues[ i ] && resolveValues[ i ].then ) === "function" ) {
+			if (master.state() === "pending" ||
+				typeof (resolveValues[i] && resolveValues[i].then) === "function") {
 
 				return master.then();
 			}
 		}
 
 		// Multiple arguments are aggregated like Promise.all array elements
-		while ( i-- ) {
-			adoptValue( resolveValues[ i ], updateFunc( i ), master.reject );
+		while (i--) {
+			adoptValue(resolveValues[i], updateFunc(i), master.reject);
 		}
 
 		return master.promise();
 	}
-} );
+});
 
 export default jQuery;

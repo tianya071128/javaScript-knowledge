@@ -2,7 +2,7 @@
  * @Descripttion: 
  * @Author: sueRimn
  * @Date: 2020-01-09 15:43:10
- * @LastEditTime : 2020-01-09 17:56:26
+ * @LastEditTime : 2020-01-10 10:46:36
  -->
 <!DOCTYPE html>
 <html lang="en">
@@ -268,8 +268,42 @@
     })
   }
 
+  // 静态成员 Promise.race 
+  Promise.race = function (iterable) {
+    return new Promise((resolve, reject) => {
+      for (const p of iterable) {
+        p.then(resolve, reject);
+      }
+    })
+  }
 
-  let p = Promise.reject(420);
-  let p2 = Promise.resolve(p);
-  p2.then(value => console.log(value), err => console.log(1, err));
+  // 静态成员 Promise.all 
+  Promise.all = function (iterable) {
+    let i = 0,
+      dataList = [],
+      count = 0,
+      total = 0;
+
+    return new Promise((resolve, reject) => {
+      for (const p of iterable) {
+        total++;
+
+        ((index) => {
+          p.then((data) => {
+            count++;
+            dataList[index] = data;
+
+            if (count === total) {
+              resolve(dataList);
+            }
+          }).catch(reject)
+        })(i++)
+      }
+    })
+  }
+
+
+  let p = Promise.resolve(420);
+  let p2 = Promise.reject(50);
+  Promise.all(new Set([p, p2])).then(data => { console.log(data) }, e => console.log(e));
 </script>

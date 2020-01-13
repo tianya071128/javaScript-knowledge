@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-01-06 20:45:05
- * @LastEditTime: 2020-01-13 22:43:43
+ * @LastEditTime : 2020-01-11 14:34:11
  */
 import arr from "./var/arr.js";
 import getProto from "./var/getProto.js";
@@ -287,7 +287,7 @@ jQuery.extend({
   each: function(obj, callback) {
     var length,
       i = 0;
-
+    // 判断是否为数组或类数组
     if (isArrayLike(obj)) {
       // 遍历数组
       length = obj.length;
@@ -315,39 +315,47 @@ jQuery.extend({
       nodeType = elem.nodeType;
 
     if (!nodeType) {
-      // If no nodeType, this is expected to be an array
+      // 如果没有 nodeType，则这应该是一个数组
       while ((node = elem[i++])) {
-        // Do not traverse comment nodes
+        // 不遍历注释节点
         ret += jQuery.text(node);
       }
     } else if (nodeType === 1 || nodeType === 9 || nodeType === 11) {
-      // Use textContent for elements
-      // innerText usage removed for consistency of new lines (jQuery #11153)
+      // nodeType: 1(一个 元素 节点) | 9(一个 Document 节点。) | 11(一个 DocumentFragment 节点)
+      // 对元素使用textContent
+      // 为保持新行的一致性，删除了innerText用法（jQuery#11153）
       if (typeof elem.textContent === "string") {
         return elem.textContent;
       } else {
-        // Traverse its children
+        // 遍历它的子对象 -- 有意思的递归, 递归有多种实现方式, 不止于 while 和 函数
         for (elem = elem.firstChild; elem; elem = elem.nextSibling) {
           ret += jQuery.text(elem);
         }
       }
     } else if (nodeType === 3 || nodeType === 4) {
+      // nodeType: 3(Element 或者 Attr 中实际的  文字) | 4(一个 CDATASection，例如 <!CDATA[[ … ]]>。)
       return elem.nodeValue;
     }
 
-    // Do not include comment or processing instruction nodes
+    // 不包括注释或处理指令节点
 
     return ret;
   },
 
-  // results is for internal usage only
+  // results 仅供内部使用
+  // 将一个类似数组的对象转换为真正的数组对象。
   makeArray: function(arr, results) {
+    // 当只传递一个参数 arr 时, 此时为转化
+    // 当传递二个参数 arr results 时, 将 arr 添加进 results
     var ret = results || [];
 
     if (arr != null) {
+      // Object() 可用于将基本数据类型转化为对象, 复杂数据类型直接返回
       if (isArrayLike(Object(arr))) {
+        // 将 arr 合并到 ret 中
         jQuery.merge(ret, typeof arr === "string" ? [arr] : arr);
       } else {
+        // 不是类数组的话, 就直接将其添加到 ret 上
         push.call(ret, arr);
       }
     }
@@ -355,21 +363,24 @@ jQuery.extend({
     return ret;
   },
 
+  // 在数组中查找指定值并返回它的索引值（如果没有找到，则返回-1）
   inArray: function(elem, arr, i) {
     return arr == null ? -1 : indexOf.call(arr, elem, i);
   },
 
+  // 判断一个DOM节点是否位于XML文档中，或者其本身就是XML文档
   isXMLDoc: function(elem) {
     var namespace = elem.namespaceURI,
       docElem = (elem.ownerDocument || elem).documentElement;
 
-    // Assume HTML when documentElement doesn't yet exist, such as inside
-    // document fragments.
+    // 当文档元素不存在时，假设HTML，例如内部
+    // 文档片段.
     return !rhtmlSuffix.test(
       namespace || (docElem && docElem.nodeName) || "HTML"
     );
   },
 
+  // 合并两个数组内容到第一个数组
   merge: function(first, second) {
     var len = +second.length,
       j = 0,
@@ -379,11 +390,13 @@ jQuery.extend({
       first[i++] = second[j];
     }
 
+    // 因为有些类数组的 length 可能不是自动随着 first 数组变化, 所以此时可以手动调整
     first.length = i;
 
     return first;
   },
 
+  // 过滤并返回满足指定函数的数组元素
   grep: function(elems, callback, invert) {
     var callbackInverse,
       matches = [],
@@ -391,8 +404,8 @@ jQuery.extend({
       length = elems.length,
       callbackExpect = !invert;
 
-    // Go through the array, only saving the items
-    // that pass the validator function
+    // 遍历数组，只保存项目
+    // 通过验证函数的
     for (; i < length; i++) {
       callbackInverse = !callback(elems[i], i);
       if (callbackInverse !== callbackExpect) {
@@ -403,14 +416,15 @@ jQuery.extend({
     return matches;
   },
 
-  // arg is for internal usage only
+  // arg 仅供内部使用
+  // 指定函数处理数组中的每个元素(或对象的每个属性)，并将处理结果封装为新的数组返回
   map: function(elems, callback, arg) {
     var length,
       value,
       i = 0,
       ret = [];
 
-    // Go through the array, translating each of the items to their new values
+    // 遍历数组，将每个项转换为它们的新值
     if (isArrayLike(elems)) {
       length = elems.length;
       for (; i < length; i++) {
@@ -421,7 +435,7 @@ jQuery.extend({
         }
       }
 
-      // Go through every key on the object,
+      // 遍历 Object 上每个 key,
     } else {
       for (i in elems) {
         value = callback(elems[i], i, arg);
@@ -432,23 +446,24 @@ jQuery.extend({
       }
     }
 
-    // Flatten any nested arrays
+    // 展平任何嵌套数组
     return flat(ret);
   },
 
-  // A global GUID counter for objects
+  // 对象的全局 GUID 计数器
   guid: 1,
 
-  // jQuery.support is not used in Core but other projects attach their
-  // properties to it so it needs to exist.
+  // 核心中没有使用 jQuery.support，但其他项目附加了
+  // 属性，因此它需要存在。.
   support: support
 });
 
 if (typeof Symbol === "function") {
+  // jQuery.fn 默认采用数组的 Symbol.iterator
   jQuery.fn[Symbol.iterator] = arr[Symbol.iterator];
 }
 
-// Populate the class2type map
+// 填充 class2type 映射
 jQuery.each(
   "Boolean Number String Function Array Date RegExp Object Error Symbol".split(
     " "
