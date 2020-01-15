@@ -1,0 +1,137 @@
+<!--
+ * @Descripttion: 
+ * @Author: sueRimn
+ * @Date: 2019-12-31 11:10:10
+ * @LastEditTime : 2019-12-31 14:25:35
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    div.box {
+      height: 1000vh;
+    }
+
+    .top {
+      width: 100vw;
+      height: 50px;
+      padding: 0;
+      bottom: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      overflow: hidden;
+    }
+
+    .content {
+      width: 100%;
+      height: 100%;
+      transition: transform .5s;
+      transform: translateY(0);
+    }
+
+    .content.show {
+      transform: translateY(-100%);
+    }
+
+    .item {
+      width: 100%;
+      height: 100%;
+      background: red;
+    }
+
+    .item:last-child {
+      background: blue;
+    }
+
+    .right {
+      width: 50px;
+      height: 50px;
+      border-radius: 4px;
+      background: #000;
+      position: fixed;
+      right: 50px;
+      bottom: -50px;
+      transition: bottom .5s;
+    }
+
+    .right.show {
+      bottom: 50px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box"></div>
+  <div class="top">
+    <div class="content">
+      <div class="item"></div>
+      <div class="item"></div>
+    </div>
+  </div>
+  <div class="right"></div>
+</body>
+
+</html>
+
+<script>
+  window.addEventListener('load', function () {
+    let t = document.documentElement,
+      signTop = t.scrollTop,
+      $content = document.querySelector('.content'),
+      $right = document.querySelector('.right'),
+
+      scrollFun = throttleFun(function (e) {
+        let endTop = t.scrollTop;
+        if (endTop > 500 && !$right.classList.contains('show')) {
+          $right.classList.add('show');
+        } else if (endTop <= 500 && $right.classList.contains('show')) {
+          $right.classList.remove('show');
+        }
+
+
+        if (endTop - signTop > 0 && !$content.classList.contains('show')) {
+          $content.classList.add('show');
+        } else if (endTop - signTop <= 0 && $content.classList.contains('show')) {
+          $content.classList.remove('show');
+        }
+
+        signTop = endTop;
+      });
+
+    scrollFun();
+
+    window.addEventListener('scroll', scrollFun);
+
+    $right.addEventListener('click', throttleFun(function (e) {
+      document.body.scrollIntoView(true, {
+        behavior: 'smooth'
+      });
+    }, 1000))
+  })
+
+  /**
+   * @name: 节流函数 - 高频事件触发，但在n秒内只会执行一次，所以节流会稀释函数的执行频率
+   * @param {function} fn 要节流的函数
+   * @param {Number} time 节流时间
+   * @return: 
+   */
+  let throttleFun = function (fn, time = 100) {
+    let flag = false; // 是否在执行
+
+    return function (...arg) {
+      if (flag) return;
+
+      flag = true;
+      fn.apply(this, arg);
+      setTimeout(() => {
+        flag = false;
+      }, time);
+    }
+  }
+</script>

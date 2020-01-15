@@ -1,0 +1,53 @@
+<!--
+ * @Descripttion: 
+ * @Author: sueRimn
+ * @Date: 2019-11-20 09:31:30
+ * @LastEditTime: 2019-11-21 09:09:10
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+
+</html>
+
+<script>
+  // first([ .. ])
+  // 这个模式类似于与 any([ .. ]) 的竞争，即只要第一个 Promise 完成，它就会忽略后续
+  // 的任何拒绝和完成。
+  if (!Promise.first) {
+    Promise.first = (prs) => {
+      if (!Array.isArray(prs)) {
+        throw new TypeError('参数为数组');
+      }
+      let errors = [];
+      return new Promise((resolve, reject) => {
+        prs.forEach((pr, i) => {
+          Promise.resolve(pr).then(resolve).catch(err => {
+            errors[i] = err;
+            if (errors.filter(e => e).length === prs.length) {
+              reject(errors)
+            }
+          })
+        })
+      })
+    }
+  }
+  Promise.first([Promise.reject(123), Promise.reject(234)]).catch(v => {
+    console.log(v)
+  });
+  // 说明reject并不会将reject参数递归then展开
+  let P1 = new Promise((resolve, reject) => {
+    reject(new Promise((resolve, reject) => { setTimeout(() => { console.log('P1'), reject(22) }, 1000) }))
+  });
+  P1.then(x => { console.log('这是then方法', x) }).catch((x) => { console.log('这是catch方法', x) })
+</script>

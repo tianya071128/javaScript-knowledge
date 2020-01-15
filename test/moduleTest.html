@@ -1,0 +1,35 @@
+<!--
+ * @Descripttion: 
+ * @Author: sueRimn
+ * @Date: 2020-01-15 16:45:17
+ * @LastEditTime : 2020-01-15 16:57:58
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <!-- 先下载 test.js 文件, 没有 defer、async 属性, 会下载完成直接执行, 阻塞 -->
+  <script src="./test.js"></script>
+
+</head>
+<script type="module">
+  // 其次执行 -- module 会自动添加 defer 属性
+  // import test from './test.js';
+  // console.log(test);
+</script>
+
+<body>
+  <div id="box"></div>
+</body>
+
+</html>
+<script>
+  // 首先执行
+  console.log('不是模块内联文件');
+  // DOM 已经准确就绪
+  console.log(document.getElementById('box')); // DOM(#box) 元素
+</script>

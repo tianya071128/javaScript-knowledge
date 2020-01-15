@@ -1,0 +1,45 @@
+<!--
+ * @Descripttion: 
+ * @Author: sueRimn
+ * @Date: 2019-12-26 15:30:04
+ * @LastEditTime : 2019-12-26 15:32:02
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+
+</html>
+
+<script>
+  let person = {
+    getGreeting() {
+      console.log(this)
+      return "Hello";
+    }
+  };
+  let dog = {
+    getGreeting() {
+      return "Woof";
+    }
+  };
+  let friend = {
+    name: '1',
+    getGreeting() {
+      return super.getGreeting() + ", hi!";
+    }
+  };
+  // 将原型设置为 person
+  Object.setPrototypeOf(friend, person);
+
+  friend.getGreeting()
+</script>
