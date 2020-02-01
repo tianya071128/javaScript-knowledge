@@ -14,6 +14,8 @@
 - [第 21 题：有以下 3 个判断数组的方法，请分别介绍它们之间的区别和优劣](#第 21 题：有以下 3 个判断数组的方法，请分别介绍它们之间的区别和优劣)
 - [第 22 题：介绍下重绘和回流（Repaint & Reflow），以及如何进行优化](#第 22 题：介绍下重绘和回流（Repaint & Reflow），以及如何进行优化)
 - [第 26 题: 介绍模块化发展历程](#第 26 题: 介绍模块化发展历程)
+- [第 27 题：全局作用域中，用 const 和 let 声明的变量不在 window 上，那到底在哪里？如何去获取](#第-27-题：全局作用域中，用-const-和-let-声明的变量不在 window 上，那到底在哪里？如何去获取？)
+- [第 30 题：两个数组合并成一个数组](#第 30 题：两个数组合并成一个数组)
 
 ## 第 1 题: 写 React / Vue 项目时为什么要在列表组件中写 key，其作用是什么？
 
@@ -240,14 +242,14 @@ let node = document.body;
            return new Rectangle(length, width);
        }
    }
-   
+
    class Square extends Rectangle {
        constructor(length) {
            // 与 Rectangle.call(this, length, length) 相同
            super(length, length);
        }
    }
-   
+
    class Square2 extends Square {
        constructor(length) {
            // 与 Rectangle.call(this, length, length) 相同
@@ -269,7 +271,7 @@ let node = document.body;
    function MyArray() {
    	Array.apply(this, arguments);
    }
-   
+
    MyArray.prototype = Object.create(Array.prototype, {
    	constructor: {
    		value: MyArray,
@@ -278,15 +280,15 @@ let node = document.body;
    		enumerable: true
    	}
    });
-   
+
    // MyArray 实例上的 lengt 属性以及数值属性, 其行为与内置数组并不一致, 因为这些功能并未被涵盖在 Array.apply() 或 数组原型中
    var colors = new MyArray();
    colors[0] = "red";
    console.log(colors.length); // 0
-   
+
    colors.length = 0;
    console.log(colors[0]); // "red"
-   
+
    // ES6的继承内置对象
    class MyArray extends Array {
        // 空代码块
@@ -449,19 +451,19 @@ Array.from(new Set(arr.flat(Infinity))).sort((a,b)=>{ return a-b})
 
    >  Generator 函数的语法糖, 简化了 Generator 处理异步的操作
    >
-   > 优点: 代码清晰, 以同步代码形式处理异步
+   >  优点: 代码清晰, 以同步代码形式处理异步
    >
-   > 缺点: 错误处理不方便
+   >  缺点: 错误处理不方便
    >
-   > ```javascript
-   > async function test() {
+   >  ```javascript
+   >  async function test() {
    >   // 以下代码没有依赖性的话，完全可以使用 Promise.all 的方式
    >   // 如果有依赖性的话，其实就是解决回调地狱的例子了
    >   await fetch('XXX1')
    >   await fetch('XXX2')
    >   await fetch('XXX3')
-   > }
-   > ```
+   >  }
+   >  ```
 
 
 
@@ -536,13 +538,13 @@ function _new(fn, ...arg) {
 >    var arr = {};
 >    Object.setPrototypeOf(arr, Object.prototype);
 >    arr instanceof Array; // false 
->    
+>
 >    // 跨框架
 >    var iframe = document.createElement('iframe');
 >    document.body.appendChild(iframe);
 >    xArray = window.frames[window.frames.length-1].Array;
 >    var arr = new xArray(1,2,3); // [1,2,3]
->    
+>
 >    arr instanceof Array; // false
 >    ```
 >
@@ -557,4 +559,31 @@ function _new(fn, ...arg) {
 ## 第 26 题: 介绍模块化发展历程
 
 > 见 [模块化发展](https://www.processon.com/view/link/5c8409bbe4b02b2ce492286a#map)
+
+## 第 27 题：全局作用域中，用 const 和 let 声明的变量不在 window 上，那到底在哪里？如何去获取？
+
+> 在 ES5 中, 顶层对象的属性和全局变量是等价的, var 命令和 function 命令声明的全局变量, 挂载在顶层对象上(浏览器环境上是window)
+>
+> ```javascript
+> var a = 12;
+> function f(){};
+>
+> console.log(window.a); // 12
+> console.log(window.f); // f() {}
+> ```
+>
+> 在 ES6 中规定, var 命令和 function 命令声明的全局变量, 依旧是顶层对象的属性, **但是 let 命令、 const 命令、class 命令声明的全局变量, 不属于顶层对象的属性**
+>
+> ```javascript
+> let aa = 1;
+> const bb = 2;
+> console.log(window.aa); // undefined
+> console.log(window.bb); // undefined
+> ```
+
+
+
+## 第 30 题：两个数组合并成一个数组
+
+请把两个数组 ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'D1', 'D2'] 和 ['A', 'B', 'C', 'D']，合并为 ['A1', 'A2', 'A', 'B1', 'B2', 'B', 'C1', 'C2', 'C', 'D1', 'D2', 'D']。
 
