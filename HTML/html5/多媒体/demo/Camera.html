@@ -1,0 +1,62 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2019-12-03 22:37:39
+ * @LastEditTime: 2019-12-03 23:40:44
+ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      label {
+        width: 20vw;
+        height: 20vh;
+        border: 1px solid red;
+        display: inline-block;
+      }
+      img {
+        width: 100%;
+        height: 100%;
+        /* display: none; */
+      }
+    </style>
+  </head>
+  <body>
+    <label>
+      <input type="file" hidden name="" id="take-picture" accept="image/*" />
+      <img src="about:blank" id="show-picture" />
+    </label>
+  </body>
+</html>
+<script>
+  let takePicture = document.querySelector("#take-picture");
+  takePicture.onchange = function(event) {
+    // 获得图片文件的引用
+    let files = event.target.files;
+    if (files && files.length > 0) {
+      let showPicture = document.querySelector("#show-picture");
+      // 取得 window.URL 对象, 存在兼容性
+      let URL = window.URL || window.webkitURL;
+      // 通过 URL 创建一个临时url字符串
+      let imgURL = URL.createObjectURL(files[0]);
+      console.log(imgURL);
+      showPicture.src = imgURL;
+      showPicture.style.display = "initial";
+      // 释放对象URL, 提高性能
+      URL.revokeObjectURL(imgURL);
+      // 如果 createObjectURL 方法不可用
+      /*
+      let fileReader = new FileReader();
+      fileReader.onload = function(event) {
+        showPicture.src = event.target.result;
+        showPicture.style.display = "initial";
+      };
+      fileReader.readAsDataURL(files[0]);
+      */
+    }
+  };
+</script>

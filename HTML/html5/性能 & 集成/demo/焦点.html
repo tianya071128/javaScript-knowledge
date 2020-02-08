@@ -1,0 +1,58 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2019-12-01 11:36:54
+ * @LastEditTime: 2019-12-01 12:01:03
+ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+      }
+      div {
+        width: 200px;
+        height: 200px;
+        background-color: brown;
+        margin: 100px auto;
+      }
+    </style>
+  </head>
+  <body>
+    <input type="text" />
+    <div></div>
+  </body>
+</html>
+
+<script>
+  window.onload = function(e) {
+    let i = document.querySelector("input");
+    let d = document.querySelector("div");
+    d.addEventListener("click", e => {
+      if (document.activeElement === i) {
+        i.blur();
+      } else {
+        i.focus();
+      }
+    });
+    // setInterval(() => {
+    //   console.log(document.activeElement);
+    //   if (document.activeElement === i) {
+    //     console.log("失去焦点");
+    //     i.blur();
+    //   } else {
+    //     console.log("获取焦点");
+    //     i.focus();
+    //   }
+    // }, 5000);
+    i.addEventListener("blur", e => {
+      i.focus();
+    });
+  };
+</script>

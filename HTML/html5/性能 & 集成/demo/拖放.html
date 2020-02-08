@@ -1,0 +1,75 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2019-11-27 23:01:13
+ * @LastEditTime: 2019-11-27 23:47:20
+ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        bottom: 0;
+      }
+      div {
+        display: inline-block;
+        margin-right: 100px;
+      }
+      .dorp {
+        width: 100px;
+        height: 100px;
+        background: #000;
+      }
+      .box {
+        width: 300px;
+        height: 300px;
+        border: 1px solid red;
+      }
+      .box2 {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 拖动第一步: 设置可拖动属性 -->
+    <div class="dorp" draggable="true"></div>
+    <div class="box">
+      <div class="box2"></div>
+    </div>
+    <div class="dorp" draggable="true"></div>
+  </body>
+</html>
+<script>
+  let dorp = document.querySelector(".dorp");
+  let box = document.querySelector(".box");
+  // 拖动第二步: 开始拖动时, 设置拖动数据
+  // dragstart事件: 当用户开始拖动一个元素或选中的文本时触发
+  dorp.addEventListener("dragstart", e => {
+    // 获取dateTransfer接口
+    let dt = e.dataTransfer;
+    // 设置拖动过程中数据 -- 可以自定义的
+    dt.setData("form/item", "这可能是一个下拉框选项");
+  });
+
+  // 拖动第三步: 在放置目标上处理dragover事件 ==> 阻止默认事件(可以根据数据类型不同来判断是否可以放置)
+  // dragover事件: 当元素或选中的文本被拖到一个可释放目标上时触发（每100毫秒触发一次）。
+  box.addEventListener("dragover", e => {
+    // 可以通过判断 types 中存放的数据类型来判断是否是需要的拖动元素 (因为图片, 链接也是默认可以拖动的)
+    if ([...e.dataTransfer.types].includes("form/item")) {
+      e.preventDefault();
+    }
+  });
+  // 拖动第四步: 在拖动元素放置到 放置目标 , 执行一系列的操作
+  // drop事件: 当元素或选中的文本在可释放目标上被释放时触发
+  box.addEventListener("drop", function(e) {
+    console.log(e.dataTransfer.getData("form/item"));
+    e.preventDefault();
+    this.innerText = e.dataTransfer.getData("form/item");
+  });
+</script>

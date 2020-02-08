@@ -1,0 +1,41 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2019-11-30 23:22:35
+ * @LastEditTime: 2019-12-01 10:25:25
+ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>全屏</title>
+    <style>
+      * {
+        margin: 0;
+        bottom: 0;
+      }
+      .box {
+        width: 100px;
+        height: 100px;
+        background-color: lightcoral;
+        margin: 100px auto 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box" id="box"></div>
+  </body>
+</html>
+
+<script>
+  // 浏览器兼容性较差, 可以使用插件来开发全屏应用, 插件体量很小
+  let box = document.querySelector("#box");
+  let d = document.documentElement;
+  box.addEventListener("click", function(e) {
+    debugger;
+    box.requestFullscreen();
+    console.log(document.fullscreenElement);
+  });
+</script>
