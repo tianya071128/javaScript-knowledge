@@ -1,5 +1,8 @@
 **ES2016(简称ES7)**
 
+* 数组的 includes() 方法
+* a** b 指数运算符，与 Math.pow(a, b) 相同
+
 ## 1. Array.prototype.includes()
 
 用来判断一个数组是否包含一个指定的值，如果包含则返回 `true`，否则返回 `false`
