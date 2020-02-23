@@ -1,0 +1,11 @@
+{
+  "key": "value",
+  "foo": {
+    "bar": "",
+    "count": "42"
+  },
+  "name": "wenzubiao",
+  "version": "0.1.0",
+  "description": "A new package...",
+  "main": "index2.js"
+}
