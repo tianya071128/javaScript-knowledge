@@ -17,6 +17,10 @@
 - [第 27 题：全局作用域中，用 const 和 let 声明的变量不在 window 上，那到底在哪里？如何去获取](#第-27-题：全局作用域中，用-const-和-let-声明的变量不在 window 上，那到底在哪里？如何去获取？)
 - [第 30 题：两个数组合并成一个数组](#第 30 题：两个数组合并成一个数组)
 - [第 31 题：改造下面的代码，使之输出0 - 9，写出你能想到的所有解法。](#第 31 题：改造下面的代码，使之输出0 - 9，写出你能想到的所有解法。)
+- [第 32 题：Virtual DOM 真的比操作原生 DOM 快吗？谈谈你的想法。](#第 32 题：Virtual DOM 真的比操作原生 DOM 快吗？谈谈你的想法。)
+- [第 33 题：下面的代码打印什么内容，为什么？](#第 33 题：下面的代码打印什么内容，为什么？)
+- [第 34 题：简单改造下面的代码，使之分别打印 10 和 20。](#第 34 题：简单改造下面的代码，使之分别打印 10 和 20。)
+- [第 36 题：使用迭代的方式实现 flatten 函数。](#第 36 题：使用迭代的方式实现 flatten 函数。)
 
 ## 第 1 题: 写 React / Vue 项目时为什么要在列表组件中写 key，其作用是什么？
 
@@ -606,7 +610,7 @@ console.log([...r, ...r2].sort((a, b) => {
 
 
 
-### 第 31 题：改造下面的代码，使之输出0 - 9，写出你能想到的所有解法。
+## 第 31 题：改造下面的代码，使之输出0 - 9，写出你能想到的所有解法。
 
 ```javascript
 for (var i = 0; i< 10; i++){
@@ -768,4 +772,65 @@ for (var i = 0; i < 10; i++) {
   setTimeout(new Function('console.log(i)')(), 1000)
 }
 ```
+
+
+
+## 第 32 题：Virtual DOM 真的比操作原生 DOM 快吗？谈谈你的想法。
+
+[题目解析](https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/47)
+
+
+
+## 第 33 题：下面的代码打印什么内容，为什么？
+
+```javascript
+var b = 10;
+(function b(){
+    b = 20;
+    console.log(b); 
+})();
+
+// 打印
+// ƒ b(){
+//     b = 20;
+//     console.log(b); 
+// }
+
+```
+
+[答案解析1](https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/48)
+
+[答案解析2](https://segmentfault.com/q/1010000002810093)
+
+
+
+## 第 34 题：简单改造下面的代码，使之分别打印 10 和 20。
+
+```javascript
+var b = 10;
+(function b(){
+    b = 20;
+    console.log(b); 
+})();
+```
+
+```javascript
+// 个人答案
+// 打印 10
+var b = 10;
+(function b(){
+    b = 20;
+    console.log(window.b); 
+})();
+// 打印 20 
+var b = 10;
+(function b(){
+    var b = 20;
+    console.log(b); 
+})();
+```
+
+
+
+### 第 36 题：使用迭代的方式实现 flatten 函数。
 
