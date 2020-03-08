@@ -1,0 +1,56 @@
+<!--
+ * @Descripttion: 灵活的背景定位
+ * @Author: 温祖彪
+ * @Date: 2020-03-08 11:04:33
+ * @LastEditTime: 2020-03-08 11:43:39
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    /* background-position 扩展语法方案 */
+    .box {
+      margin: 50px;
+      width: 200px;
+      height: 200px;
+      /* 回退方案, 如果不支持扩展语法的话, 就可运用默认的位置 */
+      background: url(../image/image1.jpg) no-repeat bottom right #58a;
+      /* 允许我们指定背景图片距离任
+         意角的偏移量，只要我们在偏移量前面指定关键字。举例来说，如果想让背
+         景图片跟右边缘保持20px 的偏移量，同时跟底边保持10px 的偏移量， 
+      */
+      background-position: right 20px bottom 10px;
+    }
+
+    /* background-origin 方案: 可以运用于偏移量与容器的内边距一致。 */
+    .box1 {
+      margin: 50px;
+      width: 200px;
+      height: 200px;
+      padding: 10px;
+      background: url(../image/image1.jpg) no-repeat bottom right #58a;
+      background-origin: content-box;
+    }
+
+    /* calc() 方案 */
+    .box3 {
+      margin: 50px;
+      width: 200px;
+      height: 200px;
+      background: url(../image/image1.jpg) no-repeat #58a;
+      background-position: calc(100% - 20px) calc(100% - 10px);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box"></div>
+  <div class="box1"></div>
+  <div class="box3"></div>
+</body>
+
+</html>

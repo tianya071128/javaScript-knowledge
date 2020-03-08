@@ -1,0 +1,73 @@
+<!--
+ * @Descripttion: 多重边框
+ * @Author: 温祖彪
+ * @Date: 2020-03-08 09:59:34
+ * @LastEditTime: 2020-03-08 11:04:07
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    /* 方案1：box-shadow 方案 */
+    .box {
+      margin: 50px;
+      width: 100px;
+      height: 100px;
+      background: yellowgreen;
+      /* box-shadow形成的投影是一层层叠加的, 第一层位于最顶层, 依次类推 */
+      /* 注意点: 
+       * 1. 投影的行为跟边框不完全一致，因为它不会影响布局，而且也不会
+            受到box-sizing 属性的影响。不过，你还是可以通过内边距或外边
+            距（这取决于投影是内嵌和还是外扩的）来额外模拟出边框所需要
+            占据的空间。
+         2. 上述方法所创建出的假“边框”出现在元素的外圈。它们并不会响
+            应鼠标事件，比如悬停或点击。如果这一点非常重要，你可以给
+            box-shadow 属性加上inset 关键字，来使投影绘制在元素的内圈。
+            请注意，此时你需要增加额外的内边距来腾出足够的空隙。
+       */
+      box-shadow: 0 0 0 10px #655,
+        0 0 0 15px deeppink,
+        0 2px 5px 15px rgba(0, 0, 0, .6);
+    }
+
+    /* 方案2：outline 方案 */
+    /* 优点：
+     * 1. 边框样式可以多样化(实线，虚线...)
+     * 2. 可以通过outline-offset 属性来控制它跟
+          元素边缘之间的间距，这个属性甚至可以接受负值。这对于某些效果来说非
+          常有用。
+    */
+    .box2 {
+      margin: 50px;
+      width: 100px;
+      height: 100px;
+      background: #6c5a57;
+      /* 注意点:
+       * 1. 只适用于双层“边框”的场景，因为 outline 并不能
+            接受用逗号分隔的多个值。如果我们需要获得更多层的边框，前一
+            种方案就是我们唯一的选择了。
+         2. 边框不一定会贴合border-radius属性产生的圆角，因此如果元素
+            是圆角的，它的描边可能还是直角的（参见图2-9）。请注意，这种行
+            为被CSS 工作组认为是一个bug，因此未来可能会改为贴合borderradius
+            圆角。
+         3. 根据 CSS 基本 UI 特性（第三版）规范（http://w3.org/TR/css3-ui）所
+            述，“描边可以不是矩形”。尽管在绝大多数情况下，描边都是矩形
+            的，但如果你想使用这个方法，请切记：最好在不同浏览器中完整
+            地测试最终效果。
+       */
+      outline: 1px dotted deeppink;
+      outline-offset: -5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box"></div>
+  <div class="box2"></div>
+</body>
+
+</html>
