@@ -1,0 +1,62 @@
+<!--
+ * @Descripttion: 自适应的椭圆
+ * @Author: 温祖彪
+ * @Date: 2020-03-08 18:20:31
+ * @LastEditTime: 2020-03-08 20:22:18
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      display: flex;
+    }
+
+    div {
+      background: #fb3;
+      width: 100px;
+      height: 100px;
+      margin: 20px;
+    }
+
+    /* 椭圆 */
+    .ellipse {
+
+      /* 可以单独指定水平和垂直半径，只要用一个斜杠（/）分隔这两个值即可 */
+      /* border-radius: 100px / 75px; */
+
+      /* border-radius 不仅可以接受长度值，还可以接受百分比值。这个百分比值会基于元素的尺寸进行解析，即宽度用于水平半径的解析，而高度用于垂直半径的解析。 */
+      /* border-radius: 50% / 50%; */
+      border-radius: 50%;
+    }
+
+    /* 半椭圆 */
+    .half-ellipse {
+      /* 当border-radius 的值为 50% / 100% 100% 0 0 时，其效果相当于 50% 50% 50% 50% / 100% 100% 0 0 */
+      /* 底部两个角的垂直圆角是零，那么它们的水平圆角是多少就完全不重要了，因为此时水平圆角总是会被计算为零。 */
+      /* border-radius: 50% / 100% 100% 0 0; */
+      border-radius: 50% / 0 0 100% 100%;
+    }
+
+    /* 四分之一椭圆 */
+    .quarter-ellipse {
+      border-radius: 100% 0 0 0;
+    }
+
+    /* 八分之一椭圆、三分之一椭圆 是无法生成的 */
+  </style>
+</head>
+
+<body>
+  <div class="ellipse"></div>
+
+  <div class="half-ellipse"></div>
+
+  <div class="quarter-ellipse"></div>
+</body>
+
+</html>

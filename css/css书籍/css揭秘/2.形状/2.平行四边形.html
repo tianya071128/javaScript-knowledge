@@ -1,0 +1,66 @@
+<!--
+ * @Descripttion: 
+ * @Author: sueRimn
+ * @Date: 2020-03-08 20:24:49
+ * @LastEditTime: 2020-03-08 20:53:00
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      display: flex;
+    }
+
+    div {
+      width: 200px;
+      line-height: 100px;
+      margin: 50px;
+      color: #fff;
+      background: #6999c1;
+      text-align: center;
+    }
+
+    /* 嵌套元素方案: 对内容再应用一次反向的skew() 变形，从而抵消容器的变形效果 */
+    .parallelogram {
+      transform: skewX(-45deg);
+    }
+
+    .parallelogram span {
+      display: inline-block;
+      transform: skewX(45deg);
+    }
+
+    /* 伪元素方案 */
+    .pseudo-parallelogram {
+      background-color: transparent;
+      position: relative;
+    }
+
+    .pseudo-parallelogram::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #6999c1;
+      transform: skewX(-45deg);
+      /* 使伪元素堆叠层次被推到宿主元素之下 */
+      z-index: -1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="parallelogram">
+    <span>平行四边形</span>
+  </div>
+  <div class="pseudo-parallelogram">伪元素法</div>
+</body>
+
+</html>
