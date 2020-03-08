@@ -1,0 +1,82 @@
+<!--
+ * @Descripttion: 条纹背景
+ * @Author: 温祖彪
+ * @Date: 2020-03-08 15:07:30
+ * @LastEditTime: 2020-03-08 15:51:29
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      display: flex;
+    }
+
+    div {
+      margin: 30px 100px;
+      width: 200px;
+      height: 200px;
+    }
+
+    /* 水平条纹 */
+    .level {
+      /* 
+       * 如果多个色标具有相同的位置，它们会产生一个无限小的过渡区域，
+       * 过渡的起止色分别是第一个和最后一个指定值。从效果上看，颜色会在那
+       * 个位置突然变化，而不是一个平滑的渐变过程。” 
+       */
+      /* background: linear-gradient(#fb3 50%, #58a 50%); */
+
+      /* 
+       * 如果某个色标的位置值比整个列表中在它之前的色标的位置值都要小，则该色标的位置值会被设置为它前面所有色标位置值的最大值
+       * 这意味着，如果我们把第二个色标的位置值设置为0，那它的位置就总是会被浏览器调整为前一个色标的位置值
+       */
+      /* background: linear-gradient(#fb3 30%, #58a 0); */
+
+      /* 
+       * 生成三种颜色的水平条纹
+       */
+      background: linear-gradient(#fb3 33.3%,
+          #58a 0, #58a 66.6%, yellowgreen 0);
+      /* 
+       * 渐变是一种由代码生成的图像，我们能像对待其他任何背景图像那
+       * 样对待它，而且还可以通过background-size 来调整其尺寸
+       */
+      background-size: 100% 20%;
+    }
+
+    /* 垂直条纹 */
+    .vertical {
+      /* 需要在开头加上一个额外的参数来指定渐变的方向 */
+      background: linear-gradient(to right,
+          /* 或 90deg */
+          #fb3 50%, #58a 0);
+      background-size: 30px 100%;
+    }
+
+    /* 斜向条纹 */
+    .direction {
+      background: repeating-linear-gradient(60deg,
+          #fb3, #fb3 15px, #58a 0, #58a 30px);
+    }
+
+    /* 同色系条纹 */
+    .same {
+      background: repeating-linear-gradient(30deg,
+          #79b, #79b 15px, #58a 0, #58a 30px);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="level"></div>
+  <div class="vertical"></div>
+  <div class="direction"></div>
+  <div class="same"></div>
+</body>
+
+</html>

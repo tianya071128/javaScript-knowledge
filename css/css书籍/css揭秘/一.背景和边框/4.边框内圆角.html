@@ -2,7 +2,7 @@
  * @Descripttion: 边框内圆角
  * @Author: 温祖彪
  * @Date: 2020-03-08 12:10:36
- * @LastEditTime: 2020-03-08 12:12:24
+ * @LastEditTime: 2020-03-08 15:07:03
  -->
 <!DOCTYPE html>
 <html lang="en">
@@ -11,6 +11,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <style>
+    .box {
+      /* 
+        同时运用 outline 和 box-shadow 原因: 
+        1. outline 不会跟着元素的圆角走（因而显示出直角），但 box-shadow 会
+        2. box-shadow 会刚好填补描边和容器圆角之间的空隙
+       */
+      outline: .6em solid #655;
+      box-shadow: 0 0 0 .4em #655;
+      /* todo calculate max of this */
+
+      max-width: 10em;
+      border-radius: .8em;
+      padding: 1em;
+      margin: 1em;
+      background: tan;
+      font: 100%/1.5 sans-serif;
+    }
+  </style>
 </head>
 
 <body>
