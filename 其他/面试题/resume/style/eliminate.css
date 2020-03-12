@@ -155,25 +155,6 @@ a:hover {
   color: #333;
 }
 
-input {
-  border: none;
-  -moz-appearance: none;
-  -webkit-appearance: none; /*解决ios上按钮的圆角问题*/
-  border-radius: 0; /*解决ios上输入框圆角问题*/
-  outline: medium; /*去掉鼠标点击的默认黄色边框*/
-  background-color: transparent;
-
-  &:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0px 1000px white inset;
-  }
-
-  &[type='number'] {
-    -moz-appearance: textfield;
-  }
-
-  &[type='number']::-webkit-inner-spin-button,
-  &[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
+* {
+  box-sizing: border-box;
 }

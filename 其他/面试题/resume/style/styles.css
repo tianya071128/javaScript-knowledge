@@ -1,5 +1,102 @@
-header {
-  width: 100%;
-  height: 200px;
-  background-color: red;
+@page {
+  size: A4;
+}
+section {
+  display: flex;
+}
+.main-left {
+  flex: 1;
+  background: #5dc3b1;
+}
+.main-left .touxiang {
+  display: block;
+  margin: 80px auto 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+h1 {
+  color: #fff;
+  font-size: 30px;
+  text-align: center;
+  font-weight: bold;
+  line-height: 2;
+  border-bottom: 1px solid #248578;
+  margin: 0 5%;
+}
+
+.main-left ul.info {
+  margin: 0 5%;
+  border-bottom: 1px solid #248578;
+}
+
+.main-left ul.info li {
+  color: #1d7d71;
+  font-size: 15px;
+  margin: 15px 0;
+  padding-left: 25px;
+  font-weight: bold;
+  background: url(../image/出生日期.png) no-repeat left center;
+  background-size: 20px 20px;
+}
+.main-left ul.info li::before {
+  content: attr(data-title) "：";
+  color: #1e8687;
+  font-size: 14px;
+}
+.main-left ul.info li:nth-of-type(2) {
+  background-image: url(../image/手机号码.png);
+}
+.main-left ul.info li:nth-of-type(3) {
+  background-image: url(../image/邮箱.png);
+}
+.main-left ul.info li:nth-of-type(4) {
+  background-image: url(../image/git.png);
+}
+.main-left ul.info li:nth-of-type(5) {
+  background-image: url(../image/学校.png);
+}
+.main-left ul.info li:nth-of-type(6) {
+  background-image: url(../image/时间.png);
+}
+.main-left ul.info li:nth-of-type(7) {
+  background-image: url(../image/学历.png);
+}
+
+ul.skill {
+  margin: 30px 5% 0;
+}
+ul.skill li {
+  margin: 15px 0;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  font-size: 17px;
+}
+ul.skill li span {
+  text-align: right;
+  width: 33%;
+}
+ul.skill .all {
+  margin-left: 7px;
+  flex: 1;
+  height: 16px;
+  background-color: #3eb79f;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+ul.skill .all .progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: #fff;
+}
+
+/* 简历内容 */
+.main-right {
+  flex: 2;
+  background: #f1eee8;
 }
