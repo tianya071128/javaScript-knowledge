@@ -1,0 +1,50 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2020-03-13 17:29:08
+ * @LastEditTime: 2020-03-13 18:06:59
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+
+</html>
+<script>
+  // 失败
+  function isObject(o) {
+    return typeof o === 'object' && o !== undefined
+  }
+  function dataType(o) {
+    let s = Object.prototype.toString.call(o);
+    return s.substring(8, s.length - 1);
+  }
+
+  function deep(o, map = new Map()) {
+    let obj,
+      constructor = o.constructor;
+
+    switch (dataType(o)) {
+      // 时间类型
+      case 'Date':
+        return new Date(o.getTime());
+      case 'RegExp':
+        return new RegExp(o);;
+      default:
+        if (map.has(o)) {
+          return map.get(0);
+        }
+        // 创建相对应的
+        obj = 
+        break;
+    }
+  }
+</script>
