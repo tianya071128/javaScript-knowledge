@@ -10,7 +10,7 @@ section {
 }
 .main-left .touxiang {
   display: block;
-  margin: 80px auto 0;
+  margin: 30px auto 0;
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -18,16 +18,16 @@ section {
 
 h1 {
   color: #fff;
-  font-size: 30px;
+  font-size: 24px;
   text-align: center;
   font-weight: bold;
   line-height: 2;
   border-bottom: 1px solid #248578;
-  margin: 0 5%;
+  margin: 0 2%;
 }
 
 .main-left ul.info {
-  margin: 0 5%;
+  margin: 0 2%;
   border-bottom: 1px solid #248578;
 }
 
@@ -36,13 +36,12 @@ h1 {
   font-size: 15px;
   margin: 15px 0;
   padding-left: 25px;
-  font-weight: bold;
   background: url(../image/出生日期.png) no-repeat left center;
   background-size: 20px 20px;
 }
 .main-left ul.info li::before {
   content: attr(data-title) "：";
-  color: #1e8687;
+  color: #1d7d71;
   font-size: 14px;
 }
 .main-left ul.info li:nth-of-type(2) {
@@ -64,11 +63,21 @@ h1 {
   background-image: url(../image/学历.png);
 }
 
+.big-title {
+  margin: 5% 25%;
+  border-radius: 15px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 30px;
+  background: #e3e6ee;
+  color: #468871;
+}
 ul.skill {
-  margin: 30px 5% 0;
+  margin: 15px 5% 0;
 }
 ul.skill li {
-  margin: 15px 0;
+  margin: 7px 0;
   color: #fff;
   display: flex;
   align-items: center;
@@ -93,6 +102,94 @@ ul.skill .all .progress {
   left: 0;
   bottom: 0;
   background: #fff;
+}
+
+ul.company {
+  border-bottom: 1px solid #248578;
+  margin: 0 2%;
+  padding: 0 3% 3%;
+}
+ul.company .company-title {
+  margin: 5% 0;
+  font-size: 16px;
+  color: #1d7d71;
+  font-weight: bold;
+}
+ul.company .company-time {
+  margin: 3% 0;
+  font-size: 16px;
+  color: #1d7d71;
+}
+ul.company .job-content {
+  color: #1d7d71;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.job-content span {
+  font-size: 14px;
+}
+
+.gongsi-title {
+  text-align: center;
+  font-size: 16px;
+}
+.xiangmu-item {
+  margin: 5%;
+}
+.xiangmu-title {
+  font-size: 20px;
+  color: #5dc3b1;
+  font-weight: bold;
+  margin: 5% 0;
+}
+.jishu {
+  margin: 3% 0;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+.jishu-title {
+  color: #5dc3b1;
+}
+.biaoqian {
+  display: flex;
+  align-items: center;
+}
+.biaoqian li {
+  border-radius: 1px;
+  border: 1px solid #d2d2d2;
+  padding: 3px;
+}
+.tuanduidingwei {
+  margin: 3% 0;
+  font-size: 14px;
+}
+.zhize {
+  color: #5dc3b1;
+}
+.mianshu {
+  color: #5dc3b1;
+  font-size: 14px;
+}
+.xiangmu-mainshu {
+  margin-top: 2%;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.xiangmu-mainshu li {
+  position: relative;
+  padding-left: 15px;
+}
+.xiangmu-mainshu li::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #5dc3b1;
+  margin: 0 3px;
 }
 
 /* 简历内容 */
