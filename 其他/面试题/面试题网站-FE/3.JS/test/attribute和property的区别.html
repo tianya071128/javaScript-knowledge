@@ -1,0 +1,35 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2020-03-13 15:13:26
+ * @LastEditTime: 2020-03-13 15:25:01
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <input type="text" value="wzb" id="input">
+</body>
+
+</html>
+
+<script>
+  /*
+   * 理解 HTML 属性和 DOM 属性之间的区别，是了解 Angular 绑定如何工作的关键。Attribute 是由 HTML 定义的。Property 是从 DOM（文档对象模型）节点访问的。
+   * 一些 HTML Attribute 可以 1:1 映射到 Property；例如，“ id”。
+   * 某些 HTML Attribute 没有相应的 Property。例如，aria-*。
+   * 某些 DOM Property 没有相应的 Attribute。例如，textContent。
+   * 重要的是要记住，HTML Attribute 和 DOM Property 是不同的，就算它们具有相同的名称也是如此。
+   */
+  let D = document.getElementById('input');
+  console.log(D.getAttribute('value'), D.value);
+  D.oninput = () => {
+    console.log(D.getAttribute('value'), D.value);
+  }
+</script>
