@@ -1,0 +1,28 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2020-03-16 18:19:01
+ * @LastEditTime: 2020-03-16 18:36:27
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+
+</html>
+
+<script>
+  function flattenDeep(arr) {
+    return Array.isArray(arr) ? arr.reduce((a, b) => [...a, ...flattenDeep(b)], []) : [arr];
+  }
+  console.log(flattenDeep([[[2, [3], [[4]]]], [3, 5], 5]))
+  // console.log(flattenDeep([[2, 4], 2, 3, 4, [5], [[6, 7, [88]]]]))
+</script>

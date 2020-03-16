@@ -1,0 +1,79 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2020-03-16 16:46:36
+ * @LastEditTime: 2020-03-16 17:23:43
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+
+</html>
+<script>
+  /**
+   * @name: 模拟实现 bind 函数
+   */
+  Function.prototype.bind = function (context) {
+    // 应该为 Function.prototype 函数调用
+    if (typeof this !== 'function') {
+      throw new TypeError('Error');
+    }
+
+    var _this = this,
+      args = Array.prototype.slice.call(arguments, 1);
+
+    // 返回一个函数
+    return function F() {
+      // 因为返回了一个函数, 处理 new F() 的情况
+      if (this instanceof F) {
+        // _this 就是指代调用 bind 方法的原函数
+        return new _this(...args, ...arguments);
+      }
+
+      // 其他情况调用原函数, 并通过 apply 方法修改 this 指向
+      return _this.apply(context, args.concat(...arguments));
+    }
+  }
+
+  /**
+   * @name: 模拟实现 call 方法
+   */
+  Function.prototype.myCall = function (context) {
+    // 不传参时, 默认为 window
+    var context = context;
+    if (['string', 'number', 'symbol', 'boolean'].includes(typeof context)) {
+      // 兼容简单数据类型
+      context = new context.constructor(context);
+    } else {
+      context = context || window;
+    }
+
+    // 给 context 添加一个属性, 值为原函数, 这样通过 context.fn() 调用的时候, 函数内部的 this 就是 context;
+    context.fn = this;
+
+    // 保存调用结果
+    var result = context.fn(...([...arguments].slice(1)));
+
+    // 清除引用
+    delete context.fn;
+
+    // 返回调用结果
+    return result
+  }
+
+  /**
+   * @name: 模拟实现 apply 方法
+   */
+  Function.prototype.myApply = function (content) {
+    return this.myCall(content, ...(Array.isArray(arguments[1]) ? arguments[1] : [arguments[1]]));
+  }
+</script>
