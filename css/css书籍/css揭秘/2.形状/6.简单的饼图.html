@@ -1,0 +1,54 @@
+<!--
+ * @Descripttion: 简单的饼图
+ * @Author: 温祖彪
+ * @Date: 2020-03-18 18:24:01
+ * @LastEditTime: 2020-03-18 18:38:48
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      display: flex;
+    }
+
+    div {
+      width: 100px;
+      height: 100px;
+      line-height: 100px;
+      border-radius: 50%;
+      background: yellowgreen;
+      margin: 50px;
+      text-align: center;
+      color: #fff;
+    }
+
+    /* 基于 transform 的解决方案 */
+    .pie {
+      background-image:
+        linear-gradient(to right, transparent 50%, #655 0);
+    }
+
+    .pie::before {
+      content: '';
+      display: block;
+      margin-left: 50%;
+      height: 100%;
+      border-radius: 0 100% 100% 0 / 50%;
+      background-color: inherit;
+      transform-origin: left;
+      /* 利用旋转来显示饼图 - 10% */
+      transform: rotate(.1turn);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="pie"></div>
+</body>
+
+</html>
