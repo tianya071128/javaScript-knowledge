@@ -1,0 +1,76 @@
+<!--
+ * @Descripttion: 菱形图片
+ * @Author: 温祖彪
+ * @Date: 2020-03-18 10:05:55
+ * @LastEditTime: 2020-03-18 11:10:37
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      display: flex;
+    }
+
+    div {
+      width: 100px;
+      height: 100px;
+      line-height: 100px;
+      margin: 50px;
+      color: #fff;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    /* 基于变形的方案, 缺点在于: 只能处理正方形 */
+    .diamond {
+      transform: rotate(45deg);
+      overflow: hidden;
+      border: 1px solid #ccc;
+    }
+
+    .diamond-son {
+      width: 100%;
+      height: 100%;
+      display: inline-block;
+      background-color: #6999c1;
+      /* rotate(-45deg) 用来抵消父元素的旋转, 但是此时会形成一个 八边形 */
+      transform: rotate(-45deg);
+    }
+
+    .scale {
+      /* scale 缩放形成菱形 */
+      transform: rotate(-45deg) scale(1.42);
+    }
+
+    /* 裁切路径方案: clip-path(浏览器支持度不高) */
+    .cutting {
+      background-color: #6999c1;
+      clip-path: polygon(50% 0, 100% 50%,
+          50% 100%, 0 50%);
+      transition: 1s clip-path;
+    }
+
+    /* 还可以用来参与动画 */
+    .cutting:hover {
+      clip-path: polygon(0 0, 100% 0,
+          100% 100%, 0 100%);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="diamond">
+    <span class="diamond-son"></span>
+  </div>
+  <div class="diamond">
+    <span class="diamond-son scale">scale 缩放形成菱形</span>
+  </div>
+  <div class="cutting">裁切路径方案: clip-path</div>
+</body>
+
+</html>
