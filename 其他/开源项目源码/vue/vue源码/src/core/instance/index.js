@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-09 22:29:29
+ * @LastEditTime: 2020-03-18 21:11:03
  */
 import { initMixin } from "./init";
 import { stateMixin } from "./state";
@@ -23,6 +23,7 @@ function Vue(options) {
 initMixin(Vue);
 stateMixin(Vue);
 eventsMixin(Vue);
+// update 函数，将 VNode 渲染成真实的 DOM
 lifecycleMixin(Vue);
 // 向原型中添加 render 函数
 renderMixin(Vue);

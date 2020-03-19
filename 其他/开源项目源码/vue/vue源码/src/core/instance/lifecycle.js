@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-09 22:25:21
+ * @LastEditTime: 2020-03-18 22:18:16
  */
 /* @flow */
 
@@ -62,6 +62,7 @@ export function initLifecycle(vm: Component) {
 }
 
 export function lifecycleMixin(Vue: Class<Component>) {
+  // 负责将 VNode 渲染为真实的 DOM
   Vue.prototype._update = function(vnode: VNode, hydrating?: boolean) {
     const vm: Component = this;
     const prevEl = vm.$el;
@@ -72,9 +73,11 @@ export function lifecycleMixin(Vue: Class<Component>) {
     // based on the rendering backend used.
     if (!prevVnode) {
       // initial render
+      // 初始渲染 -- vm。$el 为真实 DOM
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
     } else {
       // updates
+      // 更新时候，diff 算法
       vm.$el = vm.__patch__(prevVnode, vnode);
     }
     restoreActiveInstance();
