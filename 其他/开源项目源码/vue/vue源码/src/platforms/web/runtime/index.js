@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-18 21:27:53
+ * @LastEditTime: 2020-03-19 20:49:57
  */
 /* @flow */
 
@@ -37,7 +37,7 @@ extend(Vue.options.directives, platformDirectives);
 extend(Vue.options.components, platformComponents);
 
 // install platform patch function
-// web 中区分是否是服务端渲染。在服务端渲染是不需要生成 DOM 的，因此是一个空函数
+// 区分是否是服务端渲染。在服务端渲染是不需要生成 DOM 的，因此是一个空函数
 Vue.prototype.__patch__ = inBrowser ? patch : noop;
 
 // public mount method
