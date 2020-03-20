@@ -1,0 +1,117 @@
+<!--
+ * @Descripttion: 渐变 demo
+ * @Author: 温祖彪
+ * @Date: 2020-03-20 15:51:46
+ * @LastEditTime: 2020-03-20 17:21:13
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      display: flex;
+    }
+
+    section {
+      margin: 50px;
+    }
+
+    div {
+      width: 100px;
+      height: 200px;
+      margin: 0 auto;
+    }
+
+    p {
+      text-align: center;
+    }
+
+    /* 
+     * 可以为渐变轴某个位置指定某个颜色，这些位置可被称为“颜色中间点（color-stops）”。
+     * 颜色会从一个颜色中间点平滑过渡到下一个。在渐变范围内，每个颜色都表现为一条垂直于渐变轴的直线。
+     * 在下图中，渐变轴从左上角出发并且呈45度(MDN原话-应该是标准有所变化, 但是测试证明, 渐变轴是从左下角出发并且呈 45 度)。
+     * 渐变轴上定义了红色和蓝色两个颜色中间点。 
+     */
+    .box1 {
+      background: linear-gradient(45deg, red, blue);
+    }
+
+    /* 
+     * 有时候我们不希望一开始就出现渐变，可以从中间某个地方开始最好
+     * 为了实现这个效果，可以在你希望渐变梯度开始的地方，加上一个同样色值的颜色中间点
+     */
+    .box2 {
+      background: linear-gradient(135deg, red, red 60%, blue 70%);
+    }
+
+    /* 
+     * 如果第一个颜色中间点没有 <length> 或 <percentage>属性,那么它默认为0%。
+     * 如果最后一个颜色中间点没有 <length> 或者 <percentage>属性, 则默认为100%。
+     * 如果一个既不是起始也不是终止的颜色中间点，没有被明确声明位置，那么这个颜色就会从前后两个颜色的中间位置开始。
+     * 如果一个既不是起始也不是终止的颜色中, 位置为 0, 那么这个颜色的开始值就会是上一个颜色的结束值。
+     * 颜色中间点必须按照顺序声明。给起始和终止的颜色中间值赋值后，如果一个颜色中间点的位置比任何一个颜色中间点的位置都要小，那它的位置会按照离它最近的一个颜色中间点来计算。
+     */
+    .box3 {
+      background: linear-gradient(to right, red, orange 20%, yellow, green, blue 0, indigo, violet);
+    }
+
+    /* 使用透明度 */
+    .box4 {
+      background: linear-gradient(to bottom right, red, rgba(0, 0, 0, 0));
+    }
+
+    /* 跨浏览器实施渐变 */
+    .box5 {
+      background-color: #F07575;
+      /* 不支持渐变的浏览器回退方案 */
+      background-image: -webkit-linear-gradient(top, hsl(0, 80%, 70%), #bada55);
+      /* 支持 Chrome 25 and Safari 6, iOS 6.1, Android 4.3 */
+      background-image: -moz-linear-gradient(top, hsl(0, 80%, 70%), #bada55);
+      /* 支持 Firefox (3.6 to 15) */
+      background-image: -o-linear-gradient(top, hsl(0, 80%, 70%), #bada55);
+      /* 支持旧 Opera (11.1 to 12.0) */
+      background-image: linear-gradient(to bottom, hsl(0, 80%, 70%), #bada55);
+      /* 标准语法; 需要最新版本 */
+    }
+
+    /* 动画, 动画效果无效.  */
+    .box6 {
+      background: linear-gradient(135deg, red, red 60%, blue);
+      transition: all 1s;
+    }
+
+    .box6:hover {
+      background: linear-gradient(135deg, red, red 30%, blue);
+      ;
+    }
+  </style>
+</head>
+
+<body>
+  <section>
+    <p>45度渐变</p>
+    <div class="box1"></div>
+  </section>
+  <section>
+    <p>从60％的梯度线开始的渐变</p>
+    <div class="box2"></div>
+  </section>
+  <section>
+    <p>具有多个颜色停止的渐变</p>
+    <div class="box3"></div>
+  </section>
+  <section>
+    <p>使用透明度 </p>
+    <div class="box4"></div>
+  </section>
+  <section>
+    <p>动画-动画效果无效 </p>
+    <div class="box6"></div>
+  </section>
+</body>
+
+</html>
