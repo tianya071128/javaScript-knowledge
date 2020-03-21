@@ -2,7 +2,7 @@
  * @Descripttion: 生成 VNode
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-16 21:26:34
+ * @LastEditTime: 2020-03-21 21:14:05
  */
 /* @flow */
 
@@ -137,6 +137,7 @@ export function _createElement(
     }
   } else {
     // direct component options / constructor
+    // 组件类型，通过 createComponent 来创建 VNode
     vnode = createComponent(tag, data, context, children);
   }
   if (Array.isArray(vnode)) {
