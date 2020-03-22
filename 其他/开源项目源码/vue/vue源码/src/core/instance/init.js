@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-21 22:13:41
+ * @LastEditTime: 2020-03-22 21:25:30
  */
 /* @flow */
 
@@ -36,6 +36,7 @@ export function initMixin(Vue: Class<Component>) {
     // a flag to avoid this being observed
     vm._isVue = true;
     // merge options
+    // 合并配置
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
@@ -43,6 +44,7 @@ export function initMixin(Vue: Class<Component>) {
       // 实例组件化
       initInternalComponent(vm, options);
     } else {
+      // 不是组件时
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
