@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-21 21:31:35
+ * @LastEditTime: 2020-03-21 22:12:08
  */
 /* @flow */
 
@@ -220,6 +220,7 @@ export function createComponentInstanceForVnode(
     options.render = inlineTemplate.render;
     options.staticRenderFns = inlineTemplate.staticRenderFns;
   }
+  // 在这里创建一个 Vue 的实例 - 对应的就是组件的构造函数，我们上.节分析了它实际上是继承于 Vue 的.个构造器 Sub ，相当于 newSub(options)
   return new vnode.componentOptions.Ctor(options);
 }
 

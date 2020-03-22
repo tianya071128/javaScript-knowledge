@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-09 22:28:56
+ * @LastEditTime: 2020-03-21 22:13:41
  */
 /* @flow */
 
@@ -40,6 +40,7 @@ export function initMixin(Vue: Class<Component>) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
+      // 实例组件化
       initInternalComponent(vm, options);
     } else {
       vm.$options = mergeOptions(
