@@ -1,8 +1,8 @@
 /*
- * @Descripttion:
+ * @Descripttion: 完整版(运行版 + compiler) 入口文件 -- 在运行时版的基础上添加 compiler
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-09 22:13:16
+ * @LastEditTime: 2020-03-23 22:50:20
  */
 /* @flow */
 
@@ -12,19 +12,23 @@ import { mark, measure } from "core/util/perf";
 
 import Vue from "./runtime/index";
 import { query } from "./util/index";
+// 导入 compiler 功能函数 compileToFunctions
 import { compileToFunctions } from "./compiler/index";
 import {
   shouldDecodeNewlines,
   shouldDecodeNewlinesForHref
 } from "./util/compat";
 
+// 根据 id 获取元素的 innerHTML
 const idToTemplate = cached(id => {
   const el = query(id);
   return el && el.innerHTML;
 });
 
 // 纯前端浏览器环境 平台在这里调用 $mount 方法
+// 缓存 Vue.prototype.$mount 方法
 const mount = Vue.prototype.$mount;
+// 重写 Vue.prototype.$mount 方法
 Vue.prototype.$mount = function(
   el?: string | Element,
   hydrating?: boolean
@@ -102,16 +106,20 @@ Vue.prototype.$mount = function(
  * Get outerHTML of elements, taking care
  * of SVG elements in IE as well.
  */
+// 获取元素的 outerHTML
 function getOuterHTML(el: Element): string {
+  // outerHTML: 获取描述元素（包括其后代）的序列化HTML片段。
   if (el.outerHTML) {
     return el.outerHTML;
   } else {
+    // 不支持 outerHTML 时, 兼容写法
     const container = document.createElement("div");
     container.appendChild(el.cloneNode(true));
     return container.innerHTML;
   }
 }
 
+// 在 Vue 上添加一个全局 API , 也就是 compile 方法
 Vue.compile = compileToFunctions;
 
 export default Vue;

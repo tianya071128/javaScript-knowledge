@@ -1,8 +1,12 @@
 /*
- * @Descripttion:
+ * @Descripttion: 对 Vue 进行平台化地包装:
+ *  1. 设置平台化的 Vue.config.
+ *  2. 在 Vue.options 上混合了两个指令(directives)，分别是 model 和 show
+ *  3. 在 Vue.options 上混合了两个组件(components)，分别是 Transition 和 TransitionGroup。
+ *  4. 在 Vue.prototype 上添加了两个方法：__patch__ 和 $mount。
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-19 20:49:57
+ * @LastEditTime: 2020-03-23 22:36:49
  */
 /* @flow */
 
@@ -26,6 +30,7 @@ import platformDirectives from "./directives/index";
 import platformComponents from "./components/index";
 
 // install platform specific utils
+// 这个配置是与平台有关的，很可能会被覆盖掉。
 Vue.config.mustUseProp = mustUseProp;
 Vue.config.isReservedTag = isReservedTag;
 Vue.config.isReservedAttr = isReservedAttr;
@@ -33,8 +38,25 @@ Vue.config.getTagNamespace = getTagNamespace;
 Vue.config.isUnknownElement = isUnknownElement;
 
 // install platform runtime directives & components
+// 安装特定平台运行时的指令和组件. -- 添加在 Vue.options 属性上
 extend(Vue.options.directives, platformDirectives);
 extend(Vue.options.components, platformComponents);
+/**
+ * 执行完上面代码后, Vue.options 将变成这样:
+ * Vue.options = {
+ *   components: {
+ *     KeepAlive,
+ *     Transtion,
+ *     TransitionGroup
+ *   },
+ *   directives: {
+ *     model,
+ *     show
+ *   },
+ *   filters: Object.create(null),
+ *   _base: Vue,
+ * }
+ */
 
 // install platform patch function
 // 区分是否是服务端渲染。在服务端渲染是不需要生成 DOM 的，因此是一个空函数

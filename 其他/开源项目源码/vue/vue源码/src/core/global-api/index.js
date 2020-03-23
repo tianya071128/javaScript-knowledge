@@ -2,7 +2,7 @@
  * @Descripttion: 在 Vue 构造函数上添加全局的 API
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-23 22:11:11
+ * @LastEditTime: 2020-03-23 22:33:29
  */
 /* @flow */
 
@@ -89,13 +89,12 @@ export function initGlobalAPI(Vue: GlobalAPI) {
   /**
    * 执行完上面代码后, Vue.options 将变成这样:
    * Vue.options = {
-   *   components: Object.create(null),
-   *   directives: Object.create(null),
-   *   filters: Object.create(null),
-   *   _base: Vue,
    *   components: {
    *     KeepAlive
-   *   }
+   *   },
+   *   directives: Object.create(null),
+   *   filters: Object.create(null),
+   *   _base: Vue
    * }
    */
 
