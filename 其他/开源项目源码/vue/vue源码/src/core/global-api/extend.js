@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-22 22:16:10
+ * @LastEditTime: 2020-03-23 22:08:25
  */
 /* @flow */
 
@@ -16,6 +16,7 @@ export function initExtend(Vue: GlobalAPI) {
    * cid. This enables us to create wrapped "child
    * constructors" for prototypal inheritance and cache them.
    */
+  // 在 Vue 上添加 Vue.cid 静态属性
   Vue.cid = 0;
   let cid = 1;
 
