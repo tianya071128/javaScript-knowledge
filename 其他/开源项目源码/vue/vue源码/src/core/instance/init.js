@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-22 21:25:30
+ * @LastEditTime: 2020-03-23 21:21:45
  */
 /* @flow */
 
@@ -18,6 +18,7 @@ import { extend, mergeOptions, formatComponentName } from "../util/index";
 
 let uid = 0;
 
+// 在 Vue 的原型上添加 _init 方法,在 new Vue() 的时候, this._init(options) 将被执行
 export function initMixin(Vue: Class<Component>) {
   // 初始化函数
   Vue.prototype._init = function(options?: Object) {
