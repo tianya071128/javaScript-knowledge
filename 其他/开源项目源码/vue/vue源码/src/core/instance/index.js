@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-23 21:35:48
+ * @LastEditTime: 2020-03-24 21:14:34
  */
 // 从五个文件导入五个方法（不包括 warn）
 import { initMixin } from "./init";
@@ -13,7 +13,7 @@ import { lifecycleMixin } from "./lifecycle";
 
 import { warn } from "../util/index";
 
-// 定义 Vue 构造函数
+// 定义 Vue 构造函数 -- options 是 new Vue(options) 的参数
 function Vue(options) {
   // vue 必须要用 new 调用
   if (process.env.NODE_ENV !== "production" && !(this instanceof Vue)) {
