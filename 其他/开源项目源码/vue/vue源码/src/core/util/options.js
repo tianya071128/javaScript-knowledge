@@ -1,3 +1,9 @@
+/*
+ * @Descripttion: 选项的合并
+ * @Author: 温祖彪
+ * @Date: 2020-03-06 22:40:51
+ * @LastEditTime: 2020-03-24 21:51:29
+ */
 /* @flow */
 
 import config from "../config";
@@ -258,7 +264,7 @@ const defaultStrat = function(parentVal: any, childVal: any): any {
 };
 
 /**
- * Validate component names
+ * Validate component names 验证组件的名字是否符合要求的
  */
 function checkComponents(options: Object) {
   for (const key in options.components) {
@@ -375,16 +381,21 @@ function assertObjectType(name: string, value: any, vm: ?Component) {
 }
 
 /**
- * Merge two option objects into a new one.
- * Core utility used in both instantiation and inheritance.
+ * Merge two option objects into a new one. 合并两个选项对象为一个新的对象
+ * Core utility used in both instantiation and inheritance. 这个函数在实例化和继承的时候都有用到\
+ * 注意点:
+ * 1.这个函数将会产生一个新的对象；
+ * 2.这个函数不仅仅在实例化对象(即_init方法中)的时候用到，在继承(Vue.extend)中也有用到，所以这个函数应该是一个用来合并两个选项对象为一个新对象的通用程序。
  */
-// 主要功能就是把 parent 和 child 这两个对象根据⼀些合并策略，合并成⼀个新对象并返回。
+
 export function mergeOptions(
   parent: Object,
   child: Object,
   vm?: Component
 ): Object {
+  // 非生产环境下
   if (process.env.NODE_ENV !== "production") {
+    // 检查 child(即组件的 options) 组件名是否正确
     checkComponents(child);
   }
 

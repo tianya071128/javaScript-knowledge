@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-24 21:28:32
+ * @LastEditTime: 2020-03-24 21:40:42
  */
 /* @flow */
 
@@ -115,8 +115,10 @@ export function initInternalComponent(
   }
 }
 
+// 解析构造者的 options
 export function resolveConstructorOptions(Ctor: Class<Component>) {
   let options = Ctor.options;
+  // Ctor.super 是子类(基于 Vue 构造函数)才有的属性
   if (Ctor.super) {
     const superOptions = resolveConstructorOptions(Ctor.super);
     const cachedSuperOptions = Ctor.superOptions;
