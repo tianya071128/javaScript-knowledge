@@ -2,7 +2,7 @@
  * @Descripttion: 选项的合并
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-24 21:51:29
+ * @LastEditTime: 2020-03-24 22:21:37
  */
 /* @flow */
 
@@ -293,8 +293,14 @@ export function validateComponentName(name: string) {
 }
 
 /**
- * Ensure all props option syntax are normalized into the
- * Object-based format.
+ * Ensure all props option syntax are normalized into the 确保所有props选项语法都规范化为
+ * Object-based format. 基于对象的格式
+ */
+/**
+ * 规范化 props 选项
+ * props 写法有两种
+ * 1. props: ['someData'] => 数组写法
+ * 2. props: {} => 对象写法
  */
 function normalizeProps(options: Object, vm: ?Component) {
   const props = options.props;
@@ -329,11 +335,12 @@ function normalizeProps(options: Object, vm: ?Component) {
 }
 
 /**
- * Normalize all injections into Object-based format
+ * Normalize all injections into Object-based format. 将所有注入规范化为基于对象的格式
  */
 function normalizeInject(options: Object, vm: ?Component) {
   const inject = options.inject;
   if (!inject) return;
+  // 小技巧 -- normalized 与 options.inject 拥有相同的引用,这样修改 normalized 的时候, options.inject 也将受到影响
   const normalized = (options.inject = {});
   if (Array.isArray(inject)) {
     for (let i = 0; i < inject.length; i++) {
@@ -356,7 +363,7 @@ function normalizeInject(options: Object, vm: ?Component) {
 }
 
 /**
- * Normalize raw function directives into object format.
+ * Normalize raw function directives into object format. 将原始函数指令规范化为对象格式
  */
 function normalizeDirectives(options: Object) {
   const dirs = options.directives;
@@ -403,18 +410,32 @@ export function mergeOptions(
     child = child.options;
   }
 
+  /**
+   * 规范化 props 选项
+   * props 写法有两种
+   * 1. props: ['someData'] => 数组写法
+   * 2. props: {} => 对象写法
+   */
   normalizeProps(child, vm);
+  /**
+   * 规范化 inject 选项 -- 写法同 props, 具体见 vue 文档
+   */
   normalizeInject(child, vm);
+  /**
+   * 规范化 directives 选项 -- 写法具体见 vue 文档
+   */
   normalizeDirectives(child);
 
-  // Apply extends and mixins on the child options,
-  // but only if it is a raw options object that isn't
-  // the result of another mergeOptions call.
-  // Only merged options has the _base property.
+  // Apply extends and mixins on the child options, 在子选项上应用extends和mixins
+  // but only if it is a raw options object that isn't 但前提是它是一个原始选项对象，而不是
+  // the result of another mergeOptions call. 另一个mergeOptions调用的结果
+  // Only merged options has the _base property. 只有合并的选项才具有“_base”属性
   if (!child._base) {
+    // 处理 extends 选项 -- 因为 extends 类似于 Vue 传入的 options ,所以需要对其进行 options 合并
     if (child.extends) {
       parent = mergeOptions(parent, child.extends, vm);
     }
+    // 处理 mixins 选项 -- 因为 mixins 类似于 Vue 传入的 options ,所以需要对其进行 options 合并
     if (child.mixins) {
       for (let i = 0, l = child.mixins.length; i < l; i++) {
         parent = mergeOptions(parent, child.mixins[i], vm);

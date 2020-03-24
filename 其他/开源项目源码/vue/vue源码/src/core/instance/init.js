@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-24 21:40:42
+ * @LastEditTime: 2020-03-24 22:20:15
  */
 /* @flow */
 
@@ -56,6 +56,7 @@ export function initMixin(Vue: Class<Component>) {
       initInternalComponent(vm, options);
     } else {
       // 不是组件时 -- 合并配置
+      // resolveConstructorOptions(vm.constructor) 返回值为 vm.construct.options 处理后的 options
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
