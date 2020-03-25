@@ -2,7 +2,7 @@
  * @Descripttion: 选项的合并
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-25 22:21:10
+ * @LastEditTime: 2020-03-25 22:33:36
  */
 /* @flow */
 
@@ -170,12 +170,21 @@ strats.data = function(
 };
 
 /**
- * Hooks and props are merged as arrays.
+ * Hooks and props are merged as arrays. 合并生命周期成数组
  */
 function mergeHook(
   parentVal: ?Array<Function>,
   childVal: ?Function | ?Array<Function>
 ): ?Array<Function> {
+  /**
+   * (是否有 childVal，即判断组件的选项中是否有对应名字的生命周期钩子函数)
+   *   ? 如果有 childVal 则判断是否有 parentVal
+   *     ? 如果有 parentVal 则使用 concat 方法将二者合并为一个数组
+   *     : 如果没有 parentVal 则判断 childVal 是不是一个数组
+   *       ? 如果 childVal 是一个数组则直接返回
+   *       : 否则将其作为数组的元素，然后返回数组
+   *   : 如果没有 childVal 则直接返回 parentVal
+   */
   const res = childVal
     ? parentVal
       ? parentVal.concat(childVal)
