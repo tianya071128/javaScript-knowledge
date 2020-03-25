@@ -2,7 +2,7 @@
  * @Descripttion: 选项的合并
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-25 21:46:36
+ * @LastEditTime: 2020-03-25 22:21:10
  */
 /* @flow */
 
@@ -50,22 +50,28 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 /**
- * Helper that recursively merges two data objects together.
+ * Helper that recursively merges two data objects together. 递归地将两个数据对象合并在一起的助手
  */
+// 将 from 对象的属性混合到 to 对象中，也可以说是将 parentVal 对象的属性混合到 childVal 中，最后返回的是处理后的 childVal 对象。
 function mergeData(to: Object, from: ?Object): Object {
+  // 没有 from 直接返回 to
   if (!from) return to;
   let key, toVal, fromVal;
 
+  // 获取 from 上所有的 key -- ES6 新增了其他数据结构, 需要判断是否支持 ES6
   const keys = hasSymbol ? Reflect.ownKeys(from) : Object.keys(from);
-
+  // 遍历 from 的 key
   for (let i = 0; i < keys.length; i++) {
     key = keys[i];
     // in case the object is already observed...
     if (key === "__ob__") continue;
     toVal = to[key];
     fromVal = from[key];
+    // 如果 from 对象中的 key 不在 to 对象中，则使用 set 函数为 to 对象设置 key 及相应的值
     if (!hasOwn(to, key)) {
       set(to, key, fromVal);
+
+      // 如果 from 对象中的 key 也在 to 对象中，且这两个属性的值都是纯对象则递归进行深度合并
     } else if (
       toVal !== fromVal &&
       isPlainObject(toVal) &&
@@ -73,12 +79,13 @@ function mergeData(to: Object, from: ?Object): Object {
     ) {
       mergeData(toVal, fromVal);
     }
+    // 其他情况什么都不做
   }
   return to;
 }
 
 /**
- * Data
+ * Data 处理 data 的合并策略
  */
 export function mergeDataOrFn(
   parentVal: any,
@@ -86,10 +93,25 @@ export function mergeDataOrFn(
   vm?: Component
 ): ?Function {
   if (!vm) {
-    // in a Vue.extend merge, both should be functions
+    // in a Vue.extend merge, both should be functions 在 Vue.extend 合并中，两者都应该是函数
+    // 由于 childVal 和 parentVal 必定会有其一，否则便不会执行 strats.data 策略函数，
+    // 所以下面判断的意思就是：如果没有子选项则使用父选项，没有父选项就直接使用子选项，且这两个选项都能保证是函数，
+    // 返回父类的 data 选项 -- Vue.extend 会多层继承
+    /** 例如:
+     * const Parent = Vue.extend({
+     *   data: function () {
+     *     return {
+     *       test: 1
+     *     }
+     *   }
+     * })
+     *
+     * const Child = Parent.extend({})
+     */
     if (!childVal) {
       return parentVal;
     }
+    // 返回子组件的 data 选项本身
     if (!parentVal) {
       return childVal;
     }
@@ -98,6 +120,7 @@ export function mergeDataOrFn(
     // merged result of both functions... no need to
     // check if parentVal is a function here because
     // it has to be a function to pass previous merges.
+    // 返回 mergedDataFn 函数 -- 暂时不会调用
     return function mergedDataFn() {
       return mergeData(
         typeof childVal === "function" ? childVal.call(this, this) : childVal,
@@ -105,6 +128,7 @@ export function mergeDataOrFn(
       );
     };
   } else {
+    // 当合并处理的是非子组件的选项时 `data` 函数为 `mergedInstanceDataFn` 函数
     return function mergedInstanceDataFn() {
       // instance merge
       const instanceData =
@@ -120,12 +144,14 @@ export function mergeDataOrFn(
   }
 }
 
+// 选项 data 的合并策略
 strats.data = function(
   parentVal: any,
   childVal: any,
   vm?: Component
 ): ?Function {
   if (!vm) {
+    // 子组件的 data 选项合并, 如果不是函数, 发出一个警告, 并且直接返回 parentVal
     if (childVal && typeof childVal !== "function") {
       process.env.NODE_ENV !== "production" &&
         warn(
