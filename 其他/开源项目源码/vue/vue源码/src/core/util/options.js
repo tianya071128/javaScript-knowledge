@@ -2,7 +2,7 @@
  * @Descripttion: 选项的合并
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-24 22:21:37
+ * @LastEditTime: 2020-03-25 21:46:36
  */
 /* @flow */
 
@@ -25,17 +25,20 @@ import {
 } from "shared/util";
 
 /**
- * Option overwriting strategies are functions that handle
- * how to merge a parent option value and a child option
- * value into the final value.
+ * Option overwriting strategies are functions that handle 选项覆盖策略是处理
+ * how to merge a parent option value and a child option 如何合并父选项值和子选项
+ * value into the final value. value 转化为最终 value
  */
+// 刚导入进来是一个空对象, 在下面的代码下会逐步添加合并策略
 const strats = config.optionMergeStrategies;
 
 /**
- * Options with restrictions
+ * Options with restrictions 有限制的选项
  */
+// 合并 el 选项和 propsData 选项的
 if (process.env.NODE_ENV !== "production") {
   strats.el = strats.propsData = function(parent, child, vm, key) {
+    // 如果没有 vm 参数(当创建子组件时,是没有传入 vm 参数的),则说明处理的是子组件
     if (!vm) {
       warn(
         `option "${key}" can only be used during instance ` +
@@ -257,7 +260,7 @@ strats.props = strats.methods = strats.inject = strats.computed = function(
 strats.provide = mergeDataOrFn;
 
 /**
- * Default strategy.
+ * Default strategy. 默认合并策略
  */
 const defaultStrat = function(parentVal: any, childVal: any): any {
   return childVal === undefined ? parentVal : childVal;
@@ -444,6 +447,7 @@ export function mergeOptions(
   }
 
   const options = {};
+  // 下面两个循环目的: 使用在 parent 或者 child 对象中的出现的 key 合集
   let key;
   for (key in parent) {
     mergeField(key);
@@ -454,6 +458,7 @@ export function mergeOptions(
     }
   }
   function mergeField(key) {
+    //
     const strat = strats[key] || defaultStrat;
     options[key] = strat(parent[key], child[key], vm, key);
   }
