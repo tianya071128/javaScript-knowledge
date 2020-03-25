@@ -5,6 +5,7 @@ section {
   display: flex;
 }
 .main-left {
+  height: 100%;
   flex: 1;
   background: #5dc3b1;
 }
@@ -40,7 +41,7 @@ h1 {
   background-size: 20px 20px;
 }
 .main-left ul.info li::before {
-  content: attr(data-title) "：";
+  content: attr(data-title) '：';
   color: #1d7d71;
   font-size: 14px;
 }
@@ -63,6 +64,20 @@ h1 {
   background-image: url(../image/学历.png);
 }
 
+.evaluate {
+  margin: 0 2%;
+}
+ul.evaluate li {
+  color: #1d7d71;
+  font-size: 15px;
+  margin: 7px 0;
+}
+ul.evaluate li::before {
+  content: attr(data-title) '：';
+  color: #1d7d71;
+  font-size: 14px;
+}
+
 .big-title {
   margin: 5% 25%;
   border-radius: 15px;
@@ -77,11 +92,11 @@ ul.skill {
   margin: 15px 5% 0;
 }
 ul.skill li {
-  margin: 7px 0;
+  margin: 10px 0;
   color: #fff;
   display: flex;
   align-items: center;
-  font-size: 17px;
+  font-size: 14px;
 }
 ul.skill li span {
   text-align: right;
@@ -90,7 +105,7 @@ ul.skill li span {
 ul.skill .all {
   margin-left: 7px;
   flex: 1;
-  height: 16px;
+  height: 13px;
   background-color: #3eb79f;
   border-radius: 8px;
   position: relative;
@@ -163,6 +178,7 @@ ul.company .job-content {
 .tuanduidingwei {
   margin: 3% 0;
   font-size: 14px;
+  line-height: 1.3;
 }
 .zhize {
   color: #5dc3b1;
@@ -181,7 +197,7 @@ ul.company .job-content {
   padding-left: 15px;
 }
 .xiangmu-mainshu li::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 1px;
   top: 9px;
@@ -196,4 +212,5 @@ ul.company .job-content {
 .main-right {
   flex: 2;
   background: #f1eee8;
+  height: 100%;
 }
