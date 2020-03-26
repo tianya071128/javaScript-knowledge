@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-24 22:20:15
+ * @LastEditTime: 2020-03-26 17:45:15
  */
 /* @flow */
 
@@ -21,7 +21,7 @@ let uid = 0;
 // 在 Vue 的原型上添加 _init 方法,在 new Vue() 的时候, this._init(options) 将被执行
 export function initMixin(Vue: Class<Component>) {
   // 初始化函数
-  Vue.prototype._init = function(options?: Object) {
+  Vue.prototype._init = function (options?: Object) {
     const vm: Component = this;
     // a uid
     // 每次实例化一个 Vue 实例之后, uid 的值都会 ++
@@ -65,6 +65,7 @@ export function initMixin(Vue: Class<Component>) {
     }
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== "production") {
+
       initProxy(vm);
     } else {
       vm._renderProxy = vm;
