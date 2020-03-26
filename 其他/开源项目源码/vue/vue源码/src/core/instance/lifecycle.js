@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-18 22:18:16
+ * @LastEditTime: 2020-03-26 22:11:42
  */
 /* @flow */
 
@@ -36,18 +36,27 @@ export function setActiveInstance(vm: Component) {
 }
 
 export function initLifecycle(vm: Component) {
+  // 定义 options，它是 vm.$options 的引用，后面的代码使用的都是 options 常量
   const options = vm.$options;
 
-  // locate first non-abstract parent
+  // locate first non-abstract parent 查找第一个非抽象的父组件
+  // 定义 parent，它引用当前实例的父实例
   let parent = options.parent;
+  // 如果当前实例有父组件，且当前实例不是抽象的
+  // abstract: true 时, 表示为抽象组件(例如: keep-alive), 此时会跳过 if 语句, 将导致该抽象实例不会被添加到父实例的 $children 中
   if (parent && !options.abstract) {
+    // 使用 while 循环查找第一个非抽象的父组件
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent;
     }
+    // 经过上面的 while 循环后，parent 应该是一个非抽象的组件，将它作为当前实例的父级，
+    // 所以将当前实例 vm 添加到父级的 $children 属性里
     parent.$children.push(vm);
   }
 
+  // 设置当前实例的 $parent 属性，指向父级
   vm.$parent = parent;
+  // 设置 $root 属性，有父级就是用父级的 $root，否则 $root 指向自身
   vm.$root = parent ? parent.$root : vm;
 
   vm.$children = [];
@@ -361,6 +370,15 @@ export function callHook(vm: Component, hook: string) {
       invokeWithErrorHandling(handlers[i], vm, null, vm, info);
     }
   }
+  // 可以使用 hook: 加 生命周期钩子名称 的方式来监听组件相应的生命周期事件, 这样可以监听到子组件的生命周期方式(也可用其他方式处理)
+  /**
+   * <child
+   *   @hook:beforeCreate="handleChildBeforeCreate"
+   *   @hook:created="handleChildCreated"
+   *   @hook:mounted="handleChildMounted"
+   *   @hook:生命周期钩子
+   * />
+   */
   if (vm._hasHookEvent) {
     vm.$emit("hook:" + hook);
   }

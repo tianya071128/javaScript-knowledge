@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-26 17:45:15
+ * @LastEditTime: 2020-03-26 22:07:18
  */
 /* @flow */
 
@@ -21,7 +21,7 @@ let uid = 0;
 // 在 Vue 的原型上添加 _init 方法,在 new Vue() 的时候, this._init(options) 将被执行
 export function initMixin(Vue: Class<Component>) {
   // 初始化函数
-  Vue.prototype._init = function (options?: Object) {
+  Vue.prototype._init = function(options?: Object) {
     const vm: Component = this;
     // a uid
     // 每次实例化一个 Vue 实例之后, uid 的值都会 ++
@@ -64,21 +64,25 @@ export function initMixin(Vue: Class<Component>) {
       );
     }
     /* istanbul ignore else */
+    // 在支持 proxy(ES6 代理) 环境中代理 this, 用于在设置渲染函数的作用域代理
     if (process.env.NODE_ENV !== "production") {
-
       initProxy(vm);
     } else {
       vm._renderProxy = vm;
     }
     // expose real self
     vm._self = vm;
+    // 向实例 vm 添加一些属性以及建立父子组件关系
     initLifecycle(vm);
     initEvents(vm);
+    // 初始化一些属性(主要是 render 方面的)
     initRender(vm);
+    // 调用 beforeCreate 生命周期钩子 -- 在这一步还没有初始化 props, methods, data 等资源
     callHook(vm, "beforeCreate");
     initInjections(vm); // resolve injections before data/props
     initState(vm);
     initProvide(vm); // resolve provide after data/props
+    // 调用 created 生命周期钩子 -- 在这一步已经初始化 props, methods, data 等资源
     callHook(vm, "created");
 
     /* istanbul ignore if */

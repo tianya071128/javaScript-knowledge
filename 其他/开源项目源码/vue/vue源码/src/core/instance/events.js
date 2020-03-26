@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-23 21:32:00
+ * @LastEditTime: 2020-03-26 21:38:34
  */
 /* @flow */
 
@@ -19,6 +19,7 @@ export function initEvents(vm: Component) {
   vm._events = Object.create(null);
   vm._hasHookEvent = false;
   // init parent attached events
+  // vm.$options._parentListeners 创建子组件才会有用
   const listeners = vm.$options._parentListeners;
   if (listeners) {
     updateComponentListeners(vm, listeners);

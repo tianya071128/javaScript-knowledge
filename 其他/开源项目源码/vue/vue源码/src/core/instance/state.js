@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-23 21:28:00
+ * @LastEditTime: 2020-03-26 22:18:32
  */
 /* @flow */
 
@@ -51,17 +51,25 @@ export function proxy(target: Object, sourceKey: string, key: string) {
   Object.defineProperty(target, key, sharedPropertyDefinition);
 }
 
+// 初始化数据选项 -- 并且通过初始化顺序可知, props 选项的初始化要早于 data 选项的初始化，所以在 data 中可以使用 props
 export function initState(vm: Component) {
+  // 在 vue 实例上添加一个属性, 用来存储所有该组件实例的 watcher 对象.
   vm._watchers = [];
   const opts = vm.$options;
+  // 如果 opts.props 存在，即选项中有 props，那么就调用 initProps 初始化 props 选项。
   if (opts.props) initProps(vm, opts.props);
+  // 如果 opts.methods 存在，则调用 initMethods 初始化 methods 选项。
   if (opts.methods) initMethods(vm, opts.methods);
+  // 判断 data 选项是否存在，如果存在则调用 initData 初始化 data 选项，如果不存在则直接调用 observe 函数观测一个空对象：{}。
   if (opts.data) {
     initData(vm);
   } else {
     observe((vm._data = {}), true /* asRootData */);
   }
+  // 如果 opts.computed 存在，则调用 initComputed 初始化 computed 选项。
   if (opts.computed) initComputed(vm, opts.computed);
+  // 如果 opts.watch 存在，并且不是为 Firefox 浏览器中原生的 Object.prototype.watch 函数,
+  // 则调用 initWatch 初始化 watch 选项。
   if (opts.watch && opts.watch !== nativeWatch) {
     initWatch(vm, opts.watch);
   }
