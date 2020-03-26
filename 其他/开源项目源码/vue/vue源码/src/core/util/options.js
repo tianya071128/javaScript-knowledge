@@ -2,7 +2,7 @@
  * @Descripttion: 选项的合并
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-25 22:33:36
+ * @LastEditTime: 2020-03-26 17:05:30
  */
 /* @flow */
 
@@ -37,12 +37,12 @@ const strats = config.optionMergeStrategies;
  */
 // 合并 el 选项和 propsData 选项的
 if (process.env.NODE_ENV !== "production") {
-  strats.el = strats.propsData = function(parent, child, vm, key) {
+  strats.el = strats.propsData = function (parent, child, vm, key) {
     // 如果没有 vm 参数(当创建子组件时,是没有传入 vm 参数的),则说明处理的是子组件
     if (!vm) {
       warn(
         `option "${key}" can only be used during instance ` +
-          "creation with the `new` keyword."
+        "creation with the `new` keyword."
       );
     }
     return defaultStrat(parent, child);
@@ -85,7 +85,7 @@ function mergeData(to: Object, from: ?Object): Object {
 }
 
 /**
- * Data 处理 data 的合并策略
+ * Data 处理 data 的合并策略 -- 以及 provide 选项的合并策略
  */
 export function mergeDataOrFn(
   parentVal: any,
@@ -145,7 +145,7 @@ export function mergeDataOrFn(
 }
 
 // 选项 data 的合并策略
-strats.data = function(
+strats.data = function (
   parentVal: any,
   childVal: any,
   vm?: Component
@@ -156,8 +156,8 @@ strats.data = function(
       process.env.NODE_ENV !== "production" &&
         warn(
           'The "data" option should be a function ' +
-            "that returns a per-instance value in component " +
-            "definitions.",
+          "that returns a per-instance value in component " +
+          "definitions.",
           vm
         );
 
@@ -189,8 +189,8 @@ function mergeHook(
     ? parentVal
       ? parentVal.concat(childVal)
       : Array.isArray(childVal)
-      ? childVal
-      : [childVal]
+        ? childVal
+        : [childVal]
     : parentVal;
   return res ? dedupeHooks(res) : res;
 }
@@ -210,11 +210,11 @@ LIFECYCLE_HOOKS.forEach(hook => {
 });
 
 /**
- * Assets
+ * Assets 资源(components, filters, directives)
  *
- * When a vm is present (instance creation), we need to do
- * a three-way merge between constructor options, instance
- * options and parent options.
+ * When a vm is present (instance creation), we need to do 当vm存在时（实例创建），我们需要
+ * a three-way merge between constructor options, instance 构造函数选项、实例之间的三向合并
+ * options and parent options. 选项和父选项
  */
 function mergeAssets(
   parentVal: ?Object,
@@ -222,33 +222,37 @@ function mergeAssets(
   vm?: Component,
   key: string
 ): Object {
+  // 将 parentVal 作为原型, 生成一个对象
   const res = Object.create(parentVal || null);
   if (childVal) {
     process.env.NODE_ENV !== "production" &&
       assertObjectType(key, childVal, vm);
+    // 存在 childVal 时, 使用 extend 将 childVal 上的属性混合到 res 对象上并返回
     return extend(res, childVal);
   } else {
     return res;
   }
 }
 
-ASSET_TYPES.forEach(function(type) {
+ASSET_TYPES.forEach(function (type) {
   strats[type + "s"] = mergeAssets;
 });
 
 /**
- * Watchers.
+ * Watchers. 选项 watch
  *
- * Watchers hashes should not overwrite one
- * another, so we merge them as arrays.
+ * Watchers hashes should not overwrite one 观察者 hashes 不应覆盖一个
+ * another, so we merge them as arrays. 另一个，所以我们把它们合并成数组
  */
-strats.watch = function(
+// 合并处理后的 watch 选项下的每个键值，有可能是一个数组，也有可能是一个函数。
+strats.watch = function (
   parentVal: ?Object,
   childVal: ?Object,
   vm?: Component,
   key: string
 ): ?Object {
-  // work around Firefox's Object.prototype.watch...
+  // work around Firefox's Object.prototype.watch... 处理Firefox的Object.prototype.watch
+  // 当发现组件选项是浏览器原生的 watch 时，那说明用户并没有提供 Vue 的 watch 选项，直接重置为 undefined。
   if (parentVal === nativeWatch) parentVal = undefined;
   if (childVal === nativeWatch) childVal = undefined;
   /* istanbul ignore if */
@@ -258,46 +262,59 @@ strats.watch = function(
   }
   if (!parentVal) return childVal;
   const ret = {};
+  // 将 parentVal 的属性混合到 ret 中，后面处理的都将是 ret 对象，最后返回的也是 ret 对象
   extend(ret, parentVal);
   for (const key in childVal) {
+    // 由于遍历的是 childVal，所以 key 是子选项的 key，父选项中未必能获取到值，所以 parent 未必有值
     let parent = ret[key];
+    // child 是肯定有值的，因为遍历的就是 childVal 本身
     const child = childVal[key];
+    // 这个 if 分支的作用就是如果 parent 存在，就将其转为数组
     if (parent && !Array.isArray(parent)) {
       parent = [parent];
     }
     ret[key] = parent
+      // 最后，如果 parent 存在，此时的 parent 应该已经被转为数组了，所以直接将 child concat 进去
       ? parent.concat(child)
+      // 如果 parent 不存在，直接将 child 转为数组返回
       : Array.isArray(child)
-      ? child
-      : [child];
+        ? child
+        : [child];
   }
   return ret;
 };
 
 /**
- * Other object hashes.
+ * Other object hashes. 其他对象 hashes
  */
-strats.props = strats.methods = strats.inject = strats.computed = function(
+// 添加 props、methods、inject 以及 computed 策略函数
+strats.props = strats.methods = strats.inject = strats.computed = function (
   parentVal: ?Object,
   childVal: ?Object,
   vm?: Component,
   key: string
 ): ?Object {
+  // 如果存在 childVal，那么在非生产环境下要检查 childVal 的类型
   if (childVal && process.env.NODE_ENV !== "production") {
     assertObjectType(key, childVal, vm);
   }
+  // parentVal 不存在的情况下直接返回 childVal
   if (!parentVal) return childVal;
+  // 如果 parentVal 存在，则创建 ret 对象，然后分别将 parentVal 和 childVal 的属性混合到 ret 中，
+  // 注意：由于 childVal 将覆盖 parentVal 的同名属性
   const ret = Object.create(null);
   extend(ret, parentVal);
   if (childVal) extend(ret, childVal);
+  // 最后返回 ret 对象。
   return ret;
 };
+// 选项 provide 的合并策略
 strats.provide = mergeDataOrFn;
 
 /**
  * Default strategy. 默认合并策略
  */
-const defaultStrat = function(parentVal: any, childVal: any): any {
+const defaultStrat = function (parentVal: any, childVal: any): any {
   return childVal === undefined ? parentVal : childVal;
 };
 
@@ -316,16 +333,16 @@ export function validateComponentName(name: string) {
   ) {
     warn(
       'Invalid component name: "' +
-        name +
-        '". Component names ' +
-        "should conform to valid custom element name in html5 specification."
+      name +
+      '". Component names ' +
+      "should conform to valid custom element name in html5 specification."
     );
   }
   if (isBuiltInTag(name) || config.isReservedTag(name)) {
     warn(
       "Do not use built-in or reserved HTML elements as component " +
-        "id: " +
-        name
+      "id: " +
+      name
     );
   }
 }
@@ -365,7 +382,7 @@ function normalizeProps(options: Object, vm: ?Component) {
   } else if (process.env.NODE_ENV !== "production") {
     warn(
       `Invalid value for option "props": expected an Array or an Object, ` +
-        `but got ${toRawType(props)}.`,
+      `but got ${toRawType(props)}.`,
       vm
     );
   }
@@ -394,7 +411,7 @@ function normalizeInject(options: Object, vm: ?Component) {
   } else if (process.env.NODE_ENV !== "production") {
     warn(
       `Invalid value for option "inject": expected an Array or an Object, ` +
-        `but got ${toRawType(inject)}.`,
+      `but got ${toRawType(inject)}.`,
       vm
     );
   }
@@ -419,7 +436,7 @@ function assertObjectType(name: string, value: any, vm: ?Component) {
   if (!isPlainObject(value)) {
     warn(
       `Invalid value for option "${name}": expected an Object, ` +
-        `but got ${toRawType(value)}.`,
+      `but got ${toRawType(value)}.`,
       vm
     );
   }
@@ -493,7 +510,7 @@ export function mergeOptions(
     }
   }
   function mergeField(key) {
-    //
+    // 选项合并策略
     const strat = strats[key] || defaultStrat;
     options[key] = strat(parent[key], child[key], vm, key);
   }
