@@ -2,7 +2,7 @@
  * @Descripttion: 选项的合并
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-25 22:33:36
+ * @LastEditTime: 2020-03-25 22:37:38
  */
 /* @flow */
 
@@ -195,6 +195,7 @@ function mergeHook(
   return res ? dedupeHooks(res) : res;
 }
 
+// 去除重复生命周期函数
 function dedupeHooks(hooks) {
   const res = [];
   for (let i = 0; i < hooks.length; i++) {
