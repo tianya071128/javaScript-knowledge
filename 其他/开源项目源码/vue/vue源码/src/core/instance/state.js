@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-26 22:18:32
+ * @LastEditTime: 2020-03-27 11:40:25
  */
 /* @flow */
 
@@ -41,7 +41,10 @@ const sharedPropertyDefinition = {
   set: noop
 };
 
+// 实现响应式函数 -- 代理属性 _data
 export function proxy(target: Object, sourceKey: string, key: string) {
+  // 通过 Object.defineProperty 函数在实例对象 vm 上定义与 data 数据字段同名的访问器属性, 并且这些属性代理的值是 vm._data 上对应属性的值
+  // 例如: 当访问 this.a 时实际访问的是 this._data.a
   sharedPropertyDefinition.get = function proxyGetter() {
     return this[sourceKey][key];
   };
@@ -105,9 +108,9 @@ function initProps(vm: Component, propsOptions: Object) {
         if (!isRoot && !isUpdatingChildComponent) {
           warn(
             `Avoid mutating a prop directly since the value will be ` +
-              `overwritten whenever the parent component re-renders. ` +
-              `Instead, use a data or computed property based on the prop's ` +
-              `value. Prop being mutated: "${key}"`,
+            `overwritten whenever the parent component re-renders. ` +
+            `Instead, use a data or computed property based on the prop's ` +
+            `value. Prop being mutated: "${key}"`,
             vm
           );
         }
@@ -126,24 +129,30 @@ function initProps(vm: Component, propsOptions: Object) {
 }
 
 function initData(vm: Component) {
+  // 在合并选项 data 时, vm.$options.data 最终被处理成了一个函数
   let data = vm.$options.data;
   data = vm._data = typeof data === "function" ? getData(data, vm) : data || {};
+
+  // 使用 isPlainObject 函数判断变量 data 是不是一个纯对象，如果不是纯对象那么在非生产环境会打印警告信息。
   if (!isPlainObject(data)) {
     data = {};
     process.env.NODE_ENV !== "production" &&
       warn(
         "data functions should return an object:\n" +
-          "https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function",
+        "https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function",
         vm
       );
   }
-  // proxy data on instance
+
+  // proxy data on instance 实例上的代理数据
   const keys = Object.keys(data);
   const props = vm.$options.props;
   const methods = vm.$options.methods;
   let i = keys.length;
   while (i--) {
     const key = keys[i];
+    // 检测 data 上的字段名是否与 props 上或者 methods 上重复
+    // 这里有一个优先级的关系: props 优先级 > methods 优先级 > data优先级
     if (process.env.NODE_ENV !== "production") {
       if (methods && hasOwn(methods, key)) {
         warn(
@@ -156,17 +165,21 @@ function initData(vm: Component) {
       process.env.NODE_ENV !== "production" &&
         warn(
           `The data property "${key}" is already declared as a prop. ` +
-            `Use prop default value instead.`,
+          `Use prop default value instead.`,
           vm
         );
+      // isReserved 函数通过判断一个字符串的第一个字符是不是 $ 或 _ 来决定其是否是保留的，Vue 是不会代理那些键名以 $ 或 _ 开头的字段的，因为 Vue 自身的属性和方法都是以 $ 或 _ 开头的，所以这么做是为了避免与 Vue 自身的属性和方法相冲突。
     } else if (!isReserved(key)) {
+      // 其余情况就会执行 proxy 函数, 实现实例对象的代理访问
       proxy(vm, `_data`, key);
     }
   }
   // observe data
+  // observe 函数最终将 data 数据对象转换成响应式的 -- 响应系统的开始
   observe(data, true /* asRootData */);
 }
 
+// 处理 data 选项的函数 -- 通过调用 data 选项从而获取数据对象
 export function getData(data: Function, vm: Component): any {
   // #7573 disable dep collection when invoking data getters
   pushTarget();
@@ -246,7 +259,7 @@ export function defineComputed(
     process.env.NODE_ENV !== "production" &&
     sharedPropertyDefinition.set === noop
   ) {
-    sharedPropertyDefinition.set = function() {
+    sharedPropertyDefinition.set = function () {
       warn(
         `Computed property "${key}" was assigned to but it has no setter.`,
         this
@@ -284,9 +297,9 @@ function initMethods(vm: Component, methods: Object) {
       if (typeof methods[key] !== "function") {
         warn(
           `Method "${key}" has type "${typeof methods[
-            key
+          key
           ]}" in the component definition. ` +
-            `Did you reference the function correctly?`,
+          `Did you reference the function correctly?`,
           vm
         );
       }
@@ -296,7 +309,7 @@ function initMethods(vm: Component, methods: Object) {
       if (key in vm && isReserved(key)) {
         warn(
           `Method "${key}" conflicts with an existing Vue instance method. ` +
-            `Avoid defining component methods that start with _ or $.`
+          `Avoid defining component methods that start with _ or $.`
         );
       }
     }
@@ -339,23 +352,23 @@ export function stateMixin(Vue: Class<Component>) {
   // when using Object.defineProperty, so we have to procedurally build up
   // the object here.
   const dataDef = {};
-  dataDef.get = function() {
+  dataDef.get = function () {
     return this._data;
   };
   const propsDef = {};
-  propsDef.get = function() {
+  propsDef.get = function () {
     return this._props;
   };
   if (process.env.NODE_ENV !== "production") {
     // 当为非生产环境,不能修改 $data 和 $props 属性,并抛出警告(生产环境也不能修改,只是不会抛出警告)
-    dataDef.set = function() {
+    dataDef.set = function () {
       warn(
         "Avoid replacing instance root $data. " +
-          "Use nested data properties instead.",
+        "Use nested data properties instead.",
         this
       );
     };
-    propsDef.set = function() {
+    propsDef.set = function () {
       warn(`$props is readonly.`, this);
     };
   }
@@ -368,7 +381,7 @@ export function stateMixin(Vue: Class<Component>) {
   Vue.prototype.$set = set;
   Vue.prototype.$delete = del;
 
-  Vue.prototype.$watch = function(
+  Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,
     options?: Object
