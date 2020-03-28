@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-26 22:11:42
+ * @LastEditTime: 2020-03-28 19:58:08
  */
 /* @flow */
 
@@ -162,9 +162,14 @@ export function mountComponent(
   el: ?Element,
   hydrating?: boolean
 ): Component {
+  // 在组件实例对象上添加 $el 属性 -- 会被 patch 算法的返回值重写
   vm.$el = el;
+  // 检测渲染函数 render 函数是否存在
   if (!vm.$options.render) {
+    // 渲染函数不存在时, 这时将 vm.$options.render 的值设置为 createEmptyVNode
+    // 作用是将仅仅渲染一个空的 vnode 对象,
     vm.$options.render = createEmptyVNode;
+    // 在非生产环境中打印警告信息.
     if (process.env.NODE_ENV !== "production") {
       /* istanbul ignore if */
       if (
@@ -186,10 +191,12 @@ export function mountComponent(
       }
     }
   }
+  // 触发 beforeMount 生命周期钩子
   callHook(vm, "beforeMount");
 
   let updateComponent;
   /* istanbul ignore if */
+  // 性能统计, 统计了 vm._render() 以及 vm._update() 函数的运行性能.
   if (process.env.NODE_ENV !== "production" && config.performance && mark) {
     updateComponent = () => {
       const name = vm._name;
@@ -209,6 +216,8 @@ export function mountComponent(
     };
   } else {
     updateComponent = () => {
+      // _render(): 调用 vm.$options.render 函数并返回生成的虚拟节点(vnode)
+      // _update(): 把 vm._render 函数生成的虚拟节点渲染成真正的 DOM
       vm._update(vm._render(), hydrating);
     };
   }
