@@ -6,7 +6,7 @@
  *  4. 在 Vue.prototype 上添加了两个方法：__patch__ 和 $mount。
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-23 22:36:49
+ * @LastEditTime: 2020-03-28 19:13:04
  */
 /* @flow */
 
@@ -62,11 +62,13 @@ extend(Vue.options.components, platformComponents);
 // 区分是否是服务端渲染。在服务端渲染是不需要生成 DOM 的，因此是一个空函数
 Vue.prototype.__patch__ = inBrowser ? patch : noop;
 
-// public mount method
+// public mount method 公共装载方法
 Vue.prototype.$mount = function(
   el?: string | Element,
   hydrating?: boolean
 ): Component {
+  // inBrowser: 宿主环境是否是浏览器
+  // query(el): 用来根据给定的参数在 DOM 中查找对应的元素并返回.
   el = el && inBrowser ? query(el) : undefined;
   return mountComponent(this, el, hydrating);
 };
