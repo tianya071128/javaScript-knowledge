@@ -1,38 +1,40 @@
+/*
+ * @Descripttion:
+ * @Author: 温祖彪
+ * @Date: 2020-03-06 22:40:51
+ * @LastEditTime: 2020-03-29 21:56:15
+ */
 /* @flow */
 
-import {
-  no,
-  noop,
-  identity
-} from 'shared/util'
+import { no, noop, identity } from "shared/util";
 
-import { LIFECYCLE_HOOKS } from 'shared/constants'
+import { LIFECYCLE_HOOKS } from "shared/constants";
 
 export type Config = {
   // user
-  optionMergeStrategies: { [key: string]: Function };
-  silent: boolean;
-  productionTip: boolean;
-  performance: boolean;
-  devtools: boolean;
-  errorHandler: ?(err: Error, vm: Component, info: string) => void;
-  warnHandler: ?(msg: string, vm: Component, trace: string) => void;
-  ignoredElements: Array<string | RegExp>;
-  keyCodes: { [key: string]: number | Array<number> };
+  optionMergeStrategies: { [key: string]: Function },
+  silent: boolean,
+  productionTip: boolean,
+  performance: boolean,
+  devtools: boolean,
+  errorHandler: ?(err: Error, vm: Component, info: string) => void,
+  warnHandler: ?(msg: string, vm: Component, trace: string) => void,
+  ignoredElements: Array<string | RegExp>,
+  keyCodes: { [key: string]: number | Array<number> },
 
   // platform
-  isReservedTag: (x?: string) => boolean;
-  isReservedAttr: (x?: string) => boolean;
-  parsePlatformTagName: (x: string) => string;
-  isUnknownElement: (x?: string) => boolean;
-  getTagNamespace: (x?: string) => string | void;
-  mustUseProp: (tag: string, type: ?string, name: string) => boolean;
+  isReservedTag: (x?: string) => boolean,
+  isReservedAttr: (x?: string) => boolean,
+  parsePlatformTagName: (x: string) => string,
+  isUnknownElement: (x?: string) => boolean,
+  getTagNamespace: (x?: string) => string | void,
+  mustUseProp: (tag: string, type: ?string, name: string) => boolean,
 
   // private
-  async: boolean;
+  async: boolean,
 
   // legacy
-  _lifecycleHooks: Array<string>;
+  _lifecycleHooks: Array<string>
 };
 
 export default ({
@@ -50,12 +52,12 @@ export default ({
   /**
    * Show production mode tip message on boot?
    */
-  productionTip: process.env.NODE_ENV !== 'production',
+  productionTip: process.env.NODE_ENV !== "production",
 
   /**
    * Whether to enable devtools
    */
-  devtools: process.env.NODE_ENV !== 'production',
+  devtools: process.env.NODE_ENV !== "production",
 
   /**
    * Whether to record perf
@@ -118,8 +120,8 @@ export default ({
   mustUseProp: no,
 
   /**
-   * Perform updates asynchronously. Intended to be used by Vue Test Utils
-   * This will significantly reduce performance if set to false.
+   * Perform updates asynchronously. Intended to be used by Vue Test Utils 异步执行更新。拟由Vue测试实用程序使用
+   * This will significantly reduce performance if set to false. 如果设置为false，这将显著降低性能。
    */
   async: true,
 
@@ -127,4 +129,4 @@ export default ({
    * Exposed for legacy reasons
    */
   _lifecycleHooks: LIFECYCLE_HOOKS
-}: Config)
+}: Config);

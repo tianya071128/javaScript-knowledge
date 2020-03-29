@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-29 19:48:09
+ * @LastEditTime: 2020-03-29 21:42:24
  */
 /* @flow */
 
@@ -195,33 +195,41 @@ export function getData(data: Function, vm: Component): any {
 
 const computedWatcherOptions = { lazy: true };
 
+// 初始化计算属性
 function initComputed(vm: Component, computed: Object) {
   // $flow-disable-line
   const watchers = (vm._computedWatchers = Object.create(null));
-  // computed properties are just getters during SSR
+  // computed properties are just getters during SSR 计算属性只是 SSR 期间的 getter
+  // 判断是否是服务端渲染
   const isSSR = isServerRendering();
 
   for (const key in computed) {
     const userDef = computed[key];
+    // computed 有两种写法, 可以分别定义 getter 和 setter
     const getter = typeof userDef === "function" ? userDef : userDef.get;
     if (process.env.NODE_ENV !== "production" && getter == null) {
       warn(`Getter is missing for computed property "${key}".`, vm);
     }
 
+    // 非服务端渲染的实现
     if (!isSSR) {
-      // create internal watcher for the computed property.
+      // create internal watcher for the computed property. 为计算属性创建内部观察程序
+      // 创建一个观察者实例对象, 称之为 计算属性的观察者, 同时会把计算属性的观察者添加到 watchers 常量对象中,键值是对应计算属性的名字
       watchers[key] = new Watcher(
         vm,
         getter || noop,
         noop,
+        // 用来标识一个观察者对象是计算属性的观察者
         computedWatcherOptions
       );
     }
 
-    // component-defined computed properties are already defined on the
-    // component prototype. We only need to define computed properties defined
-    // at instantiation here.
+    // component-defined computed properties are already defined on the 组件定义的计算属性已在
+    // component prototype. We only need to define computed properties defined 组件原型。我们只需要定义定义的计算属性
+    // at instantiation here. 在这里实例化。
+    // 计算属性不能与 data, props, methods 中的属性同名
     if (!(key in vm)) {
+      // 将计算属性定义在组件实例对象上.
       defineComputed(vm, key, userDef);
     } else if (process.env.NODE_ENV !== "production") {
       if (key in vm.$data) {
@@ -236,13 +244,16 @@ function initComputed(vm: Component, computed: Object) {
   }
 }
 
+// 通过 Object.defineProperty 函数在组件实例对象上定义与计算属性同名的组件实例属性
 export function defineComputed(
   target: any,
   key: string,
   userDef: Object | Function
 ) {
+  // 用来标识是否应该缓存值，也就是说只有在非服务端渲染的情况下计算属性才会缓存值。
   const shouldCache = !isServerRendering();
   if (typeof userDef === "function") {
+    // 如果 shouldCache 为假说明是服务端渲染，由于服务端渲染不需要缓存值，所以直接使用 userDef 函数作为 sharedPropertyDefinition.get 的值。
     sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
       : createGetterInvoker(userDef);
@@ -269,10 +280,13 @@ export function defineComputed(
   Object.defineProperty(target, key, sharedPropertyDefinition);
 }
 
+// 用于设置计算属性的缓存
 function createComputedGetter(key) {
   return function computedGetter() {
+    // 获取计算属性对应的 watchers 实例
     const watcher = this._computedWatchers && this._computedWatchers[key];
     if (watcher) {
+      // 判断是否为计算属性
       if (watcher.dirty) {
         watcher.evaluate();
       }

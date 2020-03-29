@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-29 19:38:17
+ * @LastEditTime: 2020-03-29 21:51:09
  */
 /* @flow */
 
@@ -131,6 +131,7 @@ export default class Watcher {
       }
     }
     // 计算属性的观察者和其他观察者实例对象的处理方式是不同的
+    // 当 this.lazy 为 true 时, 说明计算属性的观察者是一个惰性求值的观察者
     this.value = this.lazy ? undefined : this.get();
   }
 
@@ -269,16 +270,17 @@ export default class Watcher {
   }
 
   /**
-   * Evaluate the value of the watcher.
-   * This only gets called for lazy watchers.
+   * Evaluate the value of the watcher. 评估观察者的值。
+   * This only gets called for lazy watchers. 这只适用于懒惰的观察者
    */
   evaluate() {
+    // 最终执行的求值函数就是用户定义的计算属性的 get 函数
     this.value = this.get();
     this.dirty = false;
   }
 
   /**
-   * Depend on all deps collected by this watcher.
+   * Depend on all deps collected by this watcher. 取决于此监视程序收集的所有 DEP。
    */
   depend() {
     let i = this.deps.length;
