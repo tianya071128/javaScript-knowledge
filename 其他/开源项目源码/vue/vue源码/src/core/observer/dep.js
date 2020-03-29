@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-26 22:18:49
+ * @LastEditTime: 2020-03-29 11:10:03
  */
 /* @flow */
 
@@ -26,6 +26,7 @@ export default class Dep {
     this.subs = [];
   }
 
+  // 真正用来收集观察者的方法
   addSub(sub: Watcher) {
     this.subs.push(sub);
   }
