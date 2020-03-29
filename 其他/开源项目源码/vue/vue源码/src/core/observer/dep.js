@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-29 11:10:03
+ * @LastEditTime: 2020-03-29 11:35:18
  */
 /* @flow */
 
@@ -42,12 +42,12 @@ export default class Dep {
   }
 
   notify() {
-    // stabilize the subscriber list first
+    // stabilize the subscriber list first 先稳定 subscriber 列表
     const subs = this.subs.slice();
     if (process.env.NODE_ENV !== "production" && !config.async) {
-      // subs aren't sorted in scheduler if not running async
-      // we need to sort them now to make sure they fire in correct
-      // order
+      // subs aren't sorted in scheduler if not running async 如果不运行async，则在调度程序中不对子进行排序
+      // we need to sort them now to make sure they fire in correct 我们现在需要对它们进行分类以确保它们正确开火
+      // order 命令
       subs.sort((a, b) => a.id - b.id);
     }
     for (let i = 0, l = subs.length; i < l; i++) {

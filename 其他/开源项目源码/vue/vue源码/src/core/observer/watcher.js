@@ -2,10 +2,20 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-29 11:18:30
+ * @LastEditTime: 2020-03-29 11:53:04
  */
 /* @flow */
 
+/** demo
+ * <div id="demo">
+ *   {{name}}
+ * </div>
+ * 这段模板将会被编译成渲染函数，接着创建一个渲染函数的观察者，从而对渲染函数求值，
+ * 在求值的过程中会触发数据对象 name 属性的 get 拦截器函数，
+ * 进而将该观察者收集到 name 属性通过闭包引用的“筐”中，即收集到 Dep 实例对象中。
+ * 这个 Dep 实例对象是属于 name 属性自身所拥有的，这样当我们尝试修改数据对象 name 属性的值时就会触发 name 属性的 set 拦截器函数，
+ * 这样就有机会调用 Dep 实例对象的 notify 方法，从而触发了响应
+ */
 import {
   warn,
   remove,
@@ -199,14 +209,18 @@ export default class Watcher {
   }
 
   /**
-   * Subscriber interface.
-   * Will be called when a dependency changes.
+   * Subscriber interface. 用户接口
+   * Will be called when a dependency changes. 将在依赖项更改时调用
    */
   update() {
     /* istanbul ignore else */
     if (this.lazy) {
+      // 判断该观察者是不是计算属性的观察者
       this.dirty = true;
     } else if (this.sync) {
+      // sync 这个值的真假代表了当变化发生时是否同步更新变化
+      // sync: true 同步更新
+      // 对于渲染函数的观察者来讲，它并不是同步更新变化的，而是将变化放到一个异步更新队列中
       this.run();
     } else {
       queueWatcher(this);
@@ -214,17 +228,21 @@ export default class Watcher {
   }
 
   /**
-   * Scheduler job interface.
-   * Will be called by the scheduler.
+   * Scheduler job interface. 调度程序作业接口。
+   * Will be called by the scheduler. 将由调度程序调用。
    */
+  // 更新变化
   run() {
     if (this.active) {
+      // 重新求值, 同时也会重新收集依赖
+      // 对于渲染函数的观察者来讲，重新求值其实等价于重新执行渲染函数，最终结果就是重新生成了虚拟DOM并更新真实DOM，这样就完成了重新渲染的过程。
       const value = this.get();
+      // if 语句块内的代码是为非渲染函数类型的观察者准备的，它用来对比新旧两次求值的结果，当值不相等的时候会调用通过参数传递进来的回调。
       if (
         value !== this.value ||
-        // Deep watchers and watchers on Object/Arrays should fire even
-        // when the value is the same, because the value may
-        // have mutated.
+        // Deep watchers and watchers on Object/Arrays should fire even 对象/数组上的深度观察者和观察者应该均匀地激发
+        // when the value is the same, because the value may 当值相同时，因为该值可能
+        // have mutated. 已经变异了。
         isObject(value) ||
         this.deep
       ) {
@@ -233,6 +251,7 @@ export default class Watcher {
         this.value = value;
         if (this.user) {
           try {
+            // 执行观察者的回调, 类似于 watch 选项的回调
             this.cb.call(this.vm, value, oldValue);
           } catch (e) {
             handleError(
@@ -242,6 +261,7 @@ export default class Watcher {
             );
           }
         } else {
+          // 执行观察者的回调, 类似于 watch 选项的回调
           this.cb.call(this.vm, value, oldValue);
         }
       }
