@@ -1,21 +1,27 @@
+/*
+ * @Descripttion:
+ * @Author: 温祖彪
+ * @Date: 2020-03-06 22:40:51
+ * @LastEditTime: 2020-03-29 19:14:10
+ */
 /* @flow */
 /* globals MutationObserver */
 
-import { noop } from 'shared/util'
-import { handleError } from './error'
-import { isIE, isIOS, isNative } from './env'
+import { noop } from "shared/util";
+import { handleError } from "./error";
+import { isIE, isIOS, isNative } from "./env";
 
-export let isUsingMicroTask = false
+export let isUsingMicroTask = false;
 
-const callbacks = []
-let pending = false
+const callbacks = [];
+let pending = false;
 
-function flushCallbacks () {
-  pending = false
-  const copies = callbacks.slice(0)
-  callbacks.length = 0
+function flushCallbacks() {
+  pending = false;
+  const copies = callbacks.slice(0);
+  callbacks.length = 0;
   for (let i = 0; i < copies.length; i++) {
-    copies[i]()
+    copies[i]();
   }
 }
 
@@ -30,7 +36,7 @@ function flushCallbacks () {
 // where microtasks have too high a priority and fire in between supposedly
 // sequential events (e.g. #4521, #6690, which have workarounds)
 // or even between bubbling of the same event (#6566).
-let timerFunc
+let timerFunc;
 
 // The nextTick behavior leverages the microtask queue, which can be accessed
 // via either native Promise.then or MutationObserver.
@@ -39,72 +45,79 @@ let timerFunc
 // completely stops working after triggering a few times... so, if native
 // Promise is available, we will use it:
 /* istanbul ignore next, $flow-disable-line */
-if (typeof Promise !== 'undefined' && isNative(Promise)) {
-  const p = Promise.resolve()
+if (typeof Promise !== "undefined" && isNative(Promise)) {
+  const p = Promise.resolve();
   timerFunc = () => {
-    p.then(flushCallbacks)
+    p.then(flushCallbacks);
     // In problematic UIWebViews, Promise.then doesn't completely break, but
     // it can get stuck in a weird state where callbacks are pushed into the
     // microtask queue but the queue isn't being flushed, until the browser
     // needs to do some other work, e.g. handle a timer. Therefore we can
     // "force" the microtask queue to be flushed by adding an empty timer.
-    if (isIOS) setTimeout(noop)
-  }
-  isUsingMicroTask = true
-} else if (!isIE && typeof MutationObserver !== 'undefined' && (
-  isNative(MutationObserver) ||
-  // PhantomJS and iOS 7.x
-  MutationObserver.toString() === '[object MutationObserverConstructor]'
-)) {
+    if (isIOS) setTimeout(noop);
+  };
+  isUsingMicroTask = true;
+} else if (
+  !isIE &&
+  typeof MutationObserver !== "undefined" &&
+  (isNative(MutationObserver) ||
+    // PhantomJS and iOS 7.x
+    MutationObserver.toString() === "[object MutationObserverConstructor]")
+) {
   // Use MutationObserver where native Promise is not available,
   // e.g. PhantomJS, iOS7, Android 4.4
   // (#6466 MutationObserver is unreliable in IE11)
-  let counter = 1
-  const observer = new MutationObserver(flushCallbacks)
-  const textNode = document.createTextNode(String(counter))
+  let counter = 1;
+  const observer = new MutationObserver(flushCallbacks);
+  const textNode = document.createTextNode(String(counter));
   observer.observe(textNode, {
     characterData: true
-  })
+  });
   timerFunc = () => {
-    counter = (counter + 1) % 2
-    textNode.data = String(counter)
-  }
-  isUsingMicroTask = true
-} else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
+    counter = (counter + 1) % 2;
+    textNode.data = String(counter);
+  };
+  isUsingMicroTask = true;
+} else if (typeof setImmediate !== "undefined" && isNative(setImmediate)) {
   // Fallback to setImmediate.
   // Technically it leverages the (macro) task queue,
   // but it is still a better choice than setTimeout.
   timerFunc = () => {
-    setImmediate(flushCallbacks)
-  }
+    setImmediate(flushCallbacks);
+  };
 } else {
   // Fallback to setTimeout.
   timerFunc = () => {
-    setTimeout(flushCallbacks, 0)
-  }
+    setTimeout(flushCallbacks, 0);
+  };
 }
 
-export function nextTick (cb?: Function, ctx?: Object) {
-  let _resolve
+export function nextTick(cb?: Function, ctx?: Object) {
+  let _resolve;
+  // 通过 callbacks 间接添加 cd 函数
   callbacks.push(() => {
+    // $nextTick 方法在支持 Promise 环境中, 是支持 Promise 写法和回调写法两种写法
     if (cb) {
       try {
-        cb.call(ctx)
+        cb.call(ctx);
       } catch (e) {
-        handleError(e, ctx, 'nextTick')
+        handleError(e, ctx, "nextTick");
       }
     } else if (_resolve) {
-      _resolve(ctx)
+      _resolve(ctx);
     }
-  })
+  });
+  // pending: 标识是否在刷新状态
+  // false: 代表回调队列为空不需要等待刷新
   if (!pending) {
-    pending = true
-    timerFunc()
+    pending = true;
+    timerFunc();
   }
   // $flow-disable-line
-  if (!cb && typeof Promise !== 'undefined') {
+  // 实现 Promise
+  if (!cb && typeof Promise !== "undefined") {
     return new Promise(resolve => {
-      _resolve = resolve
-    })
+      _resolve = resolve;
+    });
   }
 }

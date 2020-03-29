@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-27 11:40:25
+ * @LastEditTime: 2020-03-29 19:48:09
  */
 /* @flow */
 
@@ -108,9 +108,9 @@ function initProps(vm: Component, propsOptions: Object) {
         if (!isRoot && !isUpdatingChildComponent) {
           warn(
             `Avoid mutating a prop directly since the value will be ` +
-            `overwritten whenever the parent component re-renders. ` +
-            `Instead, use a data or computed property based on the prop's ` +
-            `value. Prop being mutated: "${key}"`,
+              `overwritten whenever the parent component re-renders. ` +
+              `Instead, use a data or computed property based on the prop's ` +
+              `value. Prop being mutated: "${key}"`,
             vm
           );
         }
@@ -139,7 +139,7 @@ function initData(vm: Component) {
     process.env.NODE_ENV !== "production" &&
       warn(
         "data functions should return an object:\n" +
-        "https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function",
+          "https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function",
         vm
       );
   }
@@ -165,7 +165,7 @@ function initData(vm: Component) {
       process.env.NODE_ENV !== "production" &&
         warn(
           `The data property "${key}" is already declared as a prop. ` +
-          `Use prop default value instead.`,
+            `Use prop default value instead.`,
           vm
         );
       // isReserved 函数通过判断一个字符串的第一个字符是不是 $ 或 _ 来决定其是否是保留的，Vue 是不会代理那些键名以 $ 或 _ 开头的字段的，因为 Vue 自身的属性和方法都是以 $ 或 _ 开头的，所以这么做是为了避免与 Vue 自身的属性和方法相冲突。
@@ -259,7 +259,7 @@ export function defineComputed(
     process.env.NODE_ENV !== "production" &&
     sharedPropertyDefinition.set === noop
   ) {
-    sharedPropertyDefinition.set = function () {
+    sharedPropertyDefinition.set = function() {
       warn(
         `Computed property "${key}" was assigned to but it has no setter.`,
         this
@@ -297,9 +297,9 @@ function initMethods(vm: Component, methods: Object) {
       if (typeof methods[key] !== "function") {
         warn(
           `Method "${key}" has type "${typeof methods[
-          key
+            key
           ]}" in the component definition. ` +
-          `Did you reference the function correctly?`,
+            `Did you reference the function correctly?`,
           vm
         );
       }
@@ -309,7 +309,7 @@ function initMethods(vm: Component, methods: Object) {
       if (key in vm && isReserved(key)) {
         warn(
           `Method "${key}" conflicts with an existing Vue instance method. ` +
-          `Avoid defining component methods that start with _ or $.`
+            `Avoid defining component methods that start with _ or $.`
         );
       }
     }
@@ -318,10 +318,12 @@ function initMethods(vm: Component, methods: Object) {
   }
 }
 
+// 初始化 watch 选项
 function initWatch(vm: Component, watch: Object) {
   for (const key in watch) {
     const handler = watch[key];
     if (Array.isArray(handler)) {
+      // 观察回调函数可以是数组, 也就是说我们在使用 watch 选项时可以通过传递数组来实现创建多个观察者
       for (let i = 0; i < handler.length; i++) {
         createWatcher(vm, key, handler[i]);
       }
@@ -331,6 +333,7 @@ function initWatch(vm: Component, watch: Object) {
   }
 }
 
+// 将 $watch 纯对象形式的参数规范化一下, 然后在通过 $watch 函数并将其返回.
 function createWatcher(
   vm: Component,
   expOrFn: string | Function,
@@ -352,23 +355,23 @@ export function stateMixin(Vue: Class<Component>) {
   // when using Object.defineProperty, so we have to procedurally build up
   // the object here.
   const dataDef = {};
-  dataDef.get = function () {
+  dataDef.get = function() {
     return this._data;
   };
   const propsDef = {};
-  propsDef.get = function () {
+  propsDef.get = function() {
     return this._props;
   };
   if (process.env.NODE_ENV !== "production") {
     // 当为非生产环境,不能修改 $data 和 $props 属性,并抛出警告(生产环境也不能修改,只是不会抛出警告)
-    dataDef.set = function () {
+    dataDef.set = function() {
       warn(
         "Avoid replacing instance root $data. " +
-        "Use nested data properties instead.",
+          "Use nested data properties instead.",
         this
       );
     };
-    propsDef.set = function () {
+    propsDef.set = function() {
       warn(`$props is readonly.`, this);
     };
   }
@@ -381,18 +384,22 @@ export function stateMixin(Vue: Class<Component>) {
   Vue.prototype.$set = set;
   Vue.prototype.$delete = del;
 
-  Vue.prototype.$watch = function (
+  // $watch 方法的实现本质就是创建一个 Watcher 实例对象.
+  Vue.prototype.$watch = function(
     expOrFn: string | Function,
     cb: any,
     options?: Object
   ): Function {
     const vm: Component = this;
     if (isPlainObject(cb)) {
+      // watch 有不同的写法, 当为对象写法时, 另行处理
       return createWatcher(vm, expOrFn, cb, options);
     }
     options = options || {};
     options.user = true;
+    // 创建 watcher 观察对象观察 expOrFn 指定观察属性
     const watcher = new Watcher(vm, expOrFn, cb, options);
+    // options.immediate: 是否立即执行
     if (options.immediate) {
       try {
         cb.call(vm, watcher.value);
@@ -404,6 +411,7 @@ export function stateMixin(Vue: Class<Component>) {
         );
       }
     }
+    // 用于解除当前观察者对属性的观察
     return function unwatchFn() {
       watcher.teardown();
     };

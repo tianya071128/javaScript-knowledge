@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-29 11:53:04
+ * @LastEditTime: 2020-03-29 19:38:17
  */
 /* @flow */
 
@@ -220,9 +220,9 @@ export default class Watcher {
     } else if (this.sync) {
       // sync 这个值的真假代表了当变化发生时是否同步更新变化
       // sync: true 同步更新
-      // 对于渲染函数的观察者来讲，它并不是同步更新变化的，而是将变化放到一个异步更新队列中
       this.run();
     } else {
+      // 对于渲染函数的观察者来讲，它并不是同步更新变化的，而是将变化放到一个异步更新队列中
       queueWatcher(this);
     }
   }
@@ -288,20 +288,29 @@ export default class Watcher {
   }
 
   /**
-   * Remove self from all dependencies' subscriber list.
+   * Remove self from all dependencies' subscriber list. 从所有依赖项的订阅服务器列表中删除self。
    */
   teardown() {
+    // this.active 如果为假则说明该观察者已经不处于激活状态，什么都不需要做
     if (this.active) {
-      // remove self from vm's watcher list
-      // this is a somewhat expensive operation so we skip it
-      // if the vm is being destroyed.
+      // remove self from vm's watcher list 从vm的观察者列表中删除self
+      // this is a somewhat expensive operation so we skip it 这个手术有点贵，所以我们不做了
+      // if the vm is being destroyed. 如果虚拟机正在被销毁。
+      // 如果组件没有被销毁，那么将当前观察者实例从组件实例对象的 vm._watchers 数组中移除，
       if (!this.vm._isBeingDestroyed) {
+        // vm._watchers 数组中包含了该组件所有的观察者实例对象，所以将当前观察者实例对象从 vm._watchers 数组中移除是解除属性与观察者实例对象之间关系的第一步。
         remove(this.vm._watchers, this);
       }
+      // 当一个属性与一个观察者建立联系之后，属性的 Dep 实例对象会收集到该观察者对象，
+      // 同时观察者对象也会将该 Dep 实例对象收集，
+      // 这是一个双向的过程，并且一个观察者可以同时观察多个属性，
+      // 这些属性的 Dep 实例对象都会被收集到该观察者实例对象的 this.deps 数组中，
+      // 所以解除属性与观察者之间关系的第二步就是将当前观察者实例对象从所有的 Dep 实例对象中移除
       let i = this.deps.length;
       while (i--) {
         this.deps[i].removeSub(this);
       }
+      // 表示当前实例对象处于非激活状态
       this.active = false;
     }
   }
