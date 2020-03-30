@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-30 16:16:58
+ * @LastEditTime: 2020-03-30 16:43:53
  */
 /* @flow */
 
@@ -18,11 +18,15 @@ export const createCompiler = createCompilerCreator(function baseCompile(
   template: string,
   options: CompilerOptions
 ): CompiledResult {
+  // 调用 parse 函数将字符串模板解析成抽象语法树(AST)
   const ast = parse(template.trim(), options);
   if (options.optimize !== false) {
+    // 调用 optimize 函数优化 ast
     optimize(ast, options);
   }
+  // 调用 generate 函数将 ast 编译成渲染函数
   const code = generate(ast, options);
+  // 返回 抽象语法树(ast)，渲染函数(render)，静态渲染函数(staticRenderFns)
   return {
     ast,
     render: code.render,
