@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-29 21:42:24
+ * @LastEditTime: 2020-03-30 10:22:49
  */
 /* @flow */
 
@@ -78,23 +78,31 @@ export function initState(vm: Component) {
   }
 }
 
+// 初始化 props 选项
 function initProps(vm: Component, propsOptions: Object) {
+  // vm.$options.propsData: 用来存储来自外界的组件数据的
   const propsData = vm.$options.propsData || {};
   const props = (vm._props = {});
-  // cache prop keys so that future props updates can iterate using Array
-  // instead of dynamic object key enumeration.
+  // cache prop keys so that future props updates can iterate using Array 缓存属性键，以便将来的属性更新可以使用数组迭代
+  // instead of dynamic object key enumeration. 而不是动态对象键枚举。
   const keys = (vm.$options._propKeys = []);
+  // isRoot 常量用来标识是否是根组件
   const isRoot = !vm.$parent;
   // root instance props should be converted
+  // 在定义 props 数据时，不将 prop 值转换为响应式数据 -- 通过 toggleObserving 函数来控制开关
   if (!isRoot) {
     toggleObserving(false);
   }
   for (const key in propsOptions) {
+    // 将 key 添加到 keys ,并且同时添加到了 vm.$options._propKeys 中
     keys.push(key);
+    // 用来校验名字(key)给定的 prop 数据是否符合预期的类型，并返回相应 prop 的值(或默认值)。
     const value = validateProp(key, propsOptions, propsData, vm);
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== "production") {
+      // 将 prop 的名字转为连字符加小写的形式，并将转换后的值赋值给 hyphenatedKey 常量
       const hyphenatedKey = hyphenate(key);
+      // 判断 prop 的名字是否是保留的属性(attribute)
       if (
         isReservedAttribute(hyphenatedKey) ||
         config.isReservedAttr(hyphenatedKey)
@@ -104,24 +112,33 @@ function initProps(vm: Component, propsOptions: Object) {
           vm
         );
       }
-      defineReactive(props, key, value, () => {
-        if (!isRoot && !isUpdatingChildComponent) {
-          warn(
-            `Avoid mutating a prop directly since the value will be ` +
-              `overwritten whenever the parent component re-renders. ` +
-              `Instead, use a data or computed property based on the prop's ` +
-              `value. Prop being mutated: "${key}"`,
-            vm
-          );
+      // 直接通过 defineReactive 函数来定义观察者
+      defineReactive(
+        props,
+        key,
+        value,
+        // 自定义的 setter，这个 setter 会在你尝试修改 props 数据时触发
+        () => {
+          if (!isRoot && !isUpdatingChildComponent) {
+            warn(
+              `Avoid mutating a prop directly since the value will be ` +
+                `overwritten whenever the parent component re-renders. ` +
+                `Instead, use a data or computed property based on the prop's ` +
+                `value. Prop being mutated: "${key}"`,
+              vm
+            );
+          }
         }
-      });
+      );
     } else {
+      // 直接通过 defineReactive 函数来定义观察者
       defineReactive(props, key, value);
     }
-    // static props are already proxied on the component's prototype
-    // during Vue.extend(). We only need to proxy props defined at
-    // instantiation here.
+    // static props are already proxied on the component's prototype 静态道具已经在组件的原型上代理
+    // during Vue.extend(). We only need to proxy props defined at 在 Vue.extend（）期间。我们只需要在
+    // instantiation here. 在这里实例化
     if (!(key in vm)) {
+      // 在 vm 上代理 key(即 props 的属性), 并且访问 this[propsKey] 其实是访问 this._props[propsKey]
       proxy(vm, `_props`, key);
     }
   }

@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-29 20:39:54
+ * @LastEditTime: 2020-03-30 10:08:04
  */
 /* @flow */
 
@@ -30,6 +30,7 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods);
  */
 export let shouldObserve: boolean = true;
 
+// 类似于一个开关, 通过 shouldObserve 变量控制是否观察一个对象
 export function toggleObserving(value: boolean) {
   shouldObserve = value;
 }
