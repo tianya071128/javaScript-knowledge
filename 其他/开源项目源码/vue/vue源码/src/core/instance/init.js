@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-28 19:33:08
+ * @LastEditTime: 2020-03-30 11:53:22
  */
 /* @flow */
 
@@ -79,9 +79,10 @@ export function initMixin(Vue: Class<Component>) {
     initRender(vm);
     // 调用 beforeCreate 生命周期钩子 -- 在这一步还没有初始化 props, methods, data 等资源
     callHook(vm, "beforeCreate");
-    initInjections(vm); // resolve injections before data/props
+    // 初始化 inject
+    initInjections(vm); // resolve injections before data/props 在数据/道具之前解决注入
     initState(vm);
-    initProvide(vm); // resolve provide after data/props
+    initProvide(vm); // resolve provide after data/props 解析提供后的数据/道具
     // 调用 created 生命周期钩子 -- 在这一步已经初始化 props, methods, data 等资源
     callHook(vm, "created");
 

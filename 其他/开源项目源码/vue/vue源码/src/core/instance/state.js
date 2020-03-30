@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-30 10:22:49
+ * @LastEditTime: 2020-03-30 11:30:45
  */
 /* @flow */
 
@@ -321,10 +321,12 @@ function createGetterInvoker(fn) {
   };
 }
 
+// 初始化 methods
 function initMethods(vm: Component, methods: Object) {
   const props = vm.$options.props;
   for (const key in methods) {
     if (process.env.NODE_ENV !== "production") {
+      // 检测定义的方法是否为函数
       if (typeof methods[key] !== "function") {
         warn(
           `Method "${key}" has type "${typeof methods[
@@ -334,9 +336,12 @@ function initMethods(vm: Component, methods: Object) {
           vm
         );
       }
+      // 检测方法名是否在 props 存在定义
       if (props && hasOwn(props, key)) {
         warn(`Method "${key}" has already been defined as a prop.`, vm);
       }
+      // 检测方法名字 key 是否已经在组件实例对象 vm 中有了定义，并且该名字 key 为保留的属性名，
+      // 以字符 $ 或 _ 开头的名字为保留名
       if (key in vm && isReserved(key)) {
         warn(
           `Method "${key}" conflicts with an existing Vue instance method. ` +
@@ -344,6 +349,8 @@ function initMethods(vm: Component, methods: Object) {
         );
       }
     }
+    // 在组件实例对象上定义了与 methods 选项中定义的同名方法
+    // 并且通过 bind 绑定 vm
     vm[key] =
       typeof methods[key] !== "function" ? noop : bind(methods[key], vm);
   }
