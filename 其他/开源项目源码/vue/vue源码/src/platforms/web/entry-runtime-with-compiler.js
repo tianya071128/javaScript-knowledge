@@ -2,7 +2,7 @@
  * @Descripttion: 完整版(运行版 + compiler) 入口文件 -- 在运行时版的基础上添加 compiler
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-28 19:37:34
+ * @LastEditTime: 2020-03-30 15:24:06
  */
 /* @flow */
 
@@ -93,13 +93,18 @@ Vue.prototype.$mount = function(
         mark("compile");
       }
 
-      // compileToFunctions: 将模板字符串编译成渲染函数(render), 并将渲染函数添加到 vm.$options 选项中
+      // compileToFunctions: 将模板字符串( template )编译成渲染函数(render), 并将渲染函数添加到 vm.$options 选项中
       const { render, staticRenderFns } = compileToFunctions(
         template,
         {
           outputSourceRange: process.env.NODE_ENV !== "production",
+          // 如果 shouldDecodeNewlines 为 true，意味着 Vue 在编译模板的时候，要对属性值中的换行符或制表符做兼容处理
           shouldDecodeNewlines,
+          // shouldDecodeNewlinesForHref 为 true 意味着 Vue 在编译模板的时候，要对 a 标签的 href 属性值中的换行符或制表符做兼容处理
           shouldDecodeNewlinesForHref,
+          // options.delimiters | options.comments 都是 Vue 提供的选项
+          // options.delimiters: 改变纯文本插入分隔符。
+          // options.comments: 当设为 true 时，将会保留且渲染模板中的 HTML 注释。默认行为是舍弃它们。
           delimiters: options.delimiters,
           comments: options.comments
         },
