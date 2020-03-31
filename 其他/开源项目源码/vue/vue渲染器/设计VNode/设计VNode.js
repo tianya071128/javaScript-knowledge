@@ -2,7 +2,7 @@
  * @Descripttion: 设计 VNode
  * @Author: 温祖彪
  * @Date: 2020-03-31 11:41:58
- * @LastEditTime: 2020-03-31 14:55:21
+ * @LastEditTime: 2020-03-31 22:21:02
  */
 // 标签元素 VNode 表示
 const elementVNode = {
@@ -131,3 +131,11 @@ export interface VNode {
   children: VNodeChildren
   childFlags: ChildrenFlags
 }
+
+/** VNodeData
+ * {
+ *  style: ..., // 内联样式数据
+ *  class: ..., // class 数据
+ *  target: ..., // Portal 的挂载目标
+ * }
+ */

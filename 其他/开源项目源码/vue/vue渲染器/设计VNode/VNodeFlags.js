@@ -2,7 +2,7 @@
  * @Descripttion: 枚举值VNodeFlags
  * @Author: 温祖彪
  * @Date: 2020-03-31 14:28:34
- * @LastEditTime: 2020-03-31 15:05:32
+ * @LastEditTime: 2020-03-31 20:59:32
  */
 const VNodeFlags = {
   // html 标签
@@ -25,25 +25,22 @@ const VNodeFlags = {
   FRAGMENT: 1 << 7,
   // Portal
   PORTAL: 1 << 8
-}
+};
 
 // 派生出额外的三个标识
 // html 和 svg 都是标签元素，可以用 ELEMENT 表示
-VNodeFlags.ELEMENT = VNodeFlags.ELEMENT_HTML | VNodeFlags.ELEMENT_SVG
+VNodeFlags.ELEMENT = VNodeFlags.ELEMENT_HTML | VNodeFlags.ELEMENT_SVG;
 // 普通有状态组件、需要被keepAlive的有状态组件、已经被keepAlice的有状态组件 都是“有状态组件”，
 // 统一用 COMPONENT_STATEFUL 表示
 VNodeFlags.COMPONENT_STATEFUL =
   VNodeFlags.COMPONENT_STATEFUL_NORMAL |
   VNodeFlags.COMPONENT_STATEFUL_SHOULD_KEEP_ALIVE |
-  VNodeFlags.COMPONENT_STATEFUL_KEPT_ALIVE
+  VNodeFlags.COMPONENT_STATEFUL_KEPT_ALIVE;
 // 有状态组件 和  函数式组件都是“组件”，用 COMPONENT 表示
-VNodeFlags.COMPONENT = VNodeFlags.COMPONENT_STATEFUL | VNodeFlags.COMPONENT_FUNCTIONAL
+VNodeFlags.COMPONENT =
+  VNodeFlags.COMPONENT_STATEFUL | VNodeFlags.COMPONENT_FUNCTIONAL;
 
-export {
-  VNodeFlags
-}
-
-
+export { VNodeFlags };
 
 /**
  * 举例
