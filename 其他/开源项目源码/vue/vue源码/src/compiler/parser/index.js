@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-30 16:47:06
+ * @LastEditTime: 2020-03-31 10:48:03
  */
 /* @flow */
 
@@ -27,18 +27,26 @@ import {
   getAndRemoveAttrByRegex
 } from "../helpers";
 
+// 用来匹配以字符 @ 或 v-on: 开头的字符串，主要作用是检测标签属性名是否是监听事件的指令。
 export const onRE = /^@|^v-on:/;
+// 匹配以字符 v- 或 @ 或 : 开头的字符串，主要作用是检测标签属性名是否是指令。
 export const dirRE = process.env.VBIND_PROP_SHORTHAND
   ? /^v-|^@|^:|^\.|^#/
   : /^v-|^@|^:|^#/;
+// 匹配 v-for 属性的值，并捕获 in 或 of 前后的字符串。
 export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
+// 匹配 forAliasRE 第一个捕获组所捕获到的字符串
 export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
+// 用来捕获要么以字符 ( 开头，要么以字符 ) 结尾的字符串，或者两者都满足
 const stripParensRE = /^\(|\)$/g;
 const dynamicArgRE = /^\[.*\]$/;
 
+// 匹配指令中的参数
 const argRE = /:(.*)$/;
+// 用来匹配以字符 : 或字符串 v-bind: 开头的字符串，主要用来检测一个标签的属性是否是绑定(v-bind)。
 export const bindRE = /^:|^\.|^v-bind:/;
 const propBindRE = /^\./;
+// 用来匹配修饰符的，但是并没有捕获任何东西
 const modifierRE = /\.[^.\]]+(?=[^\]]*$)/g;
 
 const slotRE = /^v-slot(:|$)|^#/;
@@ -48,11 +56,14 @@ const whitespaceRE = /\s+/g;
 
 const invalidAttributeRE = /[\s"'<>\/=]/;
 
+// 实体解码函数
+// cached: 作用是接收一个函数作为参数并返回一个新的函数，新函数的功能与作为参数传递的函数功能相同，唯一不同的是新函数具有缓存值的功能
 const decodeHTMLCached = cached(he.decode);
 
 export const emptySlotScopeToken = `_empty_`;
 
-// configurable state
+// configurable state 可配置状态
+// 平台化的选项变量
 export let warn: any;
 let delimiters;
 let transforms;
@@ -63,6 +74,7 @@ let platformMustUseProp;
 let platformGetTagNamespace;
 let maybeComponent;
 
+// 用来创建一个元素的描述对象，这样我们在创建元素描述对象时就不需要手动编写对象字面量了
 export function createASTElement(
   tag: string,
   attrs: Array<ASTAttr>,
@@ -71,7 +83,9 @@ export function createASTElement(
   return {
     type: 1,
     tag,
+    // [{name: name, value: value}]
     attrsList: attrs,
+    // 将 attrsList 转为对象形式 { name: value }
     attrsMap: makeAttrsMap(attrs),
     rawAttrsMap: {},
     parent,
@@ -86,29 +100,46 @@ export function parse(
   template: string,
   options: CompilerOptions
 ): ASTElement | void {
+  // baseWarn 函数的作用无非就是通过 console.error 函数打印错误信息。
   warn = options.warn || baseWarn;
 
+  // 作用是通过给定的标签名字判断该标签是否是 pre 标签。
   platformIsPreTag = options.isPreTag || no;
+  // 作用是用来检测一个属性在标签中是否要使用元素对象原生的 prop 进行绑定，注意：这里的 prop 指的是元素对象的属性，而非 Vue 中的 props 概念。
   platformMustUseProp = options.mustUseProp || no;
+  // 用是用来获取元素(标签)的命名空间
   platformGetTagNamespace = options.getTagNamespace || no;
   const isReservedTag = options.isReservedTag || no;
   maybeComponent = (el: ASTElement) => !!el.component || !isReservedTag(el.tag);
 
+  // pluckModuleFunction: 作用是从第一个参数中"采摘"出函数名字与第二个参数所指定字符串相同的函数，并将它们组成一个数组
+  // transforms: 从 options.modules 中提取出 transformNode 的数组 web平台[transformNode, transformNode]
+  // preTransforms: 从 options.modules 中提取出 preTransforms 的数组 web平台[preTransforms]
+  // postTransforms: 从 options.modules 中提取出 postTransforms 的数组 web平台[]
   transforms = pluckModuleFunction(options.modules, "transformNode");
   preTransforms = pluckModuleFunction(options.modules, "preTransformNode");
   postTransforms = pluckModuleFunction(options.modules, "postTransformNode");
 
+  // 在创建 Vue 实例对象时所传递的 delimiters 选项，它是一个数组。
   delimiters = options.delimiters;
 
+  // 作用是用来修正当前正在解析元素的父级
   const stack = [];
+  // options.preserveWhitespace 选项用来告诉编译器在编译 html 字符串时是否放弃标签之间的空格
   const preserveWhitespace = options.preserveWhitespace !== false;
   const whitespaceOption = options.whitespace;
+  // 定义整棵 AST, 并构建完成后返回
   let root;
+  // 元素描述对象之间的父子关系就是靠该变量进行联系的
   let currentParent;
+  // 用来标识当前解析的标签是否在拥有 v-pre 的标签之内
   let inVPre = false;
+  // 标识当前正在解析的标签是否在 <pre></pre> 标签之内
   let inPre = false;
+  // 用于接下来定义的 warnOnce 函数
   let warned = false;
 
+  // 只会打印一次警告信息，并且 warnOnce 函数也是通过调用 warn 函数来实现的
   function warnOnce(msg, range) {
     if (!warned) {
       warned = true;
@@ -116,6 +147,7 @@ export function parse(
     }
   }
 
+  // 每当遇到一个标签的结束标签时，或遇到一元标签时都会调用该方法“闭合”标签
   function closeElement(element) {
     trimEndingWhitespace(element);
     if (!inVPre && !element.processed) {
@@ -135,8 +167,8 @@ export function parse(
       } else if (process.env.NODE_ENV !== "production") {
         warnOnce(
           `Component template should contain exactly one root element. ` +
-            `If you are using v-if on multiple elements, ` +
-            `use v-else-if to chain them instead.`,
+          `If you are using v-if on multiple elements, ` +
+          `use v-else-if to chain them instead.`,
           { start: element.start }
         );
       }
@@ -192,18 +224,23 @@ export function parse(
     }
   }
 
+  // 用来检测模板根元素是否符合要求 
+  /** Vue 模板的时候会受到两种约束
+   * 1. 模板必须有且仅有一个被渲染的根元素
+   * 2. 不能使用 slot 标签和 template 标签作为模板的根元素
+   */
   function checkRootConstraints(el) {
     if (el.tag === "slot" || el.tag === "template") {
       warnOnce(
         `Cannot use <${el.tag}> as component root element because it may ` +
-          "contain multiple nodes.",
+        "contain multiple nodes.",
         { start: el.start }
       );
     }
     if (el.attrsMap.hasOwnProperty("v-for")) {
       warnOnce(
         "Cannot use v-for on stateful component root element because " +
-          "it renders multiple elements.",
+        "it renders multiple elements.",
         el.rawAttrsMap["v-for"]
       );
     }
@@ -218,19 +255,25 @@ export function parse(
     shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
+    // start 钩子函数，在解析 html 字符串时每次遇到 开始标签 时就会调用该函数
+    // tag: 标签名, attrs: 属性数组, unary: 是否为一元标签
     start(tag, attrs, unary, start, end) {
       // check namespace.
       // inherit parent ns if there is one
+      // 获取标签的命名空间
       const ns =
         (currentParent && currentParent.ns) || platformGetTagNamespace(tag);
 
       // handle IE svg bug
       /* istanbul ignore if */
+      // isIE 函数用来判断当前宿主环境是否是 IE 浏览器
       if (isIE && ns === "svg") {
         attrs = guardIESVGBug(attrs);
       }
 
+      // 为当前元素创建了描述对象
       let element: ASTElement = createASTElement(tag, attrs, currentParent);
+      // 检查当前元素是否存在命名空间 ns，如果存在则在元素对象上添加 ns 属性，其值为命名空间的值。
       if (ns) {
         element.ns = ns;
       }
@@ -248,7 +291,7 @@ export function parse(
           if (invalidAttributeRE.test(attr.name)) {
             warn(
               `Invalid dynamic argument expression: attribute names cannot contain ` +
-                `spaces, quotes, <, >, / or =.`,
+              `spaces, quotes, <, >, / or =.`,
               {
                 start: attr.start + attr.name.indexOf(`[`),
                 end: attr.start + attr.name.length
@@ -258,23 +301,33 @@ export function parse(
         });
       }
 
+      // 用来判断非服务端渲染情况下，当前元素是否是禁止在模板中使用的标签
+      // <style> 标签和 <script> 都被认为是禁止的标签
+      // 例外: 
+      /**
+       * <script type="text/x-template" id="hello-world-template">
+       *   <p>Hello hello hello</p>
+       * </script>
+       */
       if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true;
         process.env.NODE_ENV !== "production" &&
           warn(
             "Templates should only be responsible for mapping the state to the " +
-              "UI. Avoid placing tags with side-effects in your templates, such as " +
-              `<${tag}>` +
-              ", as they will not be parsed.",
+            "UI. Avoid placing tags with side-effects in your templates, such as " +
+            `<${tag}>` +
+            ", as they will not be parsed.",
             { start: element.start }
           );
       }
 
       // apply pre-transforms
+      // 使用 preTransforms 函数对属性描述对象进行处理
       for (let i = 0; i < preTransforms.length; i++) {
         element = preTransforms[i](element, options) || element;
       }
 
+      // ===== 使用 process* 系列函数对当前元素描述对象做额外的处理 ==== 
       if (!inVPre) {
         processPre(element);
         if (element.pre) {
@@ -292,7 +345,9 @@ export function parse(
         processIf(element);
         processOnce(element);
       }
+      // ====  ====
 
+      // root 不存在则说明当前元素应该就是根元素
       if (!root) {
         root = element;
         if (process.env.NODE_ENV !== "production") {
@@ -300,14 +355,18 @@ export function parse(
         }
       }
 
+      // 每当遇到一个非一元标签都会将该元素的描述对象添加到 stack 数组，并且 currentParent 始终存储的是 stack 栈顶的元素，即当前解析元素的父级。
+      // 检测是否为非一元标签
       if (!unary) {
         currentParent = element;
         stack.push(element);
       } else {
+        // 闭合该元素
         closeElement(element);
       }
     },
 
+    // end 钩子函数，在解析 html 字符串时每次遇到 结束标签 时就会调用该函数
     end(tag, start, end) {
       const element = stack[stack.length - 1];
       // pop stack
@@ -319,6 +378,7 @@ export function parse(
       closeElement(element);
     },
 
+    // chars 钩子函数，在解析 html 字符串时每次遇到 纯文本 时就会调用该函数
     chars(text: string, start: number, end: number) {
       if (!currentParent) {
         if (process.env.NODE_ENV !== "production") {
@@ -397,6 +457,8 @@ export function parse(
         }
       }
     },
+
+    // comment 钩子函数，在解析 html 字符串时每次遇到 注释节点 时就会调用该函数
     comment(text: string, start, end) {
       // adding anyting as a sibling to the root node is forbidden
       // comments should still be allowed, but ignored
@@ -487,7 +549,7 @@ function processKey(el) {
         ) {
           warn(
             `Do not use v-for index as key on <transition-group> children, ` +
-              `this is the same as not using keys.`,
+            `this is the same as not using keys.`,
             getRawBindingAttr(el, "key"),
             true /* tip */
           );
@@ -573,7 +635,7 @@ function processIfConditions(el, parent) {
   } else if (process.env.NODE_ENV !== "production") {
     warn(
       `v-${el.elseif ? 'else-if="' + el.elseif + '"' : "else"} ` +
-        `used on element <${el.tag}> without corresponding v-if.`,
+      `used on element <${el.tag}> without corresponding v-if.`,
       el.rawAttrsMap[el.elseif ? "v-else-if" : "v-else"]
     );
   }
@@ -588,7 +650,7 @@ function findPrevElement(children: Array<any>): ASTElement | void {
       if (process.env.NODE_ENV !== "production" && children[i].text !== " ") {
         warn(
           `text "${children[i].text.trim()}" between v-if and v-else(-if) ` +
-            `will be ignored.`,
+          `will be ignored.`,
           children[i]
         );
       }
@@ -621,9 +683,9 @@ function processSlotContent(el) {
     if (process.env.NODE_ENV !== "production" && slotScope) {
       warn(
         `the "scope" attribute for scoped slots have been deprecated and ` +
-          `replaced by "slot-scope" since 2.5. The new "slot-scope" attribute ` +
-          `can also be used on plain elements in addition to <template> to ` +
-          `denote scoped slots.`,
+        `replaced by "slot-scope" since 2.5. The new "slot-scope" attribute ` +
+        `can also be used on plain elements in addition to <template> to ` +
+        `denote scoped slots.`,
         el.rawAttrsMap["scope"],
         true
       );
@@ -634,8 +696,8 @@ function processSlotContent(el) {
     if (process.env.NODE_ENV !== "production" && el.attrsMap["v-for"]) {
       warn(
         `Ambiguous combined usage of slot-scope and v-for on <${el.tag}> ` +
-          `(v-for takes higher priority). Use a wrapper <template> for the ` +
-          `scoped slot to make it clearer.`,
+        `(v-for takes higher priority). Use a wrapper <template> for the ` +
+        `scoped slot to make it clearer.`,
         el.rawAttrsMap["slot-scope"],
         true
       );
@@ -670,7 +732,7 @@ function processSlotContent(el) {
           if (el.parent && !maybeComponent(el.parent)) {
             warn(
               `<template v-slot> can only appear at the root level inside ` +
-                `the receiving component`,
+              `the receiving component`,
               el
             );
           }
@@ -697,7 +759,7 @@ function processSlotContent(el) {
           if (el.scopedSlots) {
             warn(
               `To avoid scope ambiguity, the default slot should also use ` +
-                `<template> syntax when there are other named slots.`,
+              `<template> syntax when there are other named slots.`,
               slotBinding
             );
           }
@@ -739,9 +801,9 @@ function getSlotName(binding) {
   }
   return dynamicArgRE.test(name)
     ? // dynamic [name]
-      { name: name.slice(1, -1), dynamic: true }
+    { name: name.slice(1, -1), dynamic: true }
     : // static name
-      { name: `"${name}"`, dynamic: false };
+    { name: `"${name}"`, dynamic: false };
 }
 
 // handle <slot/> outlets
@@ -751,8 +813,8 @@ function processSlotOutlet(el) {
     if (process.env.NODE_ENV !== "production" && el.key) {
       warn(
         `\`key\` does not work on <slot> because slots are abstract outlets ` +
-          `and can possibly expand into multiple elements. ` +
-          `Use the key on a wrapping element instead.`,
+        `and can possibly expand into multiple elements. ` +
+        `Use the key on a wrapping element instead.`,
         getRawBindingAttr(el, "key")
       );
     }
@@ -900,9 +962,9 @@ function processAttrs(el) {
         if (res) {
           warn(
             `${name}="${value}": ` +
-              "Interpolation inside attributes has been removed. " +
-              "Use v-bind or the colon shorthand instead. For example, " +
-              'instead of <div id="{{ val }}">, use <div :id="val">.',
+            "Interpolation inside attributes has been removed. " +
+            "Use v-bind or the colon shorthand instead. For example, " +
+            'instead of <div id="{{ val }}">, use <div :id="val">.',
             list[i]
           );
         }
@@ -964,6 +1026,7 @@ function isTextTag(el): boolean {
   return el.tag === "script" || el.tag === "style";
 }
 
+// 判断当前标签是否为禁止标签
 function isForbiddenTag(el): boolean {
   return (
     el.tag === "style" ||
@@ -976,6 +1039,7 @@ const ieNSBug = /^xmlns:NS\d+/;
 const ieNSPrefix = /^NS\d+:/;
 
 /* istanbul ignore next */
+// 处理 IE 中关于 SVG 的 bug
 function guardIESVGBug(attrs) {
   const res = [];
   for (let i = 0; i < attrs.length; i++) {
@@ -994,10 +1058,10 @@ function checkForAliasModel(el, value) {
     if (_el.for && _el.alias === value) {
       warn(
         `<${el.tag} v-model="${value}">: ` +
-          `You are binding v-model directly to a v-for iteration alias. ` +
-          `This will not be able to modify the v-for source array because ` +
-          `writing to the alias is like modifying a function local variable. ` +
-          `Consider using an array of objects and use v-model on an object property instead.`,
+        `You are binding v-model directly to a v-for iteration alias. ` +
+        `This will not be able to modify the v-for source array because ` +
+        `writing to the alias is like modifying a function local variable. ` +
+        `Consider using an array of objects and use v-model on an object property instead.`,
         el.rawAttrsMap["v-model"]
       );
     }

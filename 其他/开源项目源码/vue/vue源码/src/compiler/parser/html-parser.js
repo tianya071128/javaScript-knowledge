@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-30 20:25:00
+ * @LastEditTime: 2020-03-31 09:27:29
  */
 /**
  * 文件作用: 词法分析 --  通过读取字符流配合正则一点一点的解析字符串, 直到整个字符串都被解析完毕为止.
@@ -76,6 +76,10 @@ function decodeAttr(value, shouldDecodeNewlines) {
   return value.replace(re, match => decodingMap[match]);
 }
 
+/**
+ * 每当遇到一个开始标签时会调用的 options.start 钩子函数，
+ * 每当遇到一个结束标签时会调用的 options.end 钩子函数等等
+ */
 export function parseHTML(html, options) {
   // 遇到一个 非一元标签(必须要有闭合标签的元素)，都会将该开始标签 push 到该数组, 用来检测是否缺少闭合标签
   const stack = [];
@@ -222,7 +226,7 @@ export function parseHTML(html, options) {
         ));
       // html.replace 用来将匹配字符串 html 并将其替换为空字符串,
       // 常量 rest 将保存剩余的字符
-      const rest = html.replace(reStackedTag, function(all, text, endTag) {
+      const rest = html.replace(reStackedTag, function (all, text, endTag) {
         endTagLength = endTag.length;
         if (!isPlainTextElement(stackedTag) && stackedTag !== "noscript") {
           text = text
