@@ -2,7 +2,7 @@
  * @Descripttion: childrenFlags
  * @Author: 温祖彪
  * @Date: 2020-03-31 14:42:59
- * @LastEditTime: 2020-03-31 14:51:11
+ * @LastEditTime: 2020-03-31 15:38:02
  */
 const ChildrenFlags = {
   // 未知的 children 类型
@@ -22,7 +22,10 @@ const ChildrenFlags = {
 // 所以我们可以派生出一个“多节点”标识
 ChildrenFlags.MULTIPLE_VNODES = ChildrenFlags.KEYED_VNODES | ChildrenFlags.NONE_KEYED_VNODES
 
-console.log('启动 node')
+
+export {
+  ChildrenFlags
+}
 
 /* 示例
  // 没有子节点的 div 标签

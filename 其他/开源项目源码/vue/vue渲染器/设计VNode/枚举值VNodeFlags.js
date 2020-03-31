@@ -2,7 +2,7 @@
  * @Descripttion: 枚举值VNodeFlags
  * @Author: 温祖彪
  * @Date: 2020-03-31 14:28:34
- * @LastEditTime: 2020-03-31 14:46:23
+ * @LastEditTime: 2020-03-31 15:05:32
  */
 const VNodeFlags = {
   // html 标签
@@ -39,6 +39,9 @@ VNodeFlags.COMPONENT_STATEFUL =
 // 有状态组件 和  函数式组件都是“组件”，用 COMPONENT 表示
 VNodeFlags.COMPONENT = VNodeFlags.COMPONENT_STATEFUL | VNodeFlags.COMPONENT_FUNCTIONAL
 
+export {
+  VNodeFlags
+}
 
 
 
