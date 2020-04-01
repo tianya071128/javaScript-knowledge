@@ -2,11 +2,12 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-31 20:57:35
- * @LastEditTime: 2020-04-01 15:40:59
+ * @LastEditTime: 2020-04-01 17:07:46
  */
 import { VNodeFlags } from "../设计VNode/VNodeFlags.js";
 import { ChildrenFlags } from "../设计VNode/ChildrenFlags.js";
 import { createTextVNode } from "../辅助创建 VNode 的 h 函数/h.js";
+import { patchData } from "../util/patchData.js";
 
 /** 根据 VNode 的 flags 属性值能够区分一个 VNode 对象的类型
  * VNode 类型:  html/svg 标签        组件               纯文本         Fragment       Portal
@@ -71,8 +72,6 @@ function mountElement(vnode, container, isSVG) {
   container.appendChild(el);
 }
 
-// 需要当做 DOM Prop 处理的属性
-const DOMPropsRE = /\[A-Z]|^(?:value|checked|selected|muted)$/;
 // 将 VNodeData 应用到元素上
 function mountElementAttr(vnode, el, isSVG) {
   // 拿到 VNodeData
@@ -80,34 +79,7 @@ function mountElementAttr(vnode, el, isSVG) {
   if (data) {
     // 如果 VNodeData 存在, 则遍历之.
     for (let key in data) {
-      // key 可能是 class、style、on 等等
-      switch (key) {
-        case "style":
-          // 如果 key 的值是 style, 说明是内联样式, 逐个将样式规则应用到 el
-          for (let k in data.style) {
-            el.style[k] = data.style[k];
-          }
-          break;
-        case "class":
-          // 判断是否为 SVG 标签
-          if (isSVG) {
-            el.setAttribute("class", data[key]);
-          } else {
-            el.className = data[key];
-          }
-        default:
-          if (key[0] === "o" && key[1] === "n") {
-            // 事件
-            el.addEventListener(key.slice(2), data[key]);
-          } else if (DOMPropsRE.test(key)) {
-            // 当作 DOM Prop 处理
-            el[key] = data[key];
-          } else {
-            // 当作 Attr 处理
-            el.setAttribute(key, data[key]);
-          }
-          break;
-      }
+      patchData(el, key, null, data[key]);
     }
   }
 }

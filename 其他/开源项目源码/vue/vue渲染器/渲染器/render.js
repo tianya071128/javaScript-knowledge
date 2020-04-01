@@ -2,10 +2,11 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-31 20:42:56
- * @LastEditTime: 2020-03-31 21:21:36
+ * @LastEditTime: 2020-04-01 16:30:44
  */
 
 import { mount } from "./mount.js";
+import { patch } from "../patch/patch.js";
 
 /**
  * 渲染器的工作流程分为两个阶段：mount 和 patch
@@ -35,7 +36,7 @@ export function render(vnode, container) {
   } else {
     if (vnode) {
       // 有旧的 VNode,也有新的 VNode. 则调用 `patch` 函数打补丁.
-      patch(prevVnode, vnode, container);
+      patch(prevVNode, vnode, container);
       // 更新 container.vnode
       container.vnode = vnode;
     } else {

@@ -2,7 +2,7 @@
  * @Descripttion: 测试渲染器
  * @Author: 温祖彪
  * @Date: 2020-03-31 21:23:06
- * @LastEditTime: 2020-04-01 15:38:18
+ * @LastEditTime: 2020-04-01 17:06:00
  */
 import { h, Fragment, Portal } from "../辅助创建 VNode 的 h 函数/h.js";
 import { render } from "./render.js";
@@ -25,7 +25,7 @@ const elementVnode = h(
   })
 );
 
-// render(elementVnode, document.getElementById("app"));
+render(elementVnode, document.getElementById("app"));
 
 // 测试 Attributes 和 DOM Properties
 const elementVnode2 = h("input", {
@@ -132,4 +132,4 @@ function MyFunctionalComponent() {
 
 const compVnode2 = h(MyFunctionalComponent);
 
-render(compVnode2, document.getElementById("app"));
+// render(compVnode2, document.getElementById("app"));
