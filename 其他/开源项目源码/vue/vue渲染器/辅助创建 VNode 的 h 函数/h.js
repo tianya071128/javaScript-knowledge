@@ -2,7 +2,7 @@
  * @Descripttion: 创建 VNode 的 h 函数
  * @Author: 温祖彪
  * @Date: 2020-03-31 15:02:45
- * @LastEditTime: 2020-03-31 22:27:29
+ * @LastEditTime: 2020-04-01 10:41:08
  */
 
 import { VNodeFlags } from "../设计VNode/VNodeFlags.js";
@@ -30,7 +30,7 @@ export function h(tag, data = null, children = null) {
     flags = VNodeFlags.FRAGMENT;
   } else if (tag === Portal) {
     // 当 tag 为 Portal
-    flags = VNodeFlags.Portal;
+    flags = VNodeFlags.PORTAL;
     // 模板在经过编译后，我们把 target 数据存储在 VNodeData(即 data 选项中), 所以需要提取出来
     tag = data && data.target;
   } else {
@@ -109,7 +109,7 @@ function normalizeVNodes(children) {
 }
 
 // 创建纯文本类型的 VNode
-function createTextVNode(text) {
+export function createTextVNode(text) {
   return {
     _isVNode: true,
     // flags 是 VNodeFlags.TEXT

@@ -41,26 +41,29 @@ h1 {
   background-size: 20px 20px;
 }
 .main-left ul.info li::before {
-  content: attr(data-title) '：';
+  content: attr(data-title) "：";
   color: #1d7d71;
   font-size: 14px;
 }
-.main-left ul.info li:nth-of-type(2) {
+.main-left ul.info li.nianyue {
+  background-image: url(../image/出生日期.png);
+}
+.main-left ul.info li.shouji {
   background-image: url(../image/手机号码.png);
 }
-.main-left ul.info li:nth-of-type(3) {
+.main-left ul.info li.youxiang {
   background-image: url(../image/邮箱.png);
 }
-.main-left ul.info li:nth-of-type(4) {
+.main-left ul.info li.git {
   background-image: url(../image/git.png);
 }
-.main-left ul.info li:nth-of-type(5) {
+.main-left ul.info li.xuexiao {
   background-image: url(../image/学校.png);
 }
-.main-left ul.info li:nth-of-type(6) {
+.main-left ul.info li.shijian {
   background-image: url(../image/时间.png);
 }
-.main-left ul.info li:nth-of-type(7) {
+.main-left ul.info li.xueli {
   background-image: url(../image/学历.png);
 }
 
@@ -73,7 +76,7 @@ ul.evaluate li {
   margin: 7px 0;
 }
 ul.evaluate li::before {
-  content: attr(data-title) '：';
+  content: attr(data-title) "：";
   color: #1d7d71;
   font-size: 14px;
 }
@@ -197,7 +200,7 @@ ul.company .job-content {
   padding-left: 15px;
 }
 .xiangmu-mainshu li::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 1px;
   top: 9px;
