@@ -198,21 +198,6 @@ ToPrimitive([]) == 0
 
 
 
-## 12. Eventloop
-
-- **微任务包括** `process.nextTick` ，`promise` ，`Object.observe`，`MutationObserver`
-- **宏任务包括** `script` ， `setTimeout` ，`setInterval`，`setImmediate` ，`I/O` ，`UI renderin`
-
-
-
- **Event loop 顺序**:
-
-- 执行同步代码，这属于宏任务
-- 执行栈为空，查询是否有微任务需要执行
-- 执行所有微任务
-- 必要的话渲染 `UI`
-- 然后开始下一轮 `Event loop`，执行宏任务中的异步代码
-
 
 
 ## 13. 执行上下文

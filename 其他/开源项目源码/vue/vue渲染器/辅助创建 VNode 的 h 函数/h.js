@@ -2,7 +2,7 @@
  * @Descripttion: 创建 VNode 的 h 函数
  * @Author: 温祖彪
  * @Date: 2020-03-31 15:02:45
- * @LastEditTime: 2020-04-01 10:41:08
+ * @LastEditTime: 2020-04-02 11:50:29
  */
 
 import { VNodeFlags } from "../设计VNode/VNodeFlags.js";
@@ -86,7 +86,8 @@ export function h(tag, data = null, children = null) {
     data,
     children,
     flags,
-    childFlags
+    childFlags,
+    el: null
   };
 }
 
