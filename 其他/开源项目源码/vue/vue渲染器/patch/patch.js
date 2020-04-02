@@ -7,7 +7,7 @@ import { ChildrenFlags } from "../设计VNode/ChildrenFlags.js";
  * @Descripttion: patch 文件
  * @Author: 温祖彪
  * @Date: 2020-04-01 16:13:30
- * @LastEditTime: 2020-04-02 11:52:13
+ * @LastEditTime: 2020-04-02 17:12:07
  */
 /** 对比原则
  * 1. 只有相同类型的 VNode 才有比对的意义: 不同类型的 VNode 之间存在一定的差异.
@@ -27,6 +27,9 @@ export function patch(prevVNode, nextVNode, container) {
     // 类型相同, 更新标签元素
     patchElement(prevVNode, nextVNode, container);
   } else if (nextFlags & VNodeFlags.COMPONENT) {
+    // 类型相同, 更新有状态组件
+    // 此时触发的是被动更新: 指的是由外部状态变化而引起的更新操作，通常父组件自身状态的变化可能会引起子组件的更新
+    patchComponent(prevVNode, nextVNode, container);
   } else if (nextFlags & VNodeFlags.TEXT) {
     // 类型相同, 更新文本节点
     patchText(prevVNode, nextVNode);
@@ -43,6 +46,12 @@ export function patch(prevVNode, nextVNode, container) {
 function replaceVNode(prevVNode, nextVNode, container) {
   // 将旧的 VNode 所渲染的 DOM 从容器中移除
   container.removeChild(prevVNode.el);
+  // 如果将要移除的 VNode 类型是组件, 则需要调用该组件实例的 unmounted 钩子函数
+  if (prevVNode.flags & VNodeFlags.COMPONENT_STATEFUL_NORMAL) {
+    // 类型为有状态组件的 VNode, 其 children 属性被用来存储组件实例对象
+    const instance = prevVNode.children;
+    instance.unmounted && instance.unmounted();
+  }
   // 再把新的 VNode 挂载到容器中
   mount(nextVNode, container);
 }
@@ -265,5 +274,34 @@ function patchPortal(prevVNode, nextVNode, container) {
         }
         break;
     }
+  }
+}
+
+// 更新 有状态组件 -- 被动更新时
+function patchComponent(prevVNode, nextVNode, container) {
+  // tag 属性的值是组件类, 通过比较新旧组件类是否相等来判断是否是相同的组件
+  if (nextVNode.tag !== prevVNode.tag) {
+    replaceVNode(prevVNode, nextVNode, container);
+  }
+  // 检查组件是否是有状态组件
+  else if (nextVNode.flags & VNodeFlags.COMPONENT_STATEFUL_NORMAL) {
+    // 1. 获取组件实例
+    const instance = (nextVNode.children = prevVNode.children);
+    // 2. 更新 props
+    instance.$props = nextVNode.data;
+    // 3. 更新组件
+    instance._update();
+  }
+  // 更新 函数式组件
+  else {
+    // 通过 prevVNode.handle 拿到 handle 对象
+    const handle = (nextVNode.handle = prevVNode.handle);
+    // 更新 handle 对象
+    handle.prev = prevVNode;
+    handle.next = nextVNode;
+    handle.container = container;
+
+    // 调用 update 函数完成更新
+    handle.update();
   }
 }

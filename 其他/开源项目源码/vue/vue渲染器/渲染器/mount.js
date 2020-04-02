@@ -2,12 +2,13 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-31 20:57:35
- * @LastEditTime: 2020-04-01 17:07:46
+ * @LastEditTime: 2020-04-02 17:15:22
  */
 import { VNodeFlags } from "../设计VNode/VNodeFlags.js";
 import { ChildrenFlags } from "../设计VNode/ChildrenFlags.js";
 import { createTextVNode } from "../辅助创建 VNode 的 h 函数/h.js";
 import { patchData } from "../util/patchData.js";
+import { patch } from "../patch/patch.js";
 
 /** 根据 VNode 的 flags 属性值能够区分一个 VNode 对象的类型
  * VNode 类型:  html/svg 标签        组件               纯文本         Fragment       Portal
@@ -165,13 +166,40 @@ function mountComponent(vnode, container, isSVG) {
 // 挂载有状态组件
 function mountStatefulComponent(vnode, container, isSVG) {
   // 创建组件实例
-  const instance = new vnode.tag();
-  // 渲染VNode
-  instance.$vnode = instance.render();
-  // 挂载
-  mount(instance.$vnode, container, isSVG);
-  // el 属性值 和 组件实例的 $el 属性都引用组件的根 DOM 元素
-  instance.$el = vnode.el = instance.$vnode.el;
+  const instance = (vnode.children = new vnode.tag());
+  // 初始化 props -- 简便写法
+  instance.$props = vnode.data;
+
+  // 封装为函数, 用于组件自身状态发生变化后, 调用 _update 函数来完成组件的更新
+  instance._update = function() {
+    // 使用 _mounted 作为标识, 判断是初次挂载还是执行更新操作
+    if (instance._mounted) {
+      /** 主动更新有状态组件: 主动更新指的是组件自身的状态发生变化所导致的更新
+       *
+       */
+      // 1. 拿到旧的 VNode
+      const prevVNode = instance.$vnode;
+      // 2. 重渲染新的 VNode
+      const nextVNode = (instance.$vnode = instance.render());
+      // 3. patch 更新
+      patch(prevVNode, nextVNode, prevVNode.el.parentNode);
+      // 4. 更新 vnode.el 和 $el
+      instance.$el = vnode.el = instance.$vnode.el;
+    } else {
+      // 1. 渲染VNode
+      instance.$vnode = instance.render();
+      // 2. 挂载
+      mount(instance.$vnode, container, isSVG);
+      // 3. 组件已挂载的标识
+      instance._mounted = true;
+      // 4. el 属性值 和 组件实例的 $el 属性都引用组件的根 DOM 元素
+      instance.$el = vnode.el = instance.$vnode.el;
+      // 5. 调用 mounted 钩子
+      instance.mounted && instance.mounted();
+    }
+  };
+
+  instance._update();
 }
 
 /**
@@ -180,10 +208,41 @@ function mountStatefulComponent(vnode, container, isSVG) {
  */
 // 挂载函数式组件 -- 就是一个返回 VNode 的函数
 function mountFunctionalComponent(vnode, container, isSVG) {
-  // 获取 VNode
-  const $vnode = vnode.tag();
-  // 挂载
-  mount($vnode, container, isSVG);
-  // el 元素引用该组件的根元素
-  vnode.el = $vnode.el;
+  // 在函数式组件类型的 vnode 上添加 handle 属性, 是一个对象
+  vnode.handle = {
+    // 存储旧的函数式组件 VNode，在初次挂载时，没有旧的 VNode 可言，所以初始值为 null
+    prev: null,
+    // 存储新的函数式组件 VNode，在初次挂载时，被赋值为当前正在挂载的函数式组件 VNode。
+    next: vnode,
+    // 存储的是挂载容器
+    container,
+    update: () => {
+      if (vnode.handle.prev) {
+        // 更新的逻辑
+        // prevVNode 是旧的组件VNode，nextVNode 是新的组件VNode
+        const prevVNode = vnode.handle.prev;
+        const nextVNode = vnode.handle.next;
+        // prevTree 是组件产出的旧的 VNode
+        const prevTree = prevVNode.children;
+        // 更新 props 数据
+        const props = nextVNode.data;
+        // nextTree 是组件产出的新的 VNode
+        const nextTree = (nextVNode.children = nextVNode.tag(props));
+        // 调用 patch 函数更新
+        patch(prevTree, nextTree, vnode.handle.container);
+      } else {
+        // 获取 props
+        const props = vnode.data;
+
+        // 获取 VNode
+        const $vnode = (vnode.children = vnode.tag(props));
+        // 挂载
+        mount($vnode, container, isSVG);
+        // el 元素引用该组件的根元素
+        vnode.el = $vnode.el;
+      }
+    }
+  };
+  // 立即调用 vnode.handle.update 完成初次挂载
+  vnode.handle.update();
 }

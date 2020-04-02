@@ -2,7 +2,7 @@
  * @Descripttion: 测试
  * @Author: 温祖彪
  * @Date: 2020-04-01 16:26:56
- * @LastEditTime: 2020-04-02 11:52:52
+ * @LastEditTime: 2020-04-02 17:03:14
  */
 import { h, Fragment, Portal } from "../辅助创建 VNode 的 h 函数/h.js";
 import { render } from "../渲染器/render.js";
@@ -235,11 +235,75 @@ const nextVNode9 = h(Portal, { target: "#new-container" }, [
   ])
 ]);
 
-render(prevVNode9, document.getElementById("app"));
+// render(prevVNode9, document.getElementById("app"));
 
-// // 2秒后更新
-setTimeout(() => {
-  render(nextVNode9, document.getElementById("app"));
-}, 2000);
+// // // 2秒后更新
+// setTimeout(() => {
+//   render(nextVNode9, document.getElementById("app"));
+// }, 2000);
+
+// ======== end ========
+
+// ======== 测试: 更新 有状态组件, 主动更新 ========
+
+// 组件类
+class MyComponent2 {
+  localState = "one";
+
+  mounted() {
+    setTimeout(() => {
+      this.localState = "two";
+      this._update();
+    }, 2000);
+  }
+
+  render() {
+    return h("div", null, this.localState);
+  }
+}
+// 有状态组件 VNode
+const compVNode = h(MyComponent2);
+
+// render(compVNode, document.getElementById("app"));
+
+// ======== end ========
+
+// ======== 测试: 更新 有状态组件, props ========
+
+// 子组件类 1
+class ChildComponent1 {
+  render() {
+    return h("div", null, "子组件 1");
+  }
+
+  unmounted() {
+    console.log("竟然被卸载了");
+  }
+}
+// 子组件类 2
+class ChildComponent2 {
+  render() {
+    return h("div", null, "子组件 2");
+  }
+}
+// 父组件类
+class ParentComponent {
+  isTrue = true;
+
+  mounted() {
+    setTimeout(() => {
+      this.isTrue = false;
+      this._update();
+    }, 2000);
+  }
+
+  render() {
+    return this.isTrue ? h(ChildComponent1) : h(ChildComponent2);
+  }
+}
+// 有状态组件 VNode
+const compVNode3 = h(ParentComponent);
+
+render(compVNode3, document.getElementById("app"));
 
 // ======== end ========
