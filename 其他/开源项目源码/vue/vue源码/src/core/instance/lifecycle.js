@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-28 19:58:08
+ * @LastEditTime: 2020-04-03 11:18:34
  */
 /* @flow */
 
@@ -157,7 +157,7 @@ export function lifecycleMixin(Vue: Class<Component>) {
 }
 
 // 编译函数 - 完成整个渲染工作
-export function mountComponent(
+export function   (
   vm: Component,
   el: ?Element,
   hydrating?: boolean

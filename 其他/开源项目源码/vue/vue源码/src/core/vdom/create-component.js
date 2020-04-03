@@ -101,7 +101,7 @@ const hooksToMerge = Object.keys(componentVNodeHooks);
 export function createComponent(
   Ctor: Class<Component> | Function | Object | void,
   data: ?VNodeData,
-  context: Component,
+  context: Component, 
   children: ?Array<VNode>,
   tag?: string
 ): VNode | Array<VNode> | void {
