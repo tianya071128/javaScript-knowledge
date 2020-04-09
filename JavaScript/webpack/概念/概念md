@@ -1,0 +1,701 @@
+## 1. 概念
+
+本质上, webpack 是一个 JS 应用程序的 **静态模块打包工具**. 当 webpack 处理应用程序时, 会在内部构建一个 **[依赖图](https://webpack.docschina.org/concepts/dependency-graph/) **, 此依赖图会映射项目所需的每个模块, 并生成一个或多个 bundle.
+
+
+
+### 1.1 入口
+
+**入口起点**指示 webpack 应该使用哪个模块, 来作为构建其内部 依赖图 的开始。**进入入口起点后，webpack 会找出有哪些模块和库是入口起点（直接和间接）依赖的。**
+
+默认值是 `./src/index.js`， 可以通过配置 entry 属性，来指定一个（**或多个**）不同的入口起点
+
+```javascript
+module.exports = {
+    entery: './pathc/to/my/entry/file.js'
+}
+```
+
+
+
+### 1.2 输出
+
+output 属性告诉 webpack 在哪里输出它所创建的 bundle，以及如何命名这些文件。
+
+主要输出文件的默认值是 `./dist/main.js`，其他生成文件默认放置在 `./dist` 文件夹中。
+
+```javascript
+const path = require('path');
+
+module.exports = {
+	entry: './path/to/my/entry/file.js',
+	// 配置输出
+	output: {
+		path: path.resolve(__dirname, 'dist'),
+        filename: 'my-first-webpack.bundle.js'
+	}
+}
+```
+
+
+
+### 1.3 loader
+
+**webpack 只能理解 JS 和 JSON 文件。**loader 让 webpack 能够去处理其他类型的文件，并将它们转换为有效模块，以供应用程序使用，以及被添加到依赖图中。
+
+```javascript
+const path = require('path');
+
+module.exports = {
+    output: {
+        filename: 'my-first-webpack.bundle.js'
+    },
+    module: {
+        // test: 用于标识出应该被对应的 loader 进行转换的某个或某些文件。
+        // use：表示进行转换时，应该使用哪个 loader
+        rules: [
+            { test: /\.tex$/, use: 'raw-loader' }
+        ]
+    }
+}
+```
+
+
+
+### 1.4 插件
+
+**loader 用于转换某些类型的模块；**
+
+**而插件则可以用于执行范围更广的任务。包括：打包优化，资源管理，注入环境变量。**
+
+```javascript
+// 通过 npm 安装 -- 为应用程序生成 HTML 一个文件， 并自动注入所有生成的 bundle。
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = erquire('webpack'); // 用于访问内置插件
+
+module.exports = {
+    module: {
+    rules: [
+      { test: /\.txt$/, use: 'raw-loader' }
+    ]
+  },
+  // 定义插件选项
+  plugins: [
+    // 在一个配置文件中，因为不同目的而多次使用同一个插件，这时需要通过使用 new 操作符来创建它的一个实例。
+    new HtmlWebpackPlugin({template: './src/index.html'})
+  ]
+}
+```
+
+
+
+### 1.5 模式（mode）
+
+通过选择 `development`，`production` 或 `none` 之中的一个，来设置 `mode` 参数，可以启用 webpack 内置在相应环境下的优化。其默认值为 `production`
+
+```javascript
+module.exports = {
+    mode: 'production'
+}
+```
+
+
+
+### 1.6 浏览器兼容性
+
+webpack 支持所有符合 ES5 标签的浏览器（IE 8 及以下版本不支持）。webpack 的 `import()` 和 `require.ensure()` 需要 `Promise` 。如果想要支持旧版本浏览器，需要提前加载 `polyfill`
+
+
+
+## 2. 入口起点（entry points）
+
+有多种方式定义 entry 属性
+
+### 2.1 单个入口（简写）语法
+
+用法：`entry: string|Array<string>`
+
+```javascript
+module.export = {
+    // 单个入口简写形式
+    entry: './path/to/my/entry/file.js'，
+    // 完整写法
+    entry: {
+    	main: './path/to/my/entry/file.js'
+	}
+}
+```
+
+> **向 `entry` 注入数组： `entry: []`**
+>
+> 传入文件路径数组，将创建一个 多主入口。在你想要一次注入多个依赖文件，并且将它们的依赖导向（graph）到一个 chunk 时，这种方式就很有用。
+
+
+
+### 2.2 对象语法
+
+用法：`entry： {[entryChunkName: string]: sting|Array<string>}`
+
+```javascript
+module.exports = {
+    entry: {
+        app: './src/app.js',
+        adminApp: './src/adminAPP.js'
+    }
+}
+```
+
+> **这是应用程序中定义入口的最可扩展的方式**
+>
+> **weapack 配置的可扩展**是指，这些配置可以重复使用，并且可以与其他配置组合使用。这是一种流行的技术，用于将关注点从环境（environment）、构建目标（build target）、运行时（runtime）中分离。然后使用专门的工具（如 webpack-merge）将它们合并起来。
+
+
+
+### 2.3 常见场景
+
+* 分离 APP 和 vendor[第三方库]入口
+
+  > 在 webpack < 4 的版本中，通常将 vendor 作为单独的入口起点添加到 entry 选项中，以将其编译为单独的文件（与 `CommonsChunkPlugin` 结合使用）。而在 webpack 4 中不鼓励这样做。而是使用 `optimization.splitChunks` 选项，将 vendor 和 app(应用程序) 模块分开，并为其创建一个单独的文件。**不要** 为 vendor 或其他不是执行起点创建 entry。
+
+* 多页面应用程序
+
+  ```javascript
+  module.exports = {
+      entry: {
+          pageOne: './src/pageOne/index.js',
+          pageTwo: './src/pageTwo/index.js',
+          pageThree: './src/pageThree/index.js'
+      }
+  }
+  ```
+
+  **如上，我们告诉 webpack 需要三个独立分离的依赖图**
+
+  在多页面应用程序中，服务器会传输一个新的 HTML 文档给你的客户端。页面重新加载此新文档，并且资源被重新下载。然而，这给我们特殊的机会去做很多事：
+
+  * 使用 `optimization.splitChunks` 为页面间共享的应用程序代码创建 bundle。由于入口起点增多，多页应用能够复用入口起点之间的大量代码/模块，从而可以极大地从这些技术中收益。
+
+  > **根据经验：每个 HTML 文档只使用一个入口起点。**
+
+
+
+## 3. 输出
+
+配置 output 选项可以控制 webpack 如何向硬盘写入编译文件。
+
+**注意：即使可以存在多个 entry 起点，但只指定一个 output 配置**
+
+### 3.1 用法
+
+最简单用法，设置为一个对象
+
+```javascript
+module.exports = {
+    output: {
+        // 将一个单独的 bundle.js 文件输出到 dist 目录中。
+        filename: 'bundle.js'
+    }
+}
+```
+
+### 3.2 多个入口起点
+
+如果配置创建了多个单独的 “chunk"（例如，使用多个入口起点或使用像 CommonsChunkPlugin 这样的插件），则应该使用 占位符 来确保每个文件具有唯一的名称。
+
+```javascript
+module.exports = {
+    entry: {
+        app: './src/app.js',
+        search: './src/search.js'
+    },
+    output: {
+        // 写入到硬盘： ./dist/spp.js, ./dist/search.js
+        filename: '[name].js',
+        path: __dirname + '/dist'
+    }
+}
+```
+
+
+
+### 3.3 高级进阶
+
+对资源使用 CDN 和 hash 的复杂示例。
+
+```javascript
+module.exports = {
+    ...
+    output: {
+        path: '/home/proj/cdn/assets/[hash]',
+        publicPath: 'http://cdn.example.com/assets/[hash]/'
+    }
+}
+
+// 如果不知道最终输出文件的 publicPath 是什么地址，则可以将其留空，在运行时通过入口起点文件中 __webpack_public_path__ 动态设置
+// 入口文件
+__webpack_public_path__ = myRuntimePublicPath;
+
+// 应用程序入口的其余部分
+```
+
+
+
+## 4. 模式
+
+使用 `mode` 配置选项，告知 webpack 使用相应环境的内置优化。
+
+`mode: string` 可能的值有：`none`、`development`、`production(默认)`
+
+### 4.1 用法
+
+* 在配置对象中提供 mode 选项
+
+  ```javascript
+  module.exports = {
+      mode: 'production'
+  }
+  ```
+
+* 或者从 CLI 参数中传递：
+
+  ```javascript
+  webpack --mode=production
+  ```
+
+  | 选项        | 描述                                                         |
+  | ----------- | ------------------------------------------------------------ |
+  | development | 会将 `DefinePlugin` 中 `process.env.NODE_ENV` 的值设置为 `development`。启用 `NamedChunksPlugin` 和 `NamedModulesPlugin` |
+  | production  | 会将 `DefinePlugin` 中 `process.env.NODE_ENV` 的值设置为 `production`。启用 `FlagDependencyUsagePlugin`, `FlagIncludedChunksPlugin`, `ModuleConcatenationPlugin`, `NoEmitOnErrorsPlugin`, `OccurrenceOrderPlugin`, `SideEffectsFlagPlugin` 和 `TerserPlugin`。 |
+  | none        | 退出任何默认优化选项                                         |
+
+> 设置 `process.env.NODE_ENV`并不会自动地设置 `mode`
+
+
+
+## 5. loader
+
+**loader 用于对模块的源代码进行转换。loader 可以使你在 import 或 “加载”模块时预处理文件。**
+
+**loader 可以将文件从不同的语言（如 TypeScript）转换为 JavaScript 或将内联图像转换为 data URL。loader 甚至允许直接在 JavaScript 模块中 import CSS文件！**
+
+
+
+### 5.1 示例
+
+```bash
+// 安装 loader
+npm install --save-dev css-loader
+npm install --save-dev ts-loader
+```
+
+然后指示 webpack 对每个 .css 使用 css-loader，以及对所有 .ts 文件使用 ts-loader
+
+```javascript
+module.exports = {
+    module: {
+        rules: [
+            { test: /\.css$/, use: 'css-loader' },
+            { test: /\.ts/, use: 'ts-loader' }
+        ]
+    }
+}
+```
+
+
+
+### 5.2 使用 loader
+
+有三种使用 loader 的方式：
+
+* 配置（推荐）：在 webpack.config.js 文件中指定 loader；
+* 内联：在每个 import 语句中显式指定 loader；
+* CLI：在 shell 命令中指定它们。
+
+
+
+### 5.3 配置
+
+module.rules选项，在 webpack 配置中指定多个loader。
+
+**loader 从右到左取值/执行**。
+
+```javascript
+module.exports = {
+    module: {
+        // 从 sass-loader 开始执行，然后继续执行 css-loader, 最后以 style-css 为结束
+        rules: [
+            test: /\.css$/,
+            use: [
+            	{ loader: 'style-loader' },
+    			{
+    				loader: 'css-loader',
+    				options: {
+    					modules: true
+					}
+				},
+                {
+                    loader: 'sass-loader'
+                }
+        	]
+        ]
+    }
+}
+```
+
+
+
+### 5.4 内联
+
+在 import 语句或任何 等同于“import"的方法 中指定 loader。
+
+```javascript
+// 使用 ！ 将资源中的 loader 分开。每个部分都会相对于当前目录解析。
+import Styles from 'style-loader!css-loader?modules!./style.css';
+// 选项可以传递查询参数，例如？key=value&foo=bar，或者一个 JSON 对象， 例如 ？{"key": "value", "foo": "bar"}
+```
+
+> 尽可能使用 module.rules，因为这样可以减少源码中样板文件的代码量，并且可以在出错时，更快地调试和定位 loader 中的问题。
+
+
+
+### 5.5 CLI
+
+通过 CLI 使用 loader：
+
+```bash
+# 这会对 .jade 文件使用 .jade-loader，以及对 .css 文件使用 style-loader 和 css-loader
+webpack --module-bind jade-loader --module-bind 'css=style-loader!css-loader'
+```
+
+
+
+### 5.6 loader 特性
+
+* loader 支持链式传递。**链中的每个 loader 会将转换应用在已处理过的资源上。一组链式的 loader 将按照相反的顺序执行。链中的第一个 loader 将其结果（也就是应用过转换后的资源）传递给下一个 loader ，依次类推。最后，链中的最后一个 loader，返回 webpack 期望 JavaScript。**
+* loader 可以是同步的，也可以是异步的。
+* loader 运行在 Node.js 中，并且能够执行任何 Node.js 能做到的操作。
+* loader 可以通过 `options` 对象配置（仍然支持使用 `query` 参数来设置选项，但是这种方式已被废弃）。
+* 除了常见的通过 package.json 的 main 来将一个 npm 模块导出为 loader，还可以在 module.rules 中使用 loader 字段直接引用一个模块。
+* 插件（plugin）可以为 loader 带来更多特性。
+* loader 能够产生额外的任意文件。
+
+
+
+### 5.7 解析 loader
+
+loader 遵循 模块解析 标准。多数情况下，loader 将从 模块路径 加载（通过是从 npm install, node_modules 进行加载）。
+
+**通常使用 npm 进行管理，但是也可以将自定义 loader 作为应用程序中的文件。按照约定，loader 通常被命名为 xxx-loader。**
+
+
+
+## 6. 插件
+
+插件 是 webpack 的 **支柱** 功能。 webpack 自身也是构建于在 webpack 配置中用到的**相同的插件系统**之上！
+
+**插件的目的在于解决 loader 无法实现的其他事。**
+
+### 6.1 剖析
+
+插件是一个具有 apply 方法的 JS 对象。 apply 方法会被 webpack compiler 调用，并且 compiler 对象在整个编译生命周期访问。
+
+```javascript
+// ConsoleLogOnBuildWebpackPlugin.js
+const pluginName = 'ConsoleLogOnbuildWebpackPlugin';
+
+class ConsoleLogOnBuildWebpackPlugin {
+    apply(compiler) {
+        compiler.hooks.run.tap(pluginName, compilation => {
+            console.log('webpack 构建过程开始！')；
+        })
+    }
+}
+```
+
+
+
+### 6.2 用法
+
+由于 插件 可以携带参数/选项，你必须在 webpack 配置中，向 plugins 属性传入 new 实例。
+
+根据使用 webpack 的需要，可以有多种方式使用插件。
+
+
+
+### 6.3 配置
+
+```javascript
+const HtmlWebpackPlugin = require('html-webpack-plugin'); // 通过 npm 安装
+const webpack = require('webpack')； // 访问内置的插件
+const path = require('path');
+
+module.exports = {
+    entry: './path/to/my/entry/file.js',
+    output: {
+        filename: 'my-first-webpack.bundle.js',
+        path: path.resolve(__dirname, 'dist')
+    },
+    module: {
+        rules: [
+            {
+                test: /\.(js|jsx)$/,
+                use：'babel-loader'
+            }
+        ]
+    },
+    plugins: [
+        new webpack.ProgressPlugin(),
+        new HtmlWebpackPlugin({ template: './src/index.html' })
+    ]
+}
+```
+
+
+
+### 6.4 Node API
+
+在使用 Node API 时，还可以通过配置中的 plugins 属性传入插件
+
+```javascript
+const webpack = require('webpack'); // 访问 webpack 运行时（runtime）
+const configurantion = require('./webpack.config.js');
+
+let compiler = webpack(configurantion);
+
+new webpack.ProgressPlugin().apply(compiler);
+
+compiler.run(function(err, stats) {
+    
+})
+```
+
+> *以上看到的示例和* [webpack 自身运行时(runtime)](https://github.com/webpack/webpack/blob/e7087ffeda7fa37dfe2ca70b5593c6e899629a2c/bin/webpack.js#L290-L292) *极其类似。*[wepback 源码](https://github.com/webpack/webpack)*中隐藏有大量使用示例，你可以用在自己的配置和脚本中。*
+
+
+
+## 7. 配置
+
+webpack 的配置文件，是一个导出 webpack 配置对象的 JS 文件。然后 webpack 会根据此配置对象上定义的属性进行处理。
+
+因为 webpack 配置是标准的 Node.js CommonJS 模块，你可以做到以下事情：
+
+* 通过 `require(...)` 导入其他文件；
+* 通过 `require(...)` 使用 npm 的工具函数；
+* 使用 JS 控制流表达式，例如 ?: 操作符；
+* 对常用值使用常量或变量；
+* 编写和执行函数，来生成部分配置；
+
+虽然技术上可行，**但应避免以下做法**：
+
+* 在使用 webpack 命令行接口（CLI）时，访问命令行接口（CLI）参数（应该编写自己的命令行接口（CLI），或使用 --env）
+* 导出不确定的值（调用 webpack 两次应该产生同样的输出文件）
+* 编写很长的配置（应该将配置拆分为多个文件）
+
+> **关键在于，为了易于理解和维护这些配置，需要保证一致性。**
+
+
+
+详情见配置篇
+
+
+
+## 8. 模块
+
+在 模块化编程 中，开发者将程序分解为功能离散的 chunk，并称之为\_模块\_。
+
+**每个模块具有比完整程序更小的接触面，使得验证、调试、测试轻而易举。精心编写的\_模\_提供了可靠的抽象和封装界限，使得应用程序中每个模块，都具备了条理清楚的设计和明确的目的。**
+
+
+
+### 8.1 什么是 webpack 模块
+
+与 Node.js 模块相比，webpack \_模块\_能够以各种方式表达它们的依赖关系。
+
+* ES2015 import 语句；
+* CommonJS require() 语句；
+* AMD define 和 require 语句；
+* css/sass/less 文件中的 @import 语句；
+* 样式（url(...)）或 HTML 文件（\<img src=...>）中的图片链接；
+
+> **webpack 1 需要特定的 loader 来转换 ES2015 import，然而在 webpack 2 中， 这一切都是开箱即用的。**
+
+
+
+### 8.2 支持的模块类型
+
+通过 loader，webpack 可以支持以各种语言和预处理器语法编写的模块。loader 描述了 webpack 如何处理 非 JS \_模块\_, 并且在 bundle 中引入这些 \_依赖\_。
+
+webpack 社区已经为各种流行语言和语言处理器创建了 loader，包括：
+
+* CoffeeScript;
+* TypeScript;
+* ESNext(Babel);
+* Sass;
+* Less;
+* Stylus;...
+
+
+
+## 9. 为什么选择 webpack
+
+在打包工具出现之前，在浏览器中运行 JavaScript 有两种方法。
+
+* 引用一些脚本来存放每个功能；
+
+  > 此解决方案很难扩展，因为加载太多脚本会导致网络瓶颈；
+
+* 使用一个包含所有项目代码的大型 .js 文件；
+
+  > 但是这会导致作用域、文件大小、可读性和可维护性方面的问题；
+
+[其余内容见文档](https://webpack.docschina.org/concepts/why-webpack/#感谢-node-js-javascript-模块诞生了)
+
+
+
+## 10. 模块解析
+
+resolve 是一个库（library），用于帮助找到模块的绝对路径。一个模块可以作为另一个模块的依赖模块，然后被后者引用：
+
+```javascript
+import foo from 'path/to/module';
+// 或者
+require('path/to/module')；
+```
+
+### 10.1 webpack 中的解析规则
+
+使用 enhanced-resolve, webpack 能够解析三种文件路径：
+
+* 绝对路径：
+
+  ```javascript
+  import '/home/me/file';
+  
+  import 'C:\\Users\\me\\file'；
+  ```
+
+  由于我们已经取得文件的绝对路径，因此不需要进一步再做解析；
+
+* 相对路径：
+
+  ```javascript
+  import '../src/file1';
+  import './file2';
+  ```
+
+  在这种情况下，使用 import 或 require 的资源文件所在的目录，被认为是上下文目录。**在 import/require 中给定的相对路径，会拼接此上下文路径，以产生模块的绝对路径。**
+
+* 模块路径：
+
+  ```javascript
+  import 'module';
+  import 'module/lib/file';
+  ```
+
+  模块将在 resolve.modules 中指定的所有目录内搜索。可以替换初始模块路径，此替换路径通过使用 resolve.alias 配置选项来创建一个别名。
+
+  一旦根据上述规则解析路径后，resolver 将检查路径是否指向文件或目录。如果路径指向一个文件：
+
+  * 如果路径具有文件扩展名，则被直接将文件打包；
+  * 否则，将使用 [ resolve.extensions ] 选项作为文件扩展名来解析，此选项告诉 resolver 在解析中能够接受哪些扩展名（例如 .js，.jsx）；
+
+  如果路径指向一个文件夹，则采取以下步骤找到具有正确扩展名的正确文件：
+
+  * 如果文件夹中包含 package.json 文件，则按照顺序查找 resolve.mainFilelds 配置选项中指定的字段。通过 package.json 中的第一个字段确定文件路径；
+  * 如果不存在 package.json 文件或者 package.json 文件中的 main 字段没有返回一个有效路径，则按照顺序查找 resolve.mainFiles 配置选项中指定的文件名，看是否能在 import/require 目录下匹配到一个存在的文件名；
+  * 文件扩展名通过 resolve.extensions 选项，采用类似的方法进行解析；
+
+
+
+### 10.2 解析 loader
+
+loader 的解析规则，也遵循文件解析的特定规则。但是 resolveLoader 配置选项，可以用来为 loader 提供独立的解析规则。
+
+
+
+### 10.3 缓存
+
+每次文件系统访问都会被缓存，以便更快触发对同一文件的多个并行或串行请求。在 观察模式 下，只有修改过的文件会从缓存中摘出。如果关闭观察模式，会在每次编译钱清理缓存。
+
+
+
+## 11. 依赖图
+
+任何时候，一个文件依赖于另一个文件， webpack 就把此视为文件之间有依赖关系。这使得 webpack 可以接收非代码资源（例如 images 或 web fonts），并且可以把它们作为 \_依赖\_ 提供给你的应用程序。
+
+**webpack 从命令行或配置文件中定义的一个模块列表开始，处理你的应用程序。从这些入口起点开始，webpack 递归地构建一个依赖图，这个依赖图包含着应用程序所需的每个模块，然后将所有这些模块打包为少量的 bundle - 通常只有一个 - 可由浏览器加载。**
+
+> 对于 HTTP/1.1 客户端，由 webpack 打包你的应用程序会极其强大，这是因为在浏览器发起一个新请求时，它能够减少应用程序必须等待的事件。**对于 HTTP/2 ，还可以使用 代码分离 来实现最佳构建结果。**
+
+
+
+## 12. manifest
+
+在使用 webpack 构建的典型应用程序或站点中，有三种主要的代码类型：
+
+1. 你或你的团队编写的源码；
+2. 你的源码会依赖的任何第三方的 library 或 “vendor" 代码；
+3. webpack 的 runtime 和 manifest， 管理所有模块的交互；
+
+详情见文档
+
+
+
+## 13. 部署目标
+
+因为服务器和浏览器代码都可以用 JS 编写，所以 webpack 提供了多种部署 target(目标)，可以在 webpack 配置对象中进行设置。
+
+### 13.1 用法
+
+```javascript
+module.exports = {
+    target: 'node'
+}
+```
+
+使用 `node` ，webpack 会编译为用于类 Node.js 环境（使用 Node.js 的 require ，而不是使用任意内置模块（如 fs 或 path）来加载 chunk）。
+
+每个 *target* 都有各种部署(deployment)/环境(environment)特定的附加项，以支持满足其需求。
+
+
+
+### 13.2 多个 target
+
+可以通过打包两个单独配置，来创建一个同构的 library：
+
+```javascript
+const path = require('path');
+const serverConfig = {
+  target: 'node',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'lib.node.js'
+  }
+  //…
+};
+
+const clientConfig = {
+  target: 'web', // <=== 默认是 'web'，可省略
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'lib.js'
+  }
+  //…
+};
+
+module.exports = [ serverConfig, clientConfig ];
+```
+
+上面的例子将在 dist 文件夹下创建 lib.js 和 lib.node.js 文件。
+
+
+
+## 14. 模块热替换(HMR)
+
+**模块热替换（HMR - hot module replacement）功能会在应用程序运行过程中，替换、添加或删除模块，而无需重新加载整个页面。**主要通过以下几种方式：
+
+* 保留在完全重新加载页面期间丢失的应用程序状态；
+* 只更新变更内容，以节省宝贵的开发时间；
+* 在源码中对 CSS/JS 进行修改，会立刻在浏览器中进行更新，这几乎相当于在浏览器 devtools 直接更改样式；
+
+...
