@@ -2,20 +2,29 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-09 21:16:28
- * @LastEditTime: 2020-04-11 18:02:26
+ * @LastEditTime: 2020-04-11 19:46:37
  */
+import _ from "lodash";
 
-async function getComponent() {
+function component() {
   var element = document.createElement("div");
-  const { default: _ } = await import(
-    /* webpackChunkName: "lodash" */ "lodash"
-  );
+  var button = document.createElement("button");
+  var br = document.createElement("br");
 
+  button.innerHTML = "Click me and look at the console!";
   element.innerHTML = _.join(["Hello", "webpack"], " ");
+  element.appendChild(br);
+  element.appendChild(button);
+
+  button.onclick = () => {
+    import(/* webpackChunkName: "print" */ "./print").then(module => {
+      var print = module.default;
+
+      print();
+    });
+  };
 
   return element;
 }
 
-getComponent().then(component => {
-  document.body.appendChild(component);
-});
+document.body.appendChild(component());
