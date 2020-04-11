@@ -2,16 +2,20 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-09 21:16:28
- * @LastEditTime: 2020-04-09 22:25:07
+ * @LastEditTime: 2020-04-11 18:02:26
  */
-import _ from "lodash";
 
-function component() {
-  let element = document.createElement("div");
+async function getComponent() {
+  var element = document.createElement("div");
+  const { default: _ } = await import(
+    /* webpackChunkName: "lodash" */ "lodash"
+  );
 
   element.innerHTML = _.join(["Hello", "webpack"], " ");
 
   return element;
 }
 
-document.body.appendChild(component());
+getComponent().then(component => {
+  document.body.appendChild(component);
+});
