@@ -2,19 +2,19 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-13 10:40:11
- * @LastEditTime: 2020-04-13 17:44:02
+ * @LastEditTime: 2020-04-13 22:26:38
  */
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = {
-  mode: "production",
-  entry: {
-    main: "./src/index.js"
-  },
+  mode: "development",
+  entry: ["./src/index.js"],
   output: {
-    filename: "bundle.js",
-    path: path.resolve(__dirname, "dist")
+    filename: "dist.js",
+    path: path.resolve(__dirname, "dist"),
+    publicPath: ""
   },
   module: {
     rules: [
@@ -70,7 +70,9 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       // 定义模板文件
-      template: "./index.html"
-    })
+      template: "./index.html",
+      title: "webpack"
+    }),
+    new CleanWebpackPlugin()
   ]
 };
