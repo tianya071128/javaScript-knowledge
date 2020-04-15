@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-13 10:40:11
- * @LastEditTime: 2020-04-13 22:26:38
+ * @LastEditTime: 2020-04-14 22:09:09
  */
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
@@ -11,6 +11,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 module.exports = {
   mode: "development",
   entry: ["./src/index.js"],
+  devtool: "source-map",
   output: {
     filename: "dist.js",
     path: path.resolve(__dirname, "dist"),
