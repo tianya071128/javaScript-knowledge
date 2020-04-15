@@ -2,16 +2,25 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-13 10:40:11
- * @LastEditTime: 2020-04-14 22:09:09
+ * @LastEditTime: 2020-04-15 10:42:03
  */
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const webpack = require("webpack");
 
 module.exports = {
   mode: "development",
   entry: ["./src/index.js"],
   devtool: "source-map",
+  devServer: {
+    // contentBase
+    // 默认打开浏览器
+    open: false,
+    // 开启 HMR
+    hot: true,
+    hotOnly: true
+  },
   output: {
     filename: "dist.js",
     path: path.resolve(__dirname, "dist"),
@@ -65,6 +74,10 @@ module.exports = {
           "sass-loader", // 将 Sass 编译成 CSS，默认使用 Node Sass
           "postcss-loader"
         ]
+      },
+      {
+        test: /\.css/,
+        use: ["style-loader", "css-loader", "postcss-loader"]
       }
     ]
   },
@@ -74,6 +87,7 @@ module.exports = {
       template: "./index.html",
       title: "webpack"
     }),
-    new CleanWebpackPlugin()
+    new CleanWebpackPlugin(),
+    new webpack.HotModuleReplacementPlugin()
   ]
 };

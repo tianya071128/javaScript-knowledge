@@ -23,6 +23,12 @@ h1 {
   text-align: center;
   font-weight: bold;
   line-height: 2;
+}
+h3 {
+  color: #fff;
+  font-size: 14px;
+  text-align: center;
+  line-height: 2;
   border-bottom: 1px solid #248578;
   margin: 0 2%;
 }
@@ -96,10 +102,11 @@ ul.skill {
 }
 ul.skill li {
   margin: 10px 0;
-  color: #fff;
   display: flex;
-  align-items: center;
-  font-size: 14px;
+  /* align-items: center; */
+  font-size: 15px;
+  line-height: 1.4;
+  color: #1d7d71;
 }
 ul.skill li span {
   text-align: right;

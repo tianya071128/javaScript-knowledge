@@ -2,16 +2,23 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-13 11:02:13
- * @LastEditTime: 2020-04-14 22:08:47
+ * @LastEditTime: 2020-04-15 10:46:35
  */
+// import "./style.css";
 
-// var img = new Image();
-// img.src = avatar;
-import "./icon.png";
+// var btn = document.createElement("button");
 
-let img = document.createElement("div");
-img.classList.add("avatar");
-console.log(saf);
+// btn.innerHTML = "新增";
+// document.body.appendChild(btn);
 
-var root = document.getElementById("root");
-root.appendChild(img);
+// btn.onclick = function() {
+//   var div = document.createElement("div");
+//   div.innerHTML = "item";
+//   document.body.appendChild(div);
+// };
+
+import counter from "./counter";
+import number from "./number";
+
+counter();
+number();
