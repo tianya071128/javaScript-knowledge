@@ -7,7 +7,8 @@
   "sideEffects": false,
   "scripts": {
     "dev": "webpack-dev-server --config ./build/webpack.dev.js",
-    "build": "webpack --config ./build/webpack.prod.js"
+    "build": "webpack --config ./build/webpack.prod.js",
+    "dev-build": "webpack --config ./build/webpack.dev.js "
   },
   "keywords": [],
   "author": "",
@@ -27,6 +28,7 @@
     "clean-webpack-plugin": "^3.0.0",
     "css-loader": "^3.5.2",
     "html-webpack-plugin": "^4.2.0",
+    "loadsh": "0.0.4",
     "node-sass": "^4.13.1",
     "postcss-loader": "^3.0.0",
     "sass-loader": "^8.0.2",

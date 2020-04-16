@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-15 17:08:55
- * @LastEditTime: 2020-04-15 17:20:59
+ * @LastEditTime: 2020-04-16 21:37:16
  */
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
@@ -80,8 +80,19 @@ module.exports = {
     }),
     new CleanWebpackPlugin()
   ],
+  // 优化配置项
+  optimization: {
+    splitChunks: {
+      chunks: "all",
+      cacheGroups: {
+        vendors: false,
+        default: false
+      }
+    }
+  },
   output: {
     filename: "dist.js",
+    chunkFilename: "[name].bundle.js",
     path: path.resolve(__dirname, "../dist"),
     publicPath: ""
   }

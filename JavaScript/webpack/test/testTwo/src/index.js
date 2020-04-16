@@ -1,10 +1,4 @@
-/*
- * @Descripttion:
- * @Author: 温祖彪
- * @Date: 2020-04-13 11:02:13
- * @LastEditTime: 2020-04-15 17:03:52
- */
+import _ from "lodash";
 
-import { add } from "./math.js";
-
-add(1, 5);
+console.log(_.join(["a", "b", "c", "d"], "**"));
+console.log(import(/* webpackChunkName: "test" */ "./test.js"));
