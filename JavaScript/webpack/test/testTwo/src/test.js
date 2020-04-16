@@ -2,6 +2,6 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-16 21:03:58
- * @LastEditTime: 2020-04-16 21:04:38
+ * @LastEditTime: 2020-04-16 22:41:49
  */
-export default 2;
+import "lodash";
