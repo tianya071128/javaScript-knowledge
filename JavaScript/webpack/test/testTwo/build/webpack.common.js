@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-15 17:08:55
- * @LastEditTime: 2020-04-16 22:43:45
+ * @LastEditTime: 2020-04-19 15:48:26
  */
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
@@ -83,7 +83,18 @@ module.exports = {
   // 优化配置项
   optimization: {
     splitChunks: {
-      chunks: "all"
+      chunks: "all",
+      minSize: 0,
+      maxSize: 0,
+      cacheGroups: {
+        default: {
+          minChunks: 1,
+          priority: -20,
+          reuseExistingChunk: true,
+          filename: "common.js"
+        }
+      }
+      // maxAsyncRequests: 1
     }
   },
   output: {
