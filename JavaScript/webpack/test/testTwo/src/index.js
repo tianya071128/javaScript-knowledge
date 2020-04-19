@@ -2,8 +2,10 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-13 11:02:13
- * @LastEditTime: 2020-04-19 15:48:07
+ * @LastEditTime: 2020-04-19 21:53:00
  */
-// console.log(import(/* webpackChunkName: "test" */ "./test.js"));
+import _ from "lodash";
 
-import "./test.js";
+const dom = $("<div>");
+dom.html(_.join(["wen", "zubiao", "hello", "wold"], "---"));
+$("body").append(dom);
