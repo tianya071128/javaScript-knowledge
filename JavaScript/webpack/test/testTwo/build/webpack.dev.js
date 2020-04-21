@@ -2,10 +2,11 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-13 10:40:11
- * @LastEditTime: 2020-04-21 11:07:26
+ * @LastEditTime: 2020-04-21 18:18:20
  */
 const webpack = require("webpack");
-const path = require("path");
+const merge = require("webpack-merge");
+const commonConfig = require("./webpack.common.js");
 
 const devConfig = {
   mode: "development",
@@ -16,7 +17,16 @@ const devConfig = {
     open: false,
     // 开启 HMR
     hot: true,
-    hotOnly: true
+    hotOnly: true,
+    proxy: {
+      "/react/api": {
+        target: "http://www.dell-lee.com",
+        pathRewrite: {
+          // 重写路径不仅可以重写 /react/api，还可以重写其他路径
+          "header.json": "demo.json"
+        }
+      }
+    }
   },
   module: {
     rules: [
@@ -57,10 +67,8 @@ const devConfig = {
   plugins: [new webpack.HotModuleReplacementPlugin()],
   output: {
     filename: "[name].js",
-    chunkFilename: "[name].bundle.js",
-    path: path.resolve(__dirname, "../dist"),
-    publicPath: ""
+    chunkFilename: "[name].bundle.js"
   }
 };
 
-module.exports = devConfig;
+module.exports = merge(commonConfig, devConfig);

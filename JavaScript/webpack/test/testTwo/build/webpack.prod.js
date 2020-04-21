@@ -2,11 +2,12 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-13 10:40:11
- * @LastEditTime: 2020-04-21 11:07:55
+ * @LastEditTime: 2020-04-21 15:09:41
  */
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
-const path = require("path");
+const merge = require("webpack-merge");
+const commonConfig = require("./webpack.common.js");
 
 const prodConfig = {
   mode: "production",
@@ -76,10 +77,8 @@ const prodConfig = {
   },
   output: {
     filename: "[name].[contenthash].js",
-    chunkFilename: "[name].[contenthash].js",
-    path: path.resolve(__dirname, "../dist"),
-    publicPath: ""
+    chunkFilename: "[name].[contenthash].js"
   }
 };
 
-module.exports = prodConfig;
+module.exports = merge(commonConfig, prodConfig);

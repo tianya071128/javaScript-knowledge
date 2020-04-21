@@ -168,9 +168,17 @@ module.exports = {
 module.exports = {
     //...
     devServer: {
-        proxy: {
-            // 请求到 /api/users 现在会被代理到请求 http://localhost:3000/api/users
-            '/api': 'http://localhost:3000'
+        proxy: {     
+            '/api': {
+                target: 'http://localhost:3000',
+                pathRewrite: {
+                    // 请求到 /api/users 现在会被代理到请求 http://localhost:3000/users
+                    '^/api': '',
+                    // 重写路径不仅可以重写 /api，还可以重写其他路径
+                    // 请求 /api/users/header.json代理到 http://localhost:3000/users/demo.json
+                    'header.json': 'demo.json'
+                }
+            }
         }
     }
 }

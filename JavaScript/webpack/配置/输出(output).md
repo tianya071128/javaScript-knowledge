@@ -210,3 +210,23 @@ module.exports = {
 
 默认使用 `[id].js` 或从 [`output.filename`](https://webpack.docschina.org/configuration/output/#output-filename) 中推断出的值（`[name]` 会被预先替换为 `[id]` 或 `[id].`）。
 
+
+
+## 5. output.library
+
+`string | object` （从 webpack 3.1.0 开始：此配置项用于 libraryTarget: 'umd'）
+
+output.library 的值的作用，取决于 output.libraryTarget 选项的值；
+
+> *有关* `output.library` *以及* `output.libraryTarget` *详细信息，请查看*[创建 library 指南](https://webpack.docschina.org/guides/author-libraries)
+
+> ***注意，如果将*`数组`*作为* `entry`*，那么只会暴露数组中的最后一个模块。如果将*`对象`*作为* `entry`*，还可以使用* `array` *语法暴露（具体查看*[这个示例](https://github.com/webpack/webpack/tree/master/examples/multi-part-library) *for details)）。***
+
+
+
+## 6. output.libraryTarget
+
+`string: 'var'`
+
+配置如何暴露 library。可以使用下面的选项中的任意一个。注意，此选项与分配给 `output.library` 的值一同使用。
+

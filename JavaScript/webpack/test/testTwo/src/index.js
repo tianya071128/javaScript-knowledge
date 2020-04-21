@@ -2,13 +2,10 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-13 11:02:13
- * @LastEditTime: 2020-04-21 10:51:47
+ * @LastEditTime: 2020-04-21 18:14:50
  */
-import _ from "lodash";
-import $ from "jquery";
+import axios from "axios";
 
-const dom = $("<div>");
-dom.html(_.join(["wen", "zubiao", "hello", "wold"], "---"));
-$("body").append(dom);
-
-console.log(this);
+axios.get("/react/api/header.json").then(res => {
+  console.log(res);
+});
