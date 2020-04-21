@@ -2,12 +2,15 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-15 17:08:55
- * @LastEditTime: 2020-04-19 21:58:17
+ * @LastEditTime: 2020-04-21 11:10:37
  */
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const merge = require("webpack-merge");
+const devConfig = require("./webpack.dev.js");
+const prodConfig = require("./webpack.prod.js");
 
-module.exports = {
+const commonConfig = {
   entry: {
     main: "./src/index.js"
   },
@@ -59,5 +62,13 @@ module.exports = {
         }
       }
     }
+  }
+};
+
+module.exports = env => {
+  if (env && env.production) {
+    return merge(commonConfig, prodConfig);
+  } else {
+    return merge(commonConfig, devConfig);
   }
 };

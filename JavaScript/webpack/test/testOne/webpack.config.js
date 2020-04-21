@@ -2,11 +2,10 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-11 17:47:02
- * @LastEditTime: 2020-04-11 20:21:41
+ * @LastEditTime: 2020-04-21 10:28:35
  */
 const path = require("path");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
+const webpack = require("webpack");
 
 module.exports = {
   mode: "development",
@@ -14,15 +13,17 @@ module.exports = {
     index: "./src/index.js"
   },
   output: {
-    filename: "[name].[contenthash].js",
-    // 非入口 chunk(non-entry chunk) 的名称
-    chunkFilename: "[name].[contenthash].js",
+    filename: "bundle.js",
     path: path.resolve(__dirname, "dist")
   },
   plugins: [
-    new CleanWebpackPlugin(),
-    new HtmlWebpackPlugin({
-      title: "Caching"
+    new webpack.ProvidePlugin({
+      _: "lodash"
     })
-  ]
+  ],
+  optimization: {
+    splitChunks: {
+      chunks: "all"
+    }
+  }
 };

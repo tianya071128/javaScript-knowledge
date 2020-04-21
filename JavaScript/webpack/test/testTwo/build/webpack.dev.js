@@ -2,11 +2,9 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-13 10:40:11
- * @LastEditTime: 2020-04-19 21:49:22
+ * @LastEditTime: 2020-04-21 11:07:26
  */
 const webpack = require("webpack");
-const merge = require("webpack-merge");
-const commonConfig = require("./webpack.common.js");
 const path = require("path");
 
 const devConfig = {
@@ -65,4 +63,4 @@ const devConfig = {
   }
 };
 
-module.exports = merge(commonConfig, devConfig);
+module.exports = devConfig;

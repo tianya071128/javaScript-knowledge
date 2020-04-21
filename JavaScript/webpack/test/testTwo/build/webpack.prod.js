@@ -2,10 +2,8 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-13 10:40:11
- * @LastEditTime: 2020-04-19 22:00:59
+ * @LastEditTime: 2020-04-21 11:07:55
  */
-const merge = require("webpack-merge");
-const commonConfig = require("./webpack.common.js");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const path = require("path");
@@ -84,4 +82,4 @@ const prodConfig = {
   }
 };
 
-module.exports = merge(commonConfig, prodConfig);
+module.exports = prodConfig;
