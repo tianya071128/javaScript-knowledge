@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-15 17:08:55
- * @LastEditTime: 2020-04-21 15:08:08
+ * @LastEditTime: 2020-04-23 19:06:15
  */
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
@@ -53,10 +53,17 @@ module.exports = {
     splitChunks: {
       chunks: "all",
       cacheGroups: {
-        vendors: {
+        libs: {
+          name: "chunk-libs",
           test: /[\\/]node_modules[\\/]/,
-          priority: -10,
-          name: "vendors"
+          priority: 10,
+          chunks: "all"
+        },
+        elementUI: {
+          name: "chunk-elementUI",
+          priority: 20,
+          test: /[\\/]node_modules[\\/]element-ui[\\/]/,
+          chunks: "all"
         }
       }
     }
