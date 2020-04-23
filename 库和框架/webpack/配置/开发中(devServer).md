@@ -184,3 +184,22 @@ module.exports = {
 }
 ```
 
+
+
+## devServer.overlay
+
+```
+boolean` `object: { boolean errors, boolean warnings }
+```
+
+当出现编译器错误或警告时，在浏览器中显示全屏覆盖层。默认禁用。
+
+```javascript
+module.exports = {
+  //...
+  devServer: {
+    overlay: true
+  }
+};
+```
+
