@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-04-13 10:40:11
- * @LastEditTime: 2020-04-21 15:09:41
+ * @LastEditTime: 2020-04-24 18:11:43
  */
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
