@@ -27,6 +27,7 @@
     "element-ui": "^2.13.1",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "svg-sprite-loader": "^4.2.5",
     "vue-template-compiler": "^2.6.11",
     "webpack-bundle-analyzer": "^3.7.0"
   },

@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <el-button type="danger">危险按钮</el-button>
+    <svg-icon iconClass="component" class="icon"></svg-icon>
     <img alt="Vue logo" src="./assets/logo.png" />
     <HelloWorld msg="Welcome to Your Vue.js App" />
   </div>

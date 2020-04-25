@@ -3,6 +3,8 @@ import ElementUI from "element-ui";
 
 Vue.use(ElementUI);
 
+import "@/icons";
+
 import App from "./App.vue";
 
 Vue.config.productionTip = false;

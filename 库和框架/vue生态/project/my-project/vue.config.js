@@ -57,6 +57,22 @@ module.exports = {
         }
       ]);
     }
+
+    // 添加 svg 组件
+    const svgRule = config.module.rule("svg");
+    svgRule.uses.clear();
+    svgRule.exclude.add(/node_modules/);
+    svgRule
+      .test(/\.svg$/)
+      .use("svg-sprite-loader")
+      .loader("svg-sprite-loader")
+      .options({
+        symbolId: "icon-[name]"
+      });
+
+    const imagesRule = config.module.rule("images");
+    imagesRule.exclude.add(resolve("src/icons"));
+    config.module.rule("images").test(/\.(png|jpe?g|gif|svg)(\?.*)?$/);
   },
   // function | object
   // function: 则会接收被解析的配置作为参数。该函数既可以修改配置并不返回任何东西，也可以返回一个被克隆或合并过的配置版本。
