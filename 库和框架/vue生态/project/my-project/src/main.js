@@ -1,14 +1,16 @@
 import Vue from "vue";
-import ElementUI from "element-ui";
 
-Vue.use(ElementUI);
-
+// svg
 import "@/icons";
+
+// vuex
+import stote from "./store";
 
 import App from "./App.vue";
 
 Vue.config.productionTip = false;
 
 new Vue({
-  render: h => h(App)
+  render: h => h(App),
+  stote
 }).$mount("#app");

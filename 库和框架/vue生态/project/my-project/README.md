@@ -32,8 +32,6 @@
 
 * 使用 SVG 组件
 
-  
-
 ### 参考资料
 
 * [vue-cli3 配置项](https://github.com/staven630/vue-cli4-config/tree/vue-cli3)
