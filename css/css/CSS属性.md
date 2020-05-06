@@ -982,7 +982,7 @@
 | ---- | ------- | ---- |
 | 是   | outside | CSS1 |
 
-![list-style-position](./list-style-position.png 'list-style-position')
+![list-style-position](../image/list-style-position.png 'list-style-position')
 
 ### 6.3 list-style-image
 
