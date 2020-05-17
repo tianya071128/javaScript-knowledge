@@ -140,6 +140,9 @@ $ git log --stat
 # 可以使用不同于默认格式的方式展示提交历史
 # 这个选项有一些内建的子选项供你使用。 比如 oneline 会将每个提交放在一行显示，在浏览大量的提交时非常有用。
 $ git log --pretty=oneline
+
+# 会输出你的提交历史、各个分支的指向以及项目的分支分叉情况
+$ git log --oneline --decorate --graph --all
 ```
 
 
@@ -148,7 +151,7 @@ $ git log --pretty=oneline
 
 ```bash
 # 恢复暂存区的指定文件到工作区
-$ git checkout [file]
+$ git checkout -- [file]
 
 # 恢复某个commit的指定文件到工作区
 $ git checkout [commit] [file]
@@ -257,6 +260,78 @@ $ git checkout -b [branch] [tag]
 ```
 
 
+
+## 11. 分支 branch
+
+Git 的分支，其实本质上仅仅是指向提交对象的可变指针。
+
+> 分支切换会改变你工作目录中的文件
+> 在切换分支时，一定要注意你工作目录里的文件会被改变。 如果是切换到一个较旧的分支，你的工作目录会恢复到该分支最后一次提交时的样子。 如果 Git 不能干净利落地完成这个任务，它将禁止切换分支。
+
+```bash
+# 列出所有本地分支
+$ git branch
+# 查看每一个分支的最后一次提交
+$ git branch -v
+# 列出所有远程分支
+$ git branch -r
+# 列出所有本地分支和远程分支
+$ git branch -a
+# 查看哪些分支已经合并到当前分支
+$ git branch --merged
+# 查看所有包含未合并工作的分支
+$ git branch --no-merged
+# 将所有的本地分支列出来并且包含更多的信息，如每一个分支正在跟踪哪个远程分支与本地分支是否是领先、落后或是都有。
+$ git branch -vv
+
+# 新建一个分支，但依然停留在当前分支
+$ git branch [branch-name]
+# 新建一个分支，并切换到该分支
+$ git checkout -b [branch]
+# 新建一个分支，指向指定commit
+$ git branch [branch] [commit]
+
+# 切换到指定分支，并更新工作区
+$ git checkout [branch-name]
+
+# 新建一个分支，与指定的远程分支建立追踪关系
+$ git branch --track [branch] [remote-branch]
+# 建立追踪关系，在现有分支与指定的远程分支之间
+$ git branch --set-upstream [branch] [remote-branch]
+
+# 合并指定分支到当前分支
+$ git merge [branch]
+
+# 选择一个 commit，合并进当前分支
+$ git cherry-pick [commit]
+
+# 删除分支
+$ git branch -d [branch-name]
+# 强制删除还未合并的分支
+$ git branch -D testing
+
+# 删除远程分支
+$ git push origin --delete
+$ git branch -dr
+```
+
+### 11.1 远程分支
+
+远程跟踪分支是远程分支状态的引用。它们是你无法移动的本地引用。一旦你进行了网络通信， Git 就会为你移动它们以精确反映远程仓库的状态。
+
+```bash
+# 取回远程仓库的变化，并与本地分支合并
+$ git pull [remote] [branch]
+
+# 上传本地指定分支到远程仓库
+$ git push [remote] [branch]
+# 强行推送当前分支到远程仓库，即使有冲突
+$ git push [remote] --force
+# 推送所有分支到远程仓库
+$ git push [remote] --all
+# 推送本地创建的分支至服务器，并建立跟踪关系
+$ git push --set-upstream origin <remote-branch> # git push -u origin <remote-branch>
+```
 
 
 
