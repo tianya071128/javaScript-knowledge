@@ -314,8 +314,7 @@ $ git branch -d [branch-name]
 $ git branch -D testing
 
 # 删除远程分支
-$ git push origin --delete
-$ git branch -dr
+$ git push origin --delete [branch-name]
 ```
 
 ### 11.1 远程分支
