@@ -92,6 +92,9 @@ $ git commit -m [message]
 
 # 提交时显示所有diff信息
 $ git commit -v
+
+# 直接提交工作区的已追踪的文件至仓库
+$ git commit -a -m [message]
 ```
 
 
