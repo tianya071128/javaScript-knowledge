@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-30 11:30:45
+ * @LastEditTime: 2020-05-21 21:46:25
  */
 /* @flow */
 
@@ -394,10 +394,12 @@ export function stateMixin(Vue: Class<Component>) {
   // the object here.
   const dataDef = {};
   dataDef.get = function() {
+    // this 是在调用时确认的，在调用时，是通过 Vue.prototype 属性访问，所以此时的 this 就是指代 Vue 实例
     return this._data;
   };
   const propsDef = {};
   propsDef.get = function() {
+    // this 是在调用时确认的，在调用时，是通过 Vue.prototype 属性访问，所以此时的 this 就是指代 Vue 实例
     return this._props;
   };
   if (process.env.NODE_ENV !== "production") {

@@ -304,7 +304,6 @@ $ git branch --set-upstream [branch] [remote-branch]
 
 # 合并指定分支到当前分支
 $ git merge [branch]
-
 # 选择一个 commit，合并进当前分支
 $ git cherry-pick [commit]
 
