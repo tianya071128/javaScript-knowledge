@@ -2,7 +2,7 @@
  * @Descripttion: 选项的合并
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-26 17:05:30
+ * @LastEditTime: 2020-05-24 09:45:03
  */
 /* @flow */
 
@@ -37,12 +37,12 @@ const strats = config.optionMergeStrategies;
  */
 // 合并 el 选项和 propsData 选项的
 if (process.env.NODE_ENV !== "production") {
-  strats.el = strats.propsData = function (parent, child, vm, key) {
+  strats.el = strats.propsData = function(parent, child, vm, key) {
     // 如果没有 vm 参数(当创建子组件时,是没有传入 vm 参数的),则说明处理的是子组件
     if (!vm) {
       warn(
         `option "${key}" can only be used during instance ` +
-        "creation with the `new` keyword."
+          "creation with the `new` keyword."
       );
     }
     return defaultStrat(parent, child);
@@ -145,7 +145,7 @@ export function mergeDataOrFn(
 }
 
 // 选项 data 的合并策略
-strats.data = function (
+strats.data = function(
   parentVal: any,
   childVal: any,
   vm?: Component
@@ -156,8 +156,8 @@ strats.data = function (
       process.env.NODE_ENV !== "production" &&
         warn(
           'The "data" option should be a function ' +
-          "that returns a per-instance value in component " +
-          "definitions.",
+            "that returns a per-instance value in component " +
+            "definitions.",
           vm
         );
 
@@ -189,8 +189,8 @@ function mergeHook(
     ? parentVal
       ? parentVal.concat(childVal)
       : Array.isArray(childVal)
-        ? childVal
-        : [childVal]
+      ? childVal
+      : [childVal]
     : parentVal;
   return res ? dedupeHooks(res) : res;
 }
@@ -235,7 +235,7 @@ function mergeAssets(
   }
 }
 
-ASSET_TYPES.forEach(function (type) {
+ASSET_TYPES.forEach(function(type) {
   strats[type + "s"] = mergeAssets;
 });
 
@@ -246,7 +246,7 @@ ASSET_TYPES.forEach(function (type) {
  * another, so we merge them as arrays. 另一个，所以我们把它们合并成数组
  */
 // 合并处理后的 watch 选项下的每个键值，有可能是一个数组，也有可能是一个函数。
-strats.watch = function (
+strats.watch = function(
   parentVal: ?Object,
   childVal: ?Object,
   vm?: Component,
@@ -275,12 +275,12 @@ strats.watch = function (
       parent = [parent];
     }
     ret[key] = parent
-      // 最后，如果 parent 存在，此时的 parent 应该已经被转为数组了，所以直接将 child concat 进去
-      ? parent.concat(child)
-      // 如果 parent 不存在，直接将 child 转为数组返回
-      : Array.isArray(child)
-        ? child
-        : [child];
+      ? // 最后，如果 parent 存在，此时的 parent 应该已经被转为数组了，所以直接将 child concat 进去
+        parent.concat(child)
+      : // 如果 parent 不存在，直接将 child 转为数组返回
+      Array.isArray(child)
+      ? child
+      : [child];
   }
   return ret;
 };
@@ -289,7 +289,7 @@ strats.watch = function (
  * Other object hashes. 其他对象 hashes
  */
 // 添加 props、methods、inject 以及 computed 策略函数
-strats.props = strats.methods = strats.inject = strats.computed = function (
+strats.props = strats.methods = strats.inject = strats.computed = function(
   parentVal: ?Object,
   childVal: ?Object,
   vm?: Component,
@@ -315,7 +315,7 @@ strats.provide = mergeDataOrFn;
 /**
  * Default strategy. 默认合并策略
  */
-const defaultStrat = function (parentVal: any, childVal: any): any {
+const defaultStrat = function(parentVal: any, childVal: any): any {
   return childVal === undefined ? parentVal : childVal;
 };
 
@@ -334,16 +334,16 @@ export function validateComponentName(name: string) {
   ) {
     warn(
       'Invalid component name: "' +
-      name +
-      '". Component names ' +
-      "should conform to valid custom element name in html5 specification."
+        name +
+        '". Component names ' +
+        "should conform to valid custom element name in html5 specification."
     );
   }
   if (isBuiltInTag(name) || config.isReservedTag(name)) {
     warn(
       "Do not use built-in or reserved HTML elements as component " +
-      "id: " +
-      name
+        "id: " +
+        name
     );
   }
 }
@@ -383,7 +383,7 @@ function normalizeProps(options: Object, vm: ?Component) {
   } else if (process.env.NODE_ENV !== "production") {
     warn(
       `Invalid value for option "props": expected an Array or an Object, ` +
-      `but got ${toRawType(props)}.`,
+        `but got ${toRawType(props)}.`,
       vm
     );
   }
@@ -412,7 +412,7 @@ function normalizeInject(options: Object, vm: ?Component) {
   } else if (process.env.NODE_ENV !== "production") {
     warn(
       `Invalid value for option "inject": expected an Array or an Object, ` +
-      `but got ${toRawType(inject)}.`,
+        `but got ${toRawType(inject)}.`,
       vm
     );
   }
@@ -437,7 +437,7 @@ function assertObjectType(name: string, value: any, vm: ?Component) {
   if (!isPlainObject(value)) {
     warn(
       `Invalid value for option "${name}": expected an Object, ` +
-      `but got ${toRawType(value)}.`,
+        `but got ${toRawType(value)}.`,
       vm
     );
   }
@@ -459,6 +459,7 @@ export function mergeOptions(
   // 非生产环境下
   if (process.env.NODE_ENV !== "production") {
     // 检查 child(即组件的 options) 组件名是否正确
+    // slot 和 component 这两个名字被 Vue 作为内置标签而存在的，你是不能够使用的
     checkComponents(child);
   }
 

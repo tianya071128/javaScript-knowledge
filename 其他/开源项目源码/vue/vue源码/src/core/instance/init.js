@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-30 11:53:22
+ * @LastEditTime: 2020-05-24 11:13:59
  */
 /* @flow */
 
@@ -64,6 +64,7 @@ export function initMixin(Vue: Class<Component>) {
       );
     }
     /* istanbul ignore else */
+    // 在实例对象 vm 上添加 _renderProxy 属性
     // 在支持 proxy(ES6 代理) 环境中代理 this, 用于在设置渲染函数的作用域代理
     if (process.env.NODE_ENV !== "production") {
       initProxy(vm);
