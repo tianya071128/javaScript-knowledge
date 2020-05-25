@@ -8,15 +8,20 @@
     <script src="./dist/vue.js"></script>
   </head>
   <body>
-    <div id="app">{{test}}</div>
+    <div id="app">{{test}}{{ object.b }}{{ array[0] }}</div>
   </body>
 </html>
 <script>
   var vm = new Vue({
-    el: '#app',
+    el: "#app",
     data: {
-        test: 1
+      test: 1,
+      array: [1, 2, 3],
+      object: {
+        a: 1,
+        b: 2
+      }
     }
-  })
+  });
   console.log(vm);
 </script>
