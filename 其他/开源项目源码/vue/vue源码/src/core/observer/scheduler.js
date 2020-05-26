@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-29 19:09:50
+ * @LastEditTime: 2020-05-26 22:32:08
  */
 /* @flow */
 
@@ -68,6 +68,7 @@ if (inBrowser && !isIE) {
 /**
  * Flush both queues and run the watchers.
  */
+// 作用之一就是用来将队列中的观察者统一执行更新的
 function flushSchedulerQueue() {
   currentFlushTimestamp = getNow();
   flushing = true;

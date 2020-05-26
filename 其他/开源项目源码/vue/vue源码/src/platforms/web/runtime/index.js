@@ -6,7 +6,7 @@
  *  4. 在 Vue.prototype 上添加了两个方法：__patch__ 和 $mount。
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-04-03 11:18:35
+ * @LastEditTime: 2020-05-26 22:43:36
  */
 /* @flow */
 

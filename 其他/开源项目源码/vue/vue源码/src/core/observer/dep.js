@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-29 11:35:18
+ * @LastEditTime: 2020-05-26 22:18:56
  */
 /* @flow */
 
@@ -26,21 +26,22 @@ export default class Dep {
     this.subs = [];
   }
 
-  // 真正用来收集观察者的方法
+  // 真正用来收集观察者的方法 -- 绕了一圈，目的在于避免重复收集
   addSub(sub: Watcher) {
     this.subs.push(sub);
   }
-
+  // 移除依赖
   removeSub(sub: Watcher) {
     remove(this.subs, sub);
   }
 
+  // 触发收集依赖
   depend() {
     if (Dep.target) {
       Dep.target.addDep(this);
     }
   }
-
+  // 触发依赖
   notify() {
     // stabilize the subscriber list first 先稳定 subscriber 列表
     const subs = this.subs.slice();
@@ -62,6 +63,7 @@ export default class Dep {
 Dep.target = null;
 const targetStack = [];
 
+// 在创建观察者的时候求值，将依赖引用在 Dep.target 中
 export function pushTarget(target: ?Watcher) {
   targetStack.push(target);
   Dep.target = target;

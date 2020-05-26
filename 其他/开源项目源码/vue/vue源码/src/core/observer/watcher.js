@@ -2,7 +2,7 @@
  * @Descripttion:
  * @Author: 温祖彪
  * @Date: 2020-03-06 22:40:51
- * @LastEditTime: 2020-03-29 21:51:09
+ * @LastEditTime: 2020-05-26 22:22:29
  */
 /* @flow */
 
@@ -142,6 +142,7 @@ export default class Watcher {
   get() {
     // 作用就是用来为 Dep.target 属性赋值的，pushTarget 函数会将接收到的参数赋值给 Dep.target 属性
     pushTarget(this);
+    // 值为 this.getter 函数的返回值
     let value;
     const vm = this.vm;
     try {
@@ -175,6 +176,7 @@ export default class Watcher {
    * Add a dependency to this directive. 向此指令添加依赖项
    */
   addDep(dep: Dep) {
+    // Dep 实例的唯一 id 值
     const id = dep.id;
     // 通过 dep 对象的 id 来避免收集重复依赖
     // 这样无论一个数据属性被读取了多少次, 对于同一个观察者它只会收集一次
@@ -234,6 +236,7 @@ export default class Watcher {
    */
   // 更新变化
   run() {
+    // this.active: 用来标识一个观察者是否处于激活状态，或者可用状态。
     if (this.active) {
       // 重新求值, 同时也会重新收集依赖
       // 对于渲染函数的观察者来讲，重新求值其实等价于重新执行渲染函数，最终结果就是重新生成了虚拟DOM并更新真实DOM，这样就完成了重新渲染的过程。
