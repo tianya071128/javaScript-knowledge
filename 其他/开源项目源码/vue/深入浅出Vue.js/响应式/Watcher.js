@@ -15,11 +15,50 @@ export function parsePath(path) {
   };
 }
 
+// 处理深度监听
+const seenObjects = new Set();
+function traverse(val) {
+  _traverse(val, seenObjects);
+  seenObjects.clear();
+}
+function _traverse(val, seen) {
+  let i, keys;
+  const isA = Array.isArray(val);
+  if ((!isA && !isObject(val)) || Object.isFrozen(val)) {
+    // val 不是数组或对象，又或者已经被冻结
+    return;
+  }
+
+  if (val.__ob__) {
+    // 深度监听时，防止收集重复依赖
+    const depId = val.__ob__.dep.id;
+    if (seen.has(depId)) {
+      return;
+    }
+    seen.add(depId);
+  }
+
+  if (isA) {
+    i = val.length;
+    while (i--) _traverse(val[i], seen);
+  } else {
+    keys = Object.keys(val);
+    i = keys.length;
+    // val[keys[i]] 会触发属性的 getter，从而触发收集依赖
+    while (i--) _traverse(val[keys[i]], seen);
+  }
+}
+
 export default class Watcher {
   constructor(vm, expOrFn, cd) {
     this.vm = vm; // 绑定所属组件
     this.deps = []; // 收集所有 dep
     this.depIds = new Set();
+    if (optins) {
+      this.deep = !!options.deep; // 深度监听
+    } else {
+      this.deep = false;
+    }
 
     if (typeof expOrFn === "function") {
       this.getter = expOrFn; // 支持函数
@@ -34,6 +73,11 @@ export default class Watcher {
     // 执行依赖函数，触发收集依赖
     window.target = this;
     let value = this.getter.call(this.vm, this.vm);
+    // 深度监听子属性
+    if (this.deep) {
+      traverse(value);
+    }
+
     window.target = undefined;
     return value;
   }

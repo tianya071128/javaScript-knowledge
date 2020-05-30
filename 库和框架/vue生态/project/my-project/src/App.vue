@@ -13,6 +13,7 @@ export default {
     console.log("BASE_URL", process.env.BASE_URL);
     console.log("VUE_APP_API", process.env.VUE_APP_API);
     console.log(process.env);
+    console.log(this);
     Promise.resolve(2).then(console.log);
   }
 };

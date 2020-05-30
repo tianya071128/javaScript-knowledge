@@ -1,4 +1,5 @@
 import Watcher from "./Watcher";
+import { set, del } from "./Observer";
 
 function Vue() {}
 
@@ -16,3 +17,6 @@ Vue.prototype.$watch = function(expOrFn, cb, options) {
     watcher.teardown();
   };
 };
+
+Vue.prototype.$set = set;
+Vue.prototype.$delete = del;

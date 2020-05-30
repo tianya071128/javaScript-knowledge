@@ -120,3 +120,71 @@ export function observe(value, asRootData) {
   }
   return ob;
 }
+
+export function set(target, key, val) {
+  if (Array.isArray(target && isValidArrayIndex(key))) {
+    // 数组处理
+    target.length = Math.max(target.length, key);
+    target.splice(key, 1, val); // 使用 splice 方法，会拦截 splice 方法，并将其设置的值递归性设置为响应式
+    return val;
+  }
+
+  // key 已经存在于 target 中 -- 直接修改属性 -- 修改属性后，就会触发依赖
+  if (key in target && !(key in Object.prototype)) {
+    target[key] = val;
+    return val;
+  }
+
+  const ob = target.__ob__;
+  // 限制使用 Vue.set/$set 函数为根数据对象添加属性时，是不被允许的。
+  if (target._isVue || (ob && ob.vmCount)) {
+    process.env.NODE_ENV !== "production" &&
+      warn(
+        "Avoid adding reactive properties to a Vue instance or its root $data " +
+          "at runtime - declare it upfront in the data option."
+      );
+    return val;
+  }
+  // 当 target 是非响应的, 简单赋值即可
+  if (!ob) {
+    target[key] = val;
+    return val;
+  }
+  // 将新添加的属性设置响应式
+  defineReactive(ob.value, key, val);
+  // 触发响应 -- 因为添加了属性, 需要触发依赖
+  ob.dep.notify();
+  return val;
+}
+
+export function del(target, key) {
+  if (Array.isArray(target && isValidArrayIndex(key))) {
+    target.splice(key, 1);
+    return;
+  }
+
+  const ob = target.__ob__;
+  // 限制使用 Vue.set/$set 函数为根数据对象添加属性时，是不被允许的。
+  if (target._isVue || (ob && ob.vmCount)) {
+    process.env.NODE_ENV !== "production" &&
+      warn(
+        "Avoid adding reactive properties to a Vue instance or its root $data " +
+          "at runtime - declare it upfront in the data option."
+      );
+    return;
+  }
+
+  // 不属于该对象，则不处理
+  if (!hasOwn(target, key)) {
+    return;
+  }
+
+  delete target[key];
+  // 当 target 是非响应的, 直接退出
+  if (!ob) {
+    return;
+  }
+  // 触发响应 -- 因为添加了属性, 需要触发依赖
+  ob.dep.notify();
+  return val;
+}
