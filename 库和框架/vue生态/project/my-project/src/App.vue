@@ -2,6 +2,7 @@
   <div id="app">
     <el-button type="danger">危险按钮</el-button>
     <svg-icon iconClass="component" class="icon"></svg-icon>
+    <div>123</div>
   </div>
 </template>
 
