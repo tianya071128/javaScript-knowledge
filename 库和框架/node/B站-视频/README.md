@@ -1,4 +1,6 @@
-# Node.js 是什么？
+# 1. Node.js
+
+## 1.1 Node.js 是什么？
 
 * Node.js® 是一个基于 [Chrome V8 引擎](https://v8.dev/) 的 JavaScript 运行时。
   * Node.js 不是一门语言
@@ -20,3 +22,17 @@
     * HTPP 服务器
     * 。。。
 * 事件驱动(event-driven)、非阻塞 IO 模型(异步)、轻量和高效；
+
+
+
+## 1.2 Node.js 能做什么？
+
+* Web 服务器后台（主要）
+* 命令行工具
+  * npm(node)
+  * git(c 语言)
+* 对于前端开发而言，接触 node 最多的是它的命令行工具
+  * webpack
+  * npm
+  * gulp。。。
+
