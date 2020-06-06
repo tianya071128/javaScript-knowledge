@@ -1,0 +1,17 @@
+{
+  "name": "code",
+  "version": "1.0.0",
+  "description": "",
+  "main": "01-像Apache一样.js",
+  "dependencies": {
+    "art-template": "^4.13.2",
+    "bootstrap": "^4.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

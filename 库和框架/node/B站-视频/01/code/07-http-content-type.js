@@ -21,7 +21,7 @@ server.on("request", function(req, res) {
     fs.readFile("./resource/imgage.png", function(err, data) {
       if (err) {
         console.log(err);
-        res.setHeader("Content-Type", "text/plain; charset=utf-8");
+        res.setHeader("Content-Type", "text/plain");
         res.end("文件读取失败, 请稍后重试");
       } else {
         // data 默认是二进制数据, 可以通过 .toString 转为能识别的字符串
@@ -36,8 +36,4 @@ server.on("request", function(req, res) {
 
 server.listen(3000, function() {
   console.log("Server is running...");
-});
-
-fs.readFile("./resource/学习路径.png", function(err, data) {
-  console.log(err, data, data.toString());
 });
