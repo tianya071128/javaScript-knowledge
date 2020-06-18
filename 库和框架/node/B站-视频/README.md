@@ -78,6 +78,17 @@ nodemon app.js # 将 node app.js 启动命令变成 nodemon app.js
 npm install --save express
 ```
 
+hello world:
+
+```javascript
+const express = require('express');
+const app = express();
+
+app.get('/', (req, res) => {});
+
+app.listen(3000, () => {})
+```
+
 
 
 ### 5.2 基本路由
@@ -107,8 +118,85 @@ app.use(express.stait('public'));
 app.use(express.stait('files'));
 
 // 重命名
-app.use('/stait', express.stait('public'));
+app.use('/stait', express.stait('./public/'));
+```
+
+### 5.4 在 express 中使用 art-template 
+
+安装:
+
+```shell
+npm install --save art-template express-art-template
+```
+
+使用:
+
+```javascript
+var express = require('express');
+var app = express();
+
+// view engine setup
+app.engine('art', require('express-art-template'));
+app.set('view', {
+    debug: process.env.NODE_ENV !== 'production'
+});
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'art');
+
+// routes
+app.get('/', function (req, res) {
+    res.render('index.art', {
+        user: {
+            name: 'aui',
+            tags: ['art', 'template', 'nodejs']
+        }
+    });
+});
 ```
 
 
+
+### 5.5 获取 GET 请求参数
+
+req 内置了 query 属性
+
+```javascript
+req.query
+```
+
+
+
+### 5.6 获取表单 POST 请求体数据
+
+使用中间件: `body-parser`
+
+
+
+安装:
+
+```shell
+npm install body-parser
+```
+
+配置:
+
+```javascript
+var express = require('express')
+var bodyParser = require('body-parser')
+
+var app = express()
+
+// 配置 application/x-www-form-urlencoded , 在 req 中可通过 req.body 获取请求体数据
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+
+// parse application/json
+app.use(bodyParser.json())
+
+app.use(function (req, res) {
+  res.setHeader('Content-Type', 'text/plain')
+  res.write('you posted:\n')
+  res.end(JSON.stringify(req.body, null, 2))
+})
+```
 
