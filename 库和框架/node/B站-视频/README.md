@@ -205,3 +205,237 @@ app.use(function (req, res) {
 ## 6. MongoDB
 
 ### 6.1 关系型数据库和非关系型数据库
+
+* 关系型数据库:
+
+  > 表与表之间存在关系. 例如 mySQL.
+  >
+  > * 所有的关系型数据库都需要通过 `sql` 语言来操作
+  > * 所有的关系型数据库在操作之前都需要设计表结构
+  > * 数据库存在约束
+  >   * 唯一的
+  >   * 主键
+  >   * 默认值
+  >   * 非空
+
+* 非关系型数据库
+
+  > 非关系型数据库非常的灵活
+  >
+  > 有的非关系型数据库就是 key-valkue 结构
+  >
+  > MongoDB 比较接近关系型数据库的非关系型数据库
+  >
+  > ...
+  
+* MongoDB 数据库的基本概念
+
+  * 可以有多个数据库
+  * 一个数据库中可以有多个集合(表)
+  * 一个集合中可以多个文档(表记录)
+  * 文档结构很灵活, 没有任何限制
+  * MongoDB 非常灵活, 不需要 MySQL 一样先创建数据库、表、设计库。
+
+### 6.2 安装
+
+* 安装
+* 配置环境变量
+*  `mongod --version` 测试是否安装成功
+
+
+
+### 6.3 启动和关闭数据库
+
+启动:
+
+```shell
+# mongodb 默认使用执行 mongod 命令所处盘符根目录下的 /data/db 作为自己的存储目录
+# 此时可以手动新建一个 /data/db
+mongod
+```
+
+如果想要修改默认的数据存储目录, 可以:
+
+```shell
+mongod --dbpath=目录
+```
+
+停止:
+
+```shell
+ctrl + c 或 关闭控制台
+```
+
+
+
+### 6.4 连接和退出数据库
+
+连接:
+
+```shell
+# 改名了默认连接本机的 MongoDB 服务
+mongo
+```
+
+退出: 
+
+```shell
+# 在连接状态输入 exit 退出连接
+```
+
+
+
+### 6.5 基本命令
+
+* `show dbs`
+  * 查看显示所有数据库
+* `db`
+  * 查看当前操作的数据库
+* `use 数据库名称`
+  * 切换到指定的数据(如果不存在则新建)
+* 插入数据
+
+
+
+### 6.6 在 node 中使用 mongoDB
+
+1. 使用官方的 `mongodb` 包来操作
+
+2. 使用第三方 mongoose 来操作 MongoDB 数据库
+
+   > `mongoose` : 基于 `mongodb` 封装
+
+
+
+## 7. mongoose
+
+### 7.1 设计架构
+
+```javascript
+var mongoose = require("mongoose");
+
+var Scheam = mongoose.Schema;
+
+// 1. 连接数据库 -- test 库
+// 指定连接的数据库不需要存在,当你插入第一条数据后会自动创建
+mongoose.connect("mongodb://localhost/test");
+
+// 2. 设计集合结构(表结构)
+var userSchema = new Scheam({
+  username: {
+    type: String,
+    required: true // 必须有
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String
+  }
+});
+
+/**
+ * @name: 3. 将文档结构发布为模型
+ * @param {String} 表示数据库的集合名词
+ * @param {Scheam} 架构
+ * @return 模型构造函数
+ */
+var User = mongoose.model("User", userSchema);
+```
+
+### 7.2 增
+
+```javascript
+// 4. 使用模型构造函数, 操作数据
+var admin = new User({
+  username: "admin",
+  password: "123456",
+  email: "admin@admin.com"
+});
+
+admin.save().then(() => {
+  console.log("保存成功");
+});
+```
+
+
+
+### 7.3 查
+
+查询所有: 
+
+```javascript
+User.find().then(ret => {
+  console.log("查询成功", ret);
+});
+```
+
+条件查询: 
+
+```javascript
+User.find({
+  username: "zs"
+}).then(ret => {
+  console.log(ret);
+});
+```
+
+只查询一个:
+
+```javascript
+User.findOne({
+  username: "zs"
+}).then(ret => {
+  console.log(ret);
+});
+```
+
+
+
+### 7.4 删
+
+根据条件删除所有:
+
+```javascript
+User.remove({
+    username: 'zs'
+}).then(ret => console.log('删除成功', ret))
+```
+
+根据条件删除一个:
+
+```javascript
+Model.findOneAndRemove(conditions, [options], [callback])
+```
+
+根据 id 删除一个:
+
+```javascript
+Model.findByIdAndRemove(id, [options], [callback])
+```
+
+
+
+### 7.5 改
+
+根据条件更新所有:
+
+```javascript
+Model.update(confitions, doc, [optinos], [callback])
+```
+
+根据指定条件更新一个:
+
+```javascript
+Model.findOneAndUpdate([conditions], [update], [options], [callback])
+```
+
+根据 id 更新一个:
+
+```javascript
+User.findByIdAndUpdate('xxx', {
+    password: '123'
+}).then(ret => {})
+```
+
