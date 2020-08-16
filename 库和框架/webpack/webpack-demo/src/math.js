@@ -5,3 +5,7 @@ export function square(x) {
 export function cube(x) {
   return x * x * x;
 }
+
+export function cubes(x) {
+  return x * x * x;
+}
