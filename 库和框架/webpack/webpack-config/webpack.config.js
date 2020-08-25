@@ -27,7 +27,7 @@ module.exports = {
     /**
      * path - 目标输出目录
      */
-    // path: "/dist",
+    // path: "/dist", 耍赖
     path: path.resolve(__dirname, "dist"),
     /**
      * chunkFilename - 决定了非入口(non-entry) chunk 文件的名称。
