@@ -1,4 +1,5 @@
 const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   mode: "development",
@@ -27,12 +28,90 @@ module.exports = {
     /**
      * path - 目标输出目录
      */
-    // path: "/dist", 耍赖
+    // path: "/dist",
     path: path.resolve(__dirname, "dist"),
     /**
      * chunkFilename - 决定了非入口(non-entry) chunk 文件的名称。
-     * 默认使用 [id].js 或从 output.filename 中腿短出的值([name] 会被预先替换为 [id] 或 [id])
+     * 默认使用 [id].js 或从 output.filename 中推断出的值([name] 会被预先替换为 [id] 或 [id])
      */
-    chunkFilename: "js/[name].[hash:4].chunk.js"
-  }
+    chunkFilename: "js/[name].[hash:4].chunk.js",
+    /**
+     * publicPath - 指定在浏览器中所引用的 url
+     * webpack-dev-server 也会默认从 publicPath 为基准，使用它来决定在哪个目录下启用服务，来访问 webpack 输出的文件。
+     */
+    publicPath: "./",
+    /**
+     * sourceMapFilename - 只在 devtool 启用了 SourceMap 选项时才使用。配置 source map 的命名方式。默认为 [file.mp]
+     * 可以使用 filename 选项中的 [name] [id] [hash] 等替换符号。
+     * 建议只使用 [file] 占位符，因为其他占位符在非 chunk 文件(non-chunk files)生成的 SourceMap 时不起作用。
+     */
+    sourceMapFilename: "[file].map"
+  },
+  /**
+   * 模块 - 决定了如何处理项目中的不同类型的模块
+   */
+  module: {
+    /**
+     * rules - 匹配请求的规则数组，这些规则能够修改模块的创建方式。这些规则能够对模块(module)应用 loader，或者修改解析器(parser)。
+     * rule：每个规则可以分为三部分 - 条件(condition), 结果(result)和嵌套规则（nested rule）\
+     *
+     * Rule 条件：条件有两种输入值 - 当使用多个条件时，所有条件都匹配。
+     *  - resource：请求文件的绝对路径。它已经根据 resolve 规则解析。 => 属性 test, include, exclude 和 resource 对 resource 匹配
+     *  - issuer：被请求资源的模块文件的绝对路径。 => 属性 issuer 对 issuer 匹配
+     *  - 从 app.js 导入 './style.css'，resource 是 /path/to/style.css. issuer 是 /path/to/app.js。
+     *
+     * Rule 结果：规则有两种输入值 - 规则结果只在规则条件匹配时使用。
+     *  - 应用的 loader：应用在 resource 上的 loader 数组
+     *  - Parser 选项：用于为模块创建解析器的选项对象
+     *
+     * 嵌套的 Rule：可以使用属性 rules 和 oneOf 指定嵌套规则
+     */
+    rules: [
+      // 每项对应一个模块的解析
+      {
+        /**
+         * 条件可以是这些之一：
+         *  - 字符串：匹配输入必须以提供的字符串开始
+         *  - 正则表达式：test 输入值
+         *  - 函数：调用输入的函数，必须返回一个真值以匹配
+         *  - 条件数组：至少一个匹配条件
+         *  - 对象：匹配所有属性。每个属性都有一个定义行为。
+         */
+        test: /\.(png|svg|jpg|gif)$/, // 匹配特定条件。一般是提供一个正则表达式或正则表达式的数组，但这不是强制的。
+        // include: /\.(png|svg|jpg|gif)$/, // 匹配特定条件。(与 test 一致)一般是提供一个字符串或者字符串数组，但这不是强制的。
+        // exclude: /exclude\.(png|svg|jpg|gif)$/, // 排除特定条件。一般是提供一个字符串或字符串数组，但这不是强制的。
+        // and: [Condition]：必须匹配数组中的所有条件
+        // or: [Condition]：匹配数组中任何一个条件
+        // not: [Condition]：必须排除这个条件
+
+        /**
+         * resource - 上面选项配置就是 resource 的简写
+         */
+        // resource:{
+        //   test:/\.css$/,
+        //   include: path.resolve(__dirname, 'src/css'),
+        //   exclude: path.resolve(__dirname, 'node_modules'),
+        // },
+
+        use: [
+          {
+            loader: "file-loader",
+            options: {
+              // 为你的文件配置自定义文件名模板
+              name: "[name].[hash:8].[ext]",
+              // 配置输出目录
+              outputPath: "images/",
+              // 配置自定义 public 发布目录 -- 默认值为 publicPath 选项
+              publicPath: "./"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: "Output Management"
+    })
+  ]
 };
