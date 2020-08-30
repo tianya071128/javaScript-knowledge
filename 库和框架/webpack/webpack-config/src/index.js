@@ -13,7 +13,6 @@ function createImg(src) {
 
 // 测试 css
 import "./assets/sass/test1.scss";
-import "./assets/sass/test2.css";
 
 createImg(test);
 createImg(exclude);

@@ -80,7 +80,7 @@ module.exports = {
          *  - 对象：匹配所有属性。每个属性都有一个定义行为。
          */
         test: /\.(png|svg|jpg|gif)$/, // 匹配特定条件。一般是提供一个正则表达式或正则表达式的数组，但这不是强制的。
-        // include: /\.(png|svg|jpg|gif)$/, // 匹配特定条件。(与 test 一致)一般是提供一个字符串或者字符串数组，但这不是强制的。
+        // include: path.resolve('src'), // 匹配特定条件。(与 test 基本一致)一般是提供一个字符串或者字符串数组，但这不是强制的。
         // exclude: /exclude\.(png|svg|jpg|gif)$/, // 排除特定条件。一般是提供一个字符串或字符串数组，但这不是强制的。
         // and: [Condition]：必须匹配数组中的所有条件
         // or: [Condition]：匹配数组中任何一个条件
@@ -102,9 +102,9 @@ module.exports = {
               // 为你的文件配置自定义文件名模板
               name: "[name].[hash:8].[ext]",
               // 配置输出目录
-              outputPath: "images/",
-              // 配置自定义 public 发布目录 -- 默认值为 publicPath 选项
-              publicPath: "./"
+              outputPath: "images/"
+              // 配置自定义 public 发布目录
+              // publicPath: "./"
             }
           }
         ]
@@ -121,13 +121,16 @@ module.exports = {
           },
           {
             loader: "css-loader", // CSS加载器
-            options: { importLoaders: 2 } // 指定css-loader处理前最多可以经过的loader个数
+            options: {
+              importLoaders: 2
+              // sourceMap: true // 启用/禁用 Sourcemap
+            } // 指定css-loader处理前最多可以经过的loader个数
           },
           {
-            loader: "postcss-loader" //承载autoprefixer功能
+            loader: "postcss-loader" // 承载autoprefixer功能
           },
           {
-            loader: "sass-loader" //SCSS加载器，webpack默认使用node-sass进行编译
+            loader: "sass-loader" // SCSS加载器，webpack默认使用node-sass进行编译
           }
         ]
       }

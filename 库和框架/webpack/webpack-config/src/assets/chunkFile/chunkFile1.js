@@ -6,4 +6,4 @@ import "../sass/test2.scss";
 /**
  * 在这里， 这个 scss 在 src/index.js 中已经被处理，所以不会包含在当前分离的 css 文件中
  */
-import "../sass/test.scss";
+import "../sass/test1.scss";
