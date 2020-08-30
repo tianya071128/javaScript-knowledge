@@ -1,5 +1,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin"); //将CSS代码提取为独立文件的插件
+const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin"); //CSS模块资源优化插件
 
 module.exports = {
   mode: "development",
@@ -106,12 +108,42 @@ module.exports = {
             }
           }
         ]
+      },
+      // scss 处理
+      {
+        test: /\.scss$/,
+        exclude: /node_modules/, //排除node_modules文件夹
+        use: [
+          // 当 loader 为多个时，优先级是后定义的先执行
+          // 每个loader 只负责自己需要负责的事情：将输入信息进行处理，并输出为下一个 loader 可识别的格式。
+          {
+            loader: MiniCssExtractPlugin.loader //建议生产环境采用此方式解耦CSS文件与js文件
+          },
+          {
+            loader: "css-loader", // CSS加载器
+            options: { importLoaders: 2 } // 指定css-loader处理前最多可以经过的loader个数
+          },
+          {
+            loader: "postcss-loader" //承载autoprefixer功能
+          },
+          {
+            loader: "sass-loader" //SCSS加载器，webpack默认使用node-sass进行编译
+          }
+        ]
       }
     ]
   },
   plugins: [
     new HtmlWebpackPlugin({
       title: "Output Management"
+    }),
+    // 为抽取出的独立的CSS文件设置配置参数, css 分离也会随着 chunk 分离而分离
+    new MiniCssExtractPlugin({
+      filename: "css/[name].css"
     })
-  ]
+  ],
+  optimization: {
+    //对生成的CSS文件进行代码压缩 mode='production'时生效
+    minimizer: [new OptimizeCssAssetsPlugin()]
+  }
 };

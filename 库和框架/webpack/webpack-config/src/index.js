@@ -11,6 +11,10 @@ function createImg(src) {
   document.body.appendChild(img);
 }
 
+// 测试 css
+import "./assets/sass/test1.scss";
+import "./assets/sass/test2.css";
+
 createImg(test);
 createImg(exclude);
 console.log(test, exclude);

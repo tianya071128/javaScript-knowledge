@@ -2,11 +2,24 @@
   "name": "webpack-config",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "webpack.config.js",
+  "dependencies": {
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
+  },
+  "devDependencies": {
+    "autoprefixer": "^9.8.6",
+    "node-sass": "^4.14.1"
+  },
   "scripts": {
     "build": "webpack"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "browerslist": [
+    "last 2 versions",
+    "IE 8",
+    "UCAndroid"
+  ]
 }
