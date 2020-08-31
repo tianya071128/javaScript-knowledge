@@ -136,6 +136,10 @@ module.exports = {
       }
     ]
   },
+  /**
+   * 插件 - 用于以各种方式自定义 webpack 构建过程。
+   * webpack 附带了各种内置插件，以及其他插件
+   */
   plugins: [
     new HtmlWebpackPlugin({
       title: "Output Management"
@@ -145,6 +149,40 @@ module.exports = {
       filename: "css/[name].css"
     })
   ],
+  /**
+   * 解析 - 设置模块如何被解析
+   * 例如：import 'lodash' 时，能够对 webpack 查找 lodash 的方式进行配置
+   */
+  resolve: {
+    /**
+     * alias - 创建别名，即路径的的别名，确保模块引入变得更简单
+     */
+    alias: {
+      "@": path.resolve(__dirname, "./src/"),
+      image: path.resolve(__dirname, "./src/assets/image/")
+    },
+    /**
+     * extensions - 自动解析确定的扩展名, 能够使用户在引入模块时不带扩展
+     * 默认值为：[".js", ".json"]
+     */
+    extensions: [".js", ".json", ".scss"],
+    /**
+     * mainFiles - 解析目录时要使用的文件名
+     * 默认值为：['index']
+     */
+    mainFiles: ["index"],
+    /**
+     * mainFields - 当从 npm 包中导入模块时（例如，import * as D3 from "d3"），此选项将决定在 package.json 中使用哪个字段导入模块。
+     * 默认值：根据 webpack 配置中指定的 target 不同，默认值也会有所不同
+     */
+    mainFields: ["browser", "module", "main"],
+    /**
+     * modules - 告诉 webpack 解析模块时应该搜索的目录，优先级从左到右
+     * 默认值为：["node_modules"]
+     */
+    modules: [path.resolve(__dirname, "src"), "node_modules"]
+  },
+  devtool: "source-map",
   optimization: {
     //对生成的CSS文件进行代码压缩 mode='production'时生效
     minimizer: [new OptimizeCssAssetsPlugin()]
