@@ -9,10 +9,12 @@
   },
   "devDependencies": {
     "autoprefixer": "^9.8.6",
-    "node-sass": "^4.14.1"
+    "node-sass": "^4.14.1",
+    "webpack-dev-server": "^3.11.0"
   },
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "serve": "webpack-dev-server --open"
   },
   "keywords": [],
   "author": "",

@@ -4,6 +4,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin"); //将CSS代码�
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin"); //CSS模块资源优化插件
 
 module.exports = {
+  // mode: "production",
   mode: "development",
   /**
    * 入口 - 起点或是应用程序的起点入口。
@@ -41,7 +42,7 @@ module.exports = {
      * publicPath - 指定在浏览器中所引用的 url
      * webpack-dev-server 也会默认从 publicPath 为基准，使用它来决定在哪个目录下启用服务，来访问 webpack 输出的文件。
      */
-    publicPath: "./",
+    publicPath: "/",
     /**
      * sourceMapFilename - 只在 devtool 启用了 SourceMap 选项时才使用。配置 source map 的命名方式。默认为 [file.mp]
      * 可以使用 filename 选项中的 [name] [id] [hash] 等替换符号。
@@ -182,7 +183,16 @@ module.exports = {
      */
     modules: [path.resolve(__dirname, "src"), "node_modules"]
   },
-  devtool: "source-map",
+  /**
+   * 详见文档
+   */
+  // devtool: "source-map",
+  /**
+   * 开发环境 - 使用 webpack-dev-server
+   */
+  devServer: {
+    contentBase: path.join(__dirname, "dist")
+  },
   optimization: {
     //对生成的CSS文件进行代码压缩 mode='production'时生效
     minimizer: [new OptimizeCssAssetsPlugin()]
