@@ -4,8 +4,8 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin"); //将CSS代码�
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin"); //CSS模块资源优化插件
 
 module.exports = {
-  // mode: "production",
-  mode: "development",
+  mode: "production",
+  // mode: "development",
   /**
    * 入口 - 起点或是应用程序的起点入口。
    */
@@ -42,7 +42,7 @@ module.exports = {
      * publicPath - 指定在浏览器中所引用的 url
      * webpack-dev-server 也会默认从 publicPath 为基准，使用它来决定在哪个目录下启用服务，来访问 webpack 输出的文件。
      */
-    publicPath: "/",
+    publicPath: "./",
     /**
      * sourceMapFilename - 只在 devtool 启用了 SourceMap 选项时才使用。配置 source map 的命名方式。默认为 [file.mp]
      * 可以使用 filename 选项中的 [name] [id] [hash] 等替换符号。
@@ -186,15 +186,38 @@ module.exports = {
   /**
    * 详见文档
    */
-  // devtool: "source-map",
+  devtool: "source-map",
   /**
    * 开发环境 - 使用 webpack-dev-server
    */
   devServer: {
-    contentBase: path.join(__dirname, "dist")
-  },
-  optimization: {
-    //对生成的CSS文件进行代码压缩 mode='production'时生效
-    minimizer: [new OptimizeCssAssetsPlugin()]
+    /**
+     * hot - 启用 webpack 的模块热替换特性：
+     */
+    hot: true,
+    /**
+     * hotOnly - 启用热模块替换，而不会在构建失败时将页面刷新作为后备
+     */
+    hotOnly: true,
+    /**
+     * https - 选择带有 HTTPS 的 HTTP/2 提供服务。默认使用 webpack 提供的签名证书，也可使用自己的签名证书
+     */
+    https: false,
+    /**
+     * port - 指定要监听的端口号
+     */
+    port: 3000,
+    index: "index.html", // 视为索引文件的文件名。
+    // host: "0.0.0.0", // 指定使用一个 host，默认是 localhost。如果希望服务器外部可访问，可指定如下：0.0.0.0
+    // lazy: false, // 惰性模式 - 启用时，dev-server 只有在请求时才编译包。这意味着 webpack 不会监视任何文件改动。
+    // filename: "bundle.js", //filename - 在不使用惰性加载时没有效果。在惰性模式中，此选项可减少编译。 默认在惰性模式，每个请求结果都会产生全新的编译。使用 filename，可以只在某个文件被请求时编译。
+    // contentBase: path.join(__dirname, "dist"),　－　告诉服务器从哪里提供内容，只有在想要提供静态文件时才需要
+    publicPath: "/",
+    open: true // 启用服务后，自动打开浏览器
+    // openPage: "different/page" // 启用服务后，指定打开浏览器时要浏览的页面。
   }
+  // optimization: {
+  //   //对生成的CSS文件进行代码压缩 mode='production'时生效
+  //   minimizer: [new OptimizeCssAssetsPlugin()]
+  // }
 };

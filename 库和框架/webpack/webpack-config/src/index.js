@@ -17,3 +17,5 @@ import "./assets/sass/test1";
 createImg(test);
 createImg(exclude);
 console.log(test, exclude);
+
+console.log("这是怎么回事？");
