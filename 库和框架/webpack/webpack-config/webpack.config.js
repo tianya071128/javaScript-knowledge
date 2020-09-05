@@ -4,8 +4,8 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin"); //将CSS代码�
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin"); //CSS模块资源优化插件
 
 module.exports = {
-  mode: "production",
-  // mode: "development",
+  // mode: "production",
+  mode: "development",
   /**
    * 入口 - 起点或是应用程序的起点入口。
    */
@@ -143,7 +143,8 @@ module.exports = {
    */
   plugins: [
     new HtmlWebpackPlugin({
-      title: "Output Management"
+      title: "Output Management",
+      template: path.resolve(__dirname, "public/index.html")
     }),
     // 为抽取出的独立的CSS文件设置配置参数, css 分离也会随着 chunk 分离而分离
     new MiniCssExtractPlugin({
@@ -207,14 +208,41 @@ module.exports = {
      * port - 指定要监听的端口号
      */
     port: 3000,
-    index: "index.html", // 视为索引文件的文件名。
+    /**
+     * publicPath - 类似于 output.pulicPath, 此路径下的打包文件可在浏览器中访问
+     */
+    publicPath: "/",
+    /**
+     * proxy - 本地代理
+     */
+    proxy: {},
+    /**
+     * quiet - 启用后，除了初始启动信息之外的任何内容都不会被打印到控制台。这也意味着来自 webpack 的错误或警告在控制台不可见
+     */
+    quiet: true,
+    compress: true,
+
+    index: "index.html" // 视为索引文件的文件名。
     // host: "0.0.0.0", // 指定使用一个 host，默认是 localhost。如果希望服务器外部可访问，可指定如下：0.0.0.0
     // lazy: false, // 惰性模式 - 启用时，dev-server 只有在请求时才编译包。这意味着 webpack 不会监视任何文件改动。
     // filename: "bundle.js", //filename - 在不使用惰性加载时没有效果。在惰性模式中，此选项可减少编译。 默认在惰性模式，每个请求结果都会产生全新的编译。使用 filename，可以只在某个文件被请求时编译。
+    /**
+     * DevServer服务器通过HTTP服务暴露出的文件分为两类：
+     * 1. 暴露本地文件
+     * 2. 暴露webpack构建出的结果，由于构建出的结果交给DevServer，所以你在使用DevServer时在本地找不到构建出的文件。
+     */
     // contentBase: path.join(__dirname, "dist"),　－　告诉服务器从哪里提供内容，只有在想要提供静态文件时才需要
-    publicPath: "/",
-    open: true // 启用服务后，自动打开浏览器
+    // open: true // 启用服务后，自动打开浏览器
     // openPage: "different/page" // 启用服务后，指定打开浏览器时要浏览的页面。
+  },
+  /**
+   * 外部扩展 - 提供了[从输出的 bundle 中排除依赖]的方法。
+   * 此功能通常对 library 开发人员来说是最有用的，然而也会有各种各样的应用程序用到它。
+   * 防止将某些 import　的包打包到 bundle 中，而是在运行时再去从外部获取这些扩展依赖
+   */
+  externals: {
+    // 这样，jquery 库是不会被打包进 bundle 的
+    jquery: "$"
   }
   // optimization: {
   //   //对生成的CSS文件进行代码压缩 mode='production'时生效
