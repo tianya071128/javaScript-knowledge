@@ -19,3 +19,5 @@ let a = new A();
 console.log(a.a);
 
 "aaa".includes("a");
+
+console.log(DEV);

@@ -62,3 +62,23 @@ module.exports = {
 2） providePlugin 给每个模块提供一个变量
 
 3） 通过 externals 选项配置不打包的模块，通过其他方式引入（如在 html 中 CDN 引入）
+
+
+
+### 4. webpack 小插件
+
+* clean-webpack-plugin 插件：用于清除 dist(打包文件夹) 文件夹
+* copy-webpack-plugin 插件：
+
+
+
+## 5. 定义环境变量
+
+利用 webpack 内置插件 DefinePlugin
+
+```javascript
+new webpack.DefinePlugin({
+	DEV: JSON.stringify("dev")
+})
+```
+
