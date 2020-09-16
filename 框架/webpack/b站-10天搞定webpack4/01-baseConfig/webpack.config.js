@@ -7,6 +7,8 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCssAssetsWebpackPlugin = require("optimize-css-assets-webpack-plugin");
 // js 压缩
 const UglifyjsWebpackPlugin = require("uglifyjs-webpack-plugin");
+// 清除 dist 文件夹
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = {
   mode: "development", // 模式
@@ -23,7 +25,8 @@ module.exports = {
     // 提取出 css
     new MiniCssExtractPlugin({
       filename: "css/[name].[hash:8].css"
-    })
+    }),
+    new CleanWebpackPlugin()
   ],
   optimization: {
     // 在 mode 为 'production' 模式下才生效
