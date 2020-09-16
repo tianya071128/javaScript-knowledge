@@ -53,3 +53,12 @@ module.exports = {
 }
 ```
 
+
+
+## 3. 全局变量引入
+
+1）expose-loader 暴露到 window 上
+
+2） providePlugin 给每个模块提供一个变量
+
+3） 通过 externals 选项配置不打包的模块，通过其他方式引入（如在 html 中 CDN 引入）

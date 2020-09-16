@@ -9,7 +9,7 @@ const OptimizeCssAssetsWebpackPlugin = require("optimize-css-assets-webpack-plug
 const UglifyjsWebpackPlugin = require("uglifyjs-webpack-plugin");
 
 module.exports = {
-  mode: "production", // 模式
+  mode: "development", // 模式
   entry: "./src/index.js", // 入口
   output: {
     filename: "bundle.[hash:4].js", // 打包后的文件名
@@ -40,9 +40,43 @@ module.exports = {
   },
   module: {
     rules: [
+      // {
+      //   test: /\.js$/,
+      //   use: {
+      //     loader: "eslint-loader",
+      //     options: {
+      //       enforce: "pre"
+      //     }
+      //   }
+      // },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        include: path.resolve(__dirname, "src"),
+        use: {
+          loader: "babel-loader", // es6+ 转化为 es5
+          options: {
+            presets: ["@babel/preset-env"],
+            plugins: [
+              "@babel/plugin-proposal-class-properties",
+              "@babel/plugin-transform-runtime"
+            ]
+          }
+        }
+      },
       {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"]
+      },
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: {
+          loader: "url-loader",
+          options: {
+            limit: 5 * 1024,
+            outputPath: "/img/"
+          }
+        }
       }
     ]
   }

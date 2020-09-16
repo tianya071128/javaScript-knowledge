@@ -1,4 +1,5 @@
 body {
   background: red;
   transform: rotate(45deg);
+  background-image: url("../img/01.png");
 }
