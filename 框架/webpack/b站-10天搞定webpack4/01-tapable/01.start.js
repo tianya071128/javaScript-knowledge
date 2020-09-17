@@ -1,0 +1,1 @@
+const { SyncHook } = require("tapable");
