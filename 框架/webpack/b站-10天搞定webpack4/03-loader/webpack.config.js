@@ -18,6 +18,10 @@ module.exports = {
     // loader 的顺序：pre
     rules: [
       {
+        test: /\.less/,
+        use: ["style-loader", "css-loader", "less-loader"]
+      },
+      {
         test: /\.png$/,
         use: {
           loader: "url-loader",
