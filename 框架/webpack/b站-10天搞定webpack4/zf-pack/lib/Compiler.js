@@ -4,6 +4,7 @@ const babylon = require("babylon");
 const traverse = require("@babel/traverse").default;
 const t = require("@babel/types");
 const generator = require("@babel/generator").default;
+const { SyncHook } = require("tapable");
 
 class Compiler {
   constructor(config) {
@@ -15,6 +16,24 @@ class Compiler {
     this.modules = {};
     this.entry = config.entry; // 入口路径
     this.root = process.cwd(); // 工作路径
+
+    // 定义生命周期
+    this.hooks = {
+      entryOption: new SyncHook(),
+      compile: new SyncHook(),
+      afterCompile: new SyncHook(),
+      afterPulgins: new SyncHook(),
+      run: new SyncHook(),
+      emit: new SyncHook(),
+      done: new SyncHook()
+    };
+    let plugins = this.config.plugins;
+    if (Array.isArray(plugins)) {
+      plugins.forEach(plugin => {
+        plugin.apply(this);
+      });
+    }
+    this.hooks.afterPulgins.call();
   }
   // 解析源码
   parse(source, parentPath) {
@@ -82,10 +101,17 @@ class Compiler {
   }
   // 开始运行方法
   run() {
+    this.hooks.run.call();
+    this.hooks.compile.call();
+
     // 执行，并且创建模块的依赖关系
     this.buildModule(path.resolve(this.root, this.entry), true);
+
+    this.hooks.afterCompile.call();
     // 发射一个文件 打包后的文件
     this.emitFile();
+
+    this.hooks.emit.call();
   }
 }
 

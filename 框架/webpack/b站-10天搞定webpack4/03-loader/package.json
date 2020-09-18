@@ -1,5 +1,5 @@
 {
-  "name": "zf-pack",
+  "name": "03-loader",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,14 +9,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bin": {
-    "zf-pack": "./bin/zf-pack.js"
-  },
   "devDependencies": {
-    "@babel/generator": "^7.11.6",
-    "@babel/traverse": "^7.11.5",
-    "@babel/types": "^7.11.5",
-    "babylon": "^6.18.0",
-    "tapable": "^2.0.0"
+    "mime": "^2.4.6",
+    "schema-utils": "^2.7.1",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12"
   }
 }
