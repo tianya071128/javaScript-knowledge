@@ -1,4 +1,4 @@
-import "./assets/module/module01.js";
+import("./assets/module/module01.js");
 import "./assets/css/css01.css";
 import "@babel/polyfill";
 import "./assets/img/01.png";
