@@ -1,6 +1,8 @@
 const path = require("path");
 const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = {
   mode: "production", // development production
@@ -38,6 +40,8 @@ module.exports = {
   plugins: [
     new MiniCssExtractPlugin({
       filename: "[name]_[contenthash:8].css"
-    })
+    }),
+    new HtmlWebpackPlugin(),
+    new CleanWebpackPlugin()
   ]
 };
