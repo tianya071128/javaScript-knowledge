@@ -68,6 +68,38 @@ module.exports = {
 
 
 
+## 3. CSS 模块化
+
+一般直接引用 css（或 less，sass）等，都是全局引入，这样会影响全局的
+
+```javascript
+import './less01.less';
+```
+
+而通过在 webpack.config.js 中的 css-loader 中开启 CSS 模块化，就可以将 CSS 的模块注册为局部 CSS 模块，让其 CSS 也具有模块功能
+
+资料：https://www.webpackjs.com/loaders/css-loader/#modules
+
+
+
+## 4. soure-map
+
+soure-map: 单独生成 .map 文件，映射原始代码
+
+inline: 以内联的形式嵌入打包后 js 文件（也就是也原本生成的 .map 文件以 base64 形式放在 js 文件中）- 更消耗性能
+
+cheap: 仅定位至行，忽略列 - 减少性能消耗
+
+eval: 将每个模块包装在一个`eval`函数中的代码
+
+推荐：
+
+开发环境：cheap-module-eval-source-map
+
+线上环境：cheap-module-source-map
+
+
+
 ## 3. optimization 优化项
 
 ### 3.1 splitChunks  - Code Splitting

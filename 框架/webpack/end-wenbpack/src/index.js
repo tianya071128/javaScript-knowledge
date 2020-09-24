@@ -3,6 +3,7 @@ import img from "./img/01.png";
 import vue from "vue";
 import vueRouter from "vue-router";
 import vuex from "vuex";
+import(/* webpackChunkName: "chunk01" */ "./chunk/chunk01");
 
 console.log("这是入口文件");
 
