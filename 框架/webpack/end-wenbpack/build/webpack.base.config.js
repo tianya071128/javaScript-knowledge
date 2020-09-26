@@ -24,12 +24,7 @@ module.exports = {
       {
         test: /\.js$/,
         use: {
-          loader: "babel-loader",
-          // 配置选项里的presets
-          // 包含ES6还有之后的版本和那些仅仅是草案的内容
-          options: {
-            presets: ["@babel/preset-env"]
-          }
+          loader: "babel-loader"
         },
         include: /src/, // 只转化src目录下的js
         exclude: /node_modules/ // 排除掉node_modules，优化打包速度

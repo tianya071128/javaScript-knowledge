@@ -1,3 +1,4 @@
+import "@babel/polyfill";
 import "./less/less01.less";
 import img from "./img/01.png";
 import vue from "vue";
@@ -15,5 +16,7 @@ document.body.appendChild(Img);
 class A {
   constructor() {}
 }
+
+Promise.resolve(2).then(console.log);
 
 console.log(vue, vueRouter, vuex);

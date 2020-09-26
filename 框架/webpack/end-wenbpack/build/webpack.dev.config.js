@@ -8,7 +8,8 @@ const webpackConfig = merge(baseWebpackConfig, {
     host: "localhost", // 默认是localhost
     port: 3000, // 端口
     // open: true, // 自动打开浏览器
-    hot: true // 开启热更新
+    hot: true, // 开启热更新
+    hotOnly: true // 当热替换失效时，不要去刷新页面
   },
   devtool: "cheap-module-eval-source-map",
   module: {

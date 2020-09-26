@@ -102,6 +102,27 @@ module: 包含`loader`的`sourcemap`
 
 
 
+## 5. 模块热替换（HMR）
+
+在新版 webpack 中，只需要在 devServer.hot 中配置即可开启 HMR
+
+```javascript
+module.exports = {
+    devServer: {
+    	hot: true, // 开启热更新
+    	hotOnly: true // 当热更新失效时，不要去刷新页面
+  	},
+}
+```
+
+CSS 的热更新：
+
+在 `style-loader` 已经内置了 CSS 的模块热替换
+
+类似于 CSS， 在 Vue, React 框架中，也通过 loader 内置了 HMR 
+
+
+
 ## 3. optimization 优化项
 
 ### 3.1 splitChunks  - Code Splitting
