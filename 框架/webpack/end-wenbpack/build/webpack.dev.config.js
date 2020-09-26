@@ -10,6 +10,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     // open: true, // 自动打开浏览器
     hot: true // 开启热更新
   },
+  devtool: "cheap-module-eval-source-map",
   module: {
     rules: [
       {

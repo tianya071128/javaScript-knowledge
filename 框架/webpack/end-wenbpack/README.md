@@ -92,6 +92,8 @@ cheap: 仅定位至行，忽略列 - 减少性能消耗
 
 eval: 将每个模块包装在一个`eval`函数中的代码
 
+module: 包含`loader`的`sourcemap`
+
 推荐：
 
 开发环境：cheap-module-eval-source-map

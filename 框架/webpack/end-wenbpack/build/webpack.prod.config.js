@@ -14,7 +14,6 @@ module.exports = merge(baseWebpackConfig, {
     filename: "js/[name].[chunkhash:6].js", // 打包后的文件名称
     path: path.resolve(__dirname, "../dist") // 打包后的目录，必须是绝对路径
   },
-  devtool: "cheap-module-eval-source-map",
   module: {
     rules: [
       {
