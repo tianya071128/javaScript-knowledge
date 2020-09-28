@@ -1,12 +1,16 @@
 ## 常用插件总结
 
-| 插件                                   | 描述                         |
-| -------------------------------------- | ---------------------------- |
-| **html-webpack-plugin**                | 用于生成 html 模板           |
-| **mini-css-extract-plugin**            | 提取 css 文件，webpack4 插件 |
-| **clean-webpack-plugin**               | 清空打包文件夹               |
-| **webpack-merge**                      | 合并 webpack 选项            |
-| **optimize-css-assets-webpack-plugin** | 压缩 CSS                     |
+| 插件                                   | 描述                               |
+| -------------------------------------- | ---------------------------------- |
+| **html-webpack-plugin**                | 用于生成 html 模板                 |
+| **mini-css-extract-plugin**            | 提取 css 文件，webpack4 插件       |
+| **clean-webpack-plugin**               | 清空打包文件夹                     |
+| **webpack-merge**                      | 合并 webpack 选项                  |
+| **optimize-css-assets-webpack-plugin** | 压缩 CSS                           |
+| **terser-webpack-plugin**              | 压缩 JS                            |
+| **uglifyjs-webpack-plugin**            | 压缩 JS，已弃用                    |
+| **webpack-bundle-analyzer**            | 打包分析                           |
+| **webpack.DefinePlugin**               | webpack 内置插件，用于设置环境变量 |
 
 > 1. extract-text-webpack-plugin: 提取 css 文件。webpack4 之前所用，在 webpack4 逐渐弃用
 
@@ -64,7 +68,7 @@ module.exports = {
 | [id]          | 模块标识符(module identifier)                                |
 | [hash]        | `hash` 和每次 `build`有关，没有任何改变的情况下，每次编译出来的 `hash`都是一样的，但当你改变了任何一点东西，它的`hash`就会发生改变。 |
 | [chunkhash]   | `chunkhash`是根据具体每一个模块文件自己的的内容包括它的依赖计算所得的`hash`，所以某个文件的改动只会影响它本身的`hash`，不会影响其它文件。 |
-| [contenthash] | 它的出现主要是为了解决，让`css`文件不受`js`文件的影响。<br /><br />这个时候我们就可以使用`contenthash`了，保证即使`css`文件所处的模块里有任何内容的改变，只要 css 文件内容不变，那么它的`hash`就不会发生变化。 |
+| [contenthash] | 根据内容生成 hash                                            |
 
 
 
@@ -128,8 +132,12 @@ CSS 的热更新：
 ### 6.1 splitChunks  - Code Splitting
 
 1. **chunks：‘saync’ 的意思是，当通过 import() 分割出异步模块时，对这个异步模块中引入的模块也进行分割，而设置为 ‘initial’ 时，也就是说，对异步模块不进行进一步分割**
+
 2. **chunks: 'initial' 就会对入口文件的模块进行分割，而通过 import() 分割的异步模块不进行进一步分割**
-3. **cacheGroups选项是有默认分组的，对其定义也不会覆盖其默认分组**
+
+3. **cacheGroups选项是有默认分组的，对其定义也不会覆盖其默认分组**，可通过对其设为 false 取消`vendors: false`
+
+   
 
 示例：
 
@@ -159,4 +167,56 @@ splitChunks: {
       }
     }
 ```
+
+### 6.2 提取引导模板 optimization.runtimeChunk
+
+用于浏览器缓存 - **此时会将引导模板提取成一个单独 js 文件**
+
+```javascript
+optimization: {
+   runtimeChunk: 'single',
+},
+```
+
+[参考-缓存](https://webpack.docschina.org/guides/caching/#extracting-boilerplate)
+
+### 6.3 改变模块标识符 optimization.moduleIds
+
+用于浏览器缓存 - **默认情况下，每个 [`module.id`](https://webpack.docschina.org/api/module-variables/#moduleid-commonjs) 会默认地基于解析顺序(resolve order)进行增量。也就是说，当解析顺序发生变化，ID 也会随之改变。**
+
+**配置 moduIds 就会改变模块标识符的算法**
+
+```javascript
+optimization: {
+	moduleIds: 'hashed',
+}
+```
+
+[参考-缓存](https://webpack.docschina.org/guides/caching/#module-identifiers)
+
+
+
+## 7. MiniCssExtractPlugin 提取 css - **提取所有的 CSS 到一个文件中**
+
+最好不用 - 先使用 MiniCssExtractPlugin 提取出 CSS，后利用 optimization.splitChunks  分组
+
+https://webpack.docschina.org/plugins/mini-css-extract-plugin/#extracting-all-css-in-a-single-file
+
+```javascript
+optimization: {
+    splitChunks: {
+      cacheGroups: {
+        styles: {
+          name: 'styles',
+          test: /\.css$/,
+          chunks: 'all',
+          enforce: true, // 忽略在 splitChunks 中定义的其他属性
+        },
+      },
+    },
+  },
+
+```
+
+
 

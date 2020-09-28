@@ -6,7 +6,10 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = {
   context: path.resolve(__dirname, "../"),
-  entry: "./src/index.js", // 入口文件
+  entry: {
+    main: "./src/index.js",
+    main2: "./src/index01.js"
+  }, // 入口文件
   output: {
     filename: "[name].js", // 打包后的文件名称
     path: path.resolve(__dirname, "../dist") // 打包后的目录，必须是绝对路径
