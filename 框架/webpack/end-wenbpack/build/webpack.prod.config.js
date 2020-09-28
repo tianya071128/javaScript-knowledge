@@ -50,7 +50,7 @@ module.exports = merge(baseWebpackConfig, {
           name: "chunk-libs", // 打包 chunk 的名称
           test: /[\\/]node_modules[\\/]/, // 匹配规则
           priority: 10, // 优先级
-          chunks: "initial" // 只打包初始时依赖的第三方
+          chunks: "initial"
         },
         elementUI: {
           name: "chunk-elementUI", // 单独将 elementUI 拆包
@@ -63,7 +63,8 @@ module.exports = merge(baseWebpackConfig, {
           minChunks: 2, // 最小共用次数
           priority: 5,
           reuseExistingChunk: true // 模块嵌套引入时，判断是否复用已经被打包的模块
-        }
+        },
+        vendors: false
       }
     }
   }

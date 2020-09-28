@@ -123,15 +123,19 @@ CSS 的热更新：
 
 
 
-## 3. optimization 优化项
+## 6. optimization 优化项
 
-### 3.1 splitChunks  - Code Splitting
+### 6.1 splitChunks  - Code Splitting
+
+1. **chunks：‘saync’ 的意思是，当通过 import() 分割出异步模块时，对这个异步模块中引入的模块也进行分割，而设置为 ‘initial’ 时，也就是说，对异步模块不进行进一步分割**
+2. **chunks: 'initial' 就会对入口文件的模块进行分割，而通过 import() 分割的异步模块不进行进一步分割**
+3. **cacheGroups选项是有默认分组的，对其定义也不会覆盖其默认分组**
 
 示例：
 
 ```javascript
 splitChunks: {
-      chunks: "all", // 分割代码的模式 all(同步异步都分割模式) | initial(只分割同步引入的模块) | async(只分割出异步引入的模块)
+      chunks: "all", // 分割代码的模式 all(同步异步模块都分割模式) | initial(只分割同步的模块) | async(只分割出异步的模块)
       cacheGroups: {
         // 分组
         libs: {
