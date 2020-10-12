@@ -14,8 +14,6 @@
 
 > 1. extract-text-webpack-plugin: 提取 css 文件。webpack4 之前所用，在 webpack4 逐渐弃用
 
-
-
 ## 常用 loader 总结
 
 | loader              | 描述                                                    |
@@ -29,62 +27,54 @@
 | html-withimg-loader | 在 html 中引用图片                                      |
 | babel-loader        | 转义 ES6                                                |
 
-
-
 ## 1. 多入口文件
 
 多入口文件有两种模式：
 
-* 一种是没有关系的但是要打包到一起去的，可以写一个数组，实现多个文件打包
-* 另一种就是每一个文件都单独打包成一个文件的
+- 一种是没有关系的但是要打包到一起去的，可以写一个数组，实现多个文件打包
+- 另一种就是每一个文件都单独打包成一个文件的
 
 ```javascript
-let path = require('path');
+let path = require("path");
 
 module.exports = {
-    // 1.写成数组的方式就可以打出多入口文件，不过这里打包后的文件都合成了一个
-    // entry: ['./src/index.js', './src/login.js'],
-    // 2.真正实现多入口和多出口需要写成对象的方式
-    entry: {
-        index: './src/index.js',
-        login: './src/login.js'
-    },
-    output: {
-        // 1. filename: 'bundle.js',
-        // 2. [name]就可以将出口文件名和入口文件名一一对应
-        filename: '[name].js',      // 打包后会生成index.js和login.js文件
-        path: path.resolve('dist')
-    }
-}
+  // 1.写成数组的方式就可以打出多入口文件，不过这里打包后的文件都合成了一个
+  // entry: ['./src/index.js', './src/login.js'],
+  // 2.真正实现多入口和多出口需要写成对象的方式
+  entry: {
+    index: "./src/index.js",
+    login: "./src/login.js"
+  },
+  output: {
+    // 1. filename: 'bundle.js',
+    // 2. [name]就可以将出口文件名和入口文件名一一对应
+    filename: "[name].js", // 打包后会生成index.js和login.js文件
+    path: path.resolve("dist")
+  }
+};
 ```
-
-
 
 ## 2. 指纹策略
 
-| **模板**      | **描述**                                                     |
-| ------------- | ------------------------------------------------------------ |
-| [name]        | 模块名称                                                     |
-| [id]          | 模块标识符(module identifier)                                |
-| [hash]        | `hash` 和每次 `build`有关，没有任何改变的情况下，每次编译出来的 `hash`都是一样的，但当你改变了任何一点东西，它的`hash`就会发生改变。 |
+| **模板**      | **描述**                                                                                                                                  |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| [name]        | 模块名称                                                                                                                                  |
+| [id]          | 模块标识符(module identifier)                                                                                                             |
+| [hash]        | `hash` 和每次 `build`有关，没有任何改变的情况下，每次编译出来的 `hash`都是一样的，但当你改变了任何一点东西，它的`hash`就会发生改变。      |
 | [chunkhash]   | `chunkhash`是根据具体每一个模块文件自己的的内容包括它的依赖计算所得的`hash`，所以某个文件的改动只会影响它本身的`hash`，不会影响其它文件。 |
-| [contenthash] | 根据内容生成 hash                                            |
-
-
+| [contenthash] | 根据内容生成 hash                                                                                                                         |
 
 ## 3. CSS 模块化
 
 一般直接引用 css（或 less，sass）等，都是全局引入，这样会影响全局的
 
 ```javascript
-import './less01.less';
+import "./less01.less";
 ```
 
 而通过在 webpack.config.js 中的 css-loader 中开启 CSS 模块化，就可以将 CSS 的模块注册为局部 CSS 模块，让其 CSS 也具有模块功能
 
 资料：https://www.webpackjs.com/loaders/css-loader/#modules
-
-
 
 ## 4. soure-map
 
@@ -104,40 +94,34 @@ module: 包含`loader`的`sourcemap`
 
 线上环境：cheap-module-source-map
 
-
-
 ## 5. 模块热替换（HMR）
 
 在新版 webpack 中，只需要在 devServer.hot 中配置即可开启 HMR
 
 ```javascript
 module.exports = {
-    devServer: {
-    	hot: true, // 开启热更新
-    	hotOnly: true // 当热更新失效时，不要去刷新页面
-  	},
-}
+  devServer: {
+    hot: true, // 开启热更新
+    hotOnly: true // 当热更新失效时，不要去刷新页面
+  }
+};
 ```
 
 CSS 的热更新：
 
 在 `style-loader` 已经内置了 CSS 的模块热替换
 
-类似于 CSS， 在 Vue, React 框架中，也通过 loader 内置了 HMR 
-
-
+类似于 CSS， 在 Vue, React 框架中，也通过 loader 内置了 HMR
 
 ## 6. optimization 优化项
 
-### 6.1 splitChunks  - Code Splitting
+### 6.1 splitChunks - Code Splitting
 
 1. **chunks：‘saync’ 的意思是，当通过 import() 分割出异步模块时，对这个异步模块中引入的模块也进行分割，而设置为 ‘initial’ 时，也就是说，对异步模块不进行进一步分割**
 
 2. **chunks: 'initial' 就会对入口文件的模块进行分割，而通过 import() 分割的异步模块不进行进一步分割**
 
-3. **cacheGroups选项是有默认分组的，对其定义也不会覆盖其默认分组**，可通过对其设为 false 取消`vendors: false`
-
-   
+3. **cacheGroups 选项是有默认分组的，对其定义也不会覆盖其默认分组**，可通过对其设为 false 取消`vendors: false`
 
 示例：
 
@@ -194,11 +178,9 @@ optimization: {
 
 [参考-缓存](https://webpack.docschina.org/guides/caching/#module-identifiers)
 
-
-
 ## 7. MiniCssExtractPlugin 提取 css - **提取所有的 CSS 到一个文件中**
 
-最好不用 - 先使用 MiniCssExtractPlugin 提取出 CSS，后利用 optimization.splitChunks  分组
+最好不用 - 先使用 MiniCssExtractPlugin 提取出 CSS，后利用 optimization.splitChunks 分组
 
 https://webpack.docschina.org/plugins/mini-css-extract-plugin/#extracting-all-css-in-a-single-file
 
@@ -218,5 +200,4 @@ optimization: {
 
 ```
 
-
-
+测试
