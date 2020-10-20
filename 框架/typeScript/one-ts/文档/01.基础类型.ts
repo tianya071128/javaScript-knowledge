@@ -17,7 +17,15 @@ const list: number[] = [1, 2, 3];
 // 5.2 - 使用数组泛型，Array<元素类型>
 const list2: Array<number> = [1, 2, 3];
 
-// 6. Object -
+// 6 - 元祖 Tuple - 用来在单个变量中存储不同类型的值
+// Declare a tuple type
+let x: [string, number];
+// Initialize it
+x = ["hello", 10]; // OK
+// Initialize it incorrectly
+x = [10, "hello"]; // Error
+
+// 7. Object -
 const obj: {
   name: string;
   age: number;
@@ -26,12 +34,22 @@ const obj: {
   age: 20
 };
 
-// 7. void - 与 any 类型相反，表示没有任何类型。
-// 7.1 常用于函数没有返回值的情况
+// 8. void - 与 any 类型相反，表示没有任何类型。
+// 8.1 常用于函数没有返回值的情况
 function warnUser(): void {
   console.log("This is my warning message");
 }
-// 7.2 声明一个 void 类型的变量是没有多大用处的，因为只能赋予 unll 和 undefined
+// 8.2 声明一个 void 类型的变量是没有多大用处的，因为只能赋予 unll 和 undefined
 const unusable: void = undefined;
 
-console.log(isDone, decLiteral, sentence, u, n, list, list2, obj);
+// 9. any - 任意类型
+let notSure: any = 4;
+notSure = "转化";
+
+// 10. never - 表示的是那些永不存在的值的类型
+// 返回never的函数必须存在无法达到的终点
+function infiniteLoop(): never {
+  while (true) {}
+}
+
+console.log(isDone, decLiteral, sentence, u, n, list, list2, obj, notSure);
