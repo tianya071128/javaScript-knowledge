@@ -1,16 +1,19 @@
 ## 常用插件总结
 
-| 插件                                   | 描述                               |
-| -------------------------------------- | ---------------------------------- |
-| **html-webpack-plugin**                | 用于生成 html 模板                 |
-| **mini-css-extract-plugin**            | 提取 css 文件，webpack4 插件       |
-| **clean-webpack-plugin**               | 清空打包文件夹                     |
-| **webpack-merge**                      | 合并 webpack 选项                  |
-| **optimize-css-assets-webpack-plugin** | 压缩 CSS                           |
-| **terser-webpack-plugin**              | 压缩 JS                            |
-| **uglifyjs-webpack-plugin**            | 压缩 JS，已弃用                    |
-| **webpack-bundle-analyzer**            | 打包分析                           |
-| **webpack.DefinePlugin**               | webpack 内置插件，用于设置环境变量 |
+| 插件                                   | 描述                                                         |
+| -------------------------------------- | ------------------------------------------------------------ |
+| **html-webpack-plugin**                | 用于生成 html 模板                                           |
+| **mini-css-extract-plugin**            | 提取 css 文件，webpack4 插件                                 |
+| **clean-webpack-plugin**               | 清空打包文件夹                                               |
+| **webpack-merge**                      | 合并 webpack 选项                                            |
+| **optimize-css-assets-webpack-plugin** | 压缩 CSS                                                     |
+| **terser-webpack-plugin**              | 压缩 JS                                                      |
+| **uglifyjs-webpack-plugin**            | 压缩 JS，已弃用                                              |
+| **webpack-bundle-analyzer**            | 打包分析                                                     |
+| **CopyWebpackPlugin**                  | 用于拷贝某个文件夹到打包文件夹中                             |
+| **webpack.DefinePlugin**               | webpack 内置插件，用于设置环境变量                           |
+| **webpack.DllPlugin**                  | 用某种方法实现了拆分 bundles，同时还大幅度提升了构建的速度。 |
+| **webpack.DllReferencePlugin**         | 用某种方法实现了拆分 bundles，同时还大幅度提升了构建的速度。 |
 
 > 1. extract-text-webpack-plugin: 提取 css 文件。webpack4 之前所用，在 webpack4 逐渐弃用
 
@@ -178,6 +181,8 @@ optimization: {
 
 [参考-缓存](https://webpack.docschina.org/guides/caching/#module-identifiers)
 
+
+
 ## 7. MiniCssExtractPlugin 提取 css - **提取所有的 CSS 到一个文件中**
 
 最好不用 - 先使用 MiniCssExtractPlugin 提取出 CSS，后利用 optimization.splitChunks 分组
@@ -200,4 +205,33 @@ optimization: {
 
 ```
 
-测试
+
+
+## 8. 性能优化手段
+
+### 8.1 跟上技术的迭代（webpack，Npm, Node...)
+
+升级最新版本，一般来讲，新版本都会进行性能上的优化
+
+### 8.2 在尽可能少的模块上应用 Loader
+
+可以利用 loader 的条件匹配来尽可能少的处理不需要处理的模块， 以及合理利用 loader
+
+### 8.3 Plugin 尽可能精简并确保可靠
+
+### 8.4 resolve 参数合理配置
+
+### 8.5 使用 DllPlugin 提高打包速度
+
+### 8.6 控制包文件大小
+
+### 8.7 thread-loader, parallel-webpack, happypack 多进程打包
+
+### 8.8 合理使用 sourceMap
+
+### 8.9 结合 打包分析 分析打包结果
+
+### 8.10 开发环境无用插件剔除
+
+例如开发环境不需要进行代码压缩 => 代码压缩会增加性能消耗的
+
