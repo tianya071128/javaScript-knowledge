@@ -6,7 +6,8 @@
   "scripts": {
     "build": "webpack --config build/webpack.prod.config.js",
     "anal": "webpack --config build/webpack.analyzer.config.js",
-    "dev": "webpack-dev-server --config build/webpack.dev.config.js"
+    "dev": "webpack-dev-server --config build/webpack.dev.config.js",
+    "debug": "node --inspect --inspect-brk node_modules/webpack/bin/webpack.js"
   },
   "keywords": [],
   "author": "",

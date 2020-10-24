@@ -235,3 +235,12 @@ optimization: {
 
 例如开发环境不需要进行代码压缩 => 代码压缩会增加性能消耗的
 
+
+
+### 9. node 调试
+
+在  package.json 中新增一条命令 `"debug": "node --inspect --inspect-brk node_modules/webpack/bin/webpack.js"`
+
+运行 `npm run debug`
+
+在浏览器中打开控制台， 就会出现调试图标
