@@ -4,6 +4,7 @@ import img from "./img/01.png";
 import vue from "vue";
 import vueRouter from "vue-router";
 import vuex from "vuex";
+import test from './js/js01';
 
 console.log("这是入口文件", "1111");
 
@@ -24,4 +25,4 @@ document.body.onclick = function() {
   // import(/* webpackChunkName: "js01" */ "./js/js01.js");
 };
 
-console.log(vue, vueRouter, vuex);
+console.log(vue, vueRouter, vuex, test(1, 2, 1, 3));
