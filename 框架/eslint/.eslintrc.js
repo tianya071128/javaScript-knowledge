@@ -3,12 +3,31 @@
  * 1. 代码检测：./node_modules/.bin/eslint index.js --- npx eslint 文件名
  * 2. 代码修复：./node_modules/.bin/eslint index.js --fix --- npx eslint 文件名 --fix 
  * 		并不是所有的规则都能修复
- * @Author: 温祖彪
- * @Date: 2020-11-08 21:29:02
- * @LastEditors: sueRimn
- * @LastEditTime: 2020-11-12 23:41:35
+ * 3. 如果同一个目录下有多个配置文件，ESlint只会使用一个。
+ * 		优先级顺序如下：
+ * 			.eslintrc.js
+ * 			.eslintrc.yaml
+ * 			.eslintrc.yml
+ * 			.eslintrc.json
+ * 			.eslintrc
+ * 			package.json
+ * 4. 完整的配置层次结构，从最高优先级最低的优先级，如下:
+ * 		4.1 行内配置
+ * 			eslint-disable 和 eslint-enable
+ * 			global
+ * 			eslint
+ * 			eslint-env
+ * 		4.2 命令行选项（或 CLIEngine 等价物）：
+ * 			--global
+ * 			--rule
+ * 			--env
+ * 			- c、--config
+ * 		4.3 项目级配置：
+ * 			与要检测的文件在同一目录下的.eslintrc.* 或 package.json 文件
+ * 			继续在父级目录寻找.eslintrc 或 package.json文件，直到根目录（包括根目录）或直到发现一个有"root": true的配置。
+ * 		4.4 如果不是（1）到（3）中的任何一种情况，退回到 ~/.eslintrc 中自定义的默认配置。
  */
-module.exports = {
+export default {
 	// ESLint 将自动在要检测的文件目录里寻找它们，紧接着是父级目录，一直到文件系统的根目录（除非指定 root: true）
 	"root": true,
 	// 解析器配置项，会被传入至解析器中，eslint 默认为 Espree，但使用 babel 时需要使用 “babel-eslint”
@@ -39,6 +58,13 @@ module.exports = {
 		// "plugin1",
 		// "eslint-plugin-plugin2"
 	],
+	/**
+	* 一个配置文件可以被基础配置中的已启用的规则继承。 --- ESLint递归地扩展配置，因此基本配置也可以具有 extends 属性。extends 属性中的相对路径和可共享配置名从配置文件中出现的位置解析。
+	* 也可以在 rules 属性中以扩展（或覆盖）规则
+	* 属性值可以是：
+	* 	1. 指定配置的字符串(配置文件的路径、可共享配置的名称、eslint:recommended 或 eslint:all)
+	* 	2. 字符串数组：每个配置继承它前面的配置
+	*/
 	"extends": "eslint:recommended",
 	// 修改项目中的规则，可以在这里配置，同时也可以在文件中配置
 	/**
@@ -50,7 +76,7 @@ module.exports = {
 		// 当为数组时，第一个表示规则的严重等级，后面的表示传递给规则的参数
 		// 'indent': [2, "tab"], // 强制使用一致的缩进
 	},
-	// 禁用一组文件的配置文件中的规则
+	// 同一个目录下的文件需要有不同的配置 - overrides 中的配置项可以细粒化匹配不同的文件
 	"overrides": [
 		{
 			"files": ["*-test.js", "*.spec.js"],
