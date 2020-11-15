@@ -8,6 +8,11 @@ export default {
   data() {
     return {};
   },
+  methods: {
+    test() {
+        var a = 2
+    }
+  },
 };
 </script>
 
