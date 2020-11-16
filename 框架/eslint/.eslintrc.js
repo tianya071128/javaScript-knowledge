@@ -27,7 +27,7 @@
  * 			继续在父级目录寻找.eslintrc 或 package.json文件，直到根目录（包括根目录）或直到发现一个有"root": true的配置。
  * 		4.4 如果不是（1）到（3）中的任何一种情况，退回到 ~/.eslintrc 中自定义的默认配置。
  */
-export default {
+module.exports = {
 	// ESLint 将自动在要检测的文件目录里寻找它们，紧接着是父级目录，一直到文件系统的根目录（除非指定 root: true）
 	"root": true,
 	// 解析器配置项，会被传入至解析器中，eslint 默认为 Espree，但使用 babel 时需要使用 “babel-eslint”

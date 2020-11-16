@@ -15,7 +15,12 @@
 
 <script>
 export default {
-  name: "",
+     name: "",
+     methods: {
+       test() {
+         var a = 1;  
+       }
+     },
 };
 </script>
 
