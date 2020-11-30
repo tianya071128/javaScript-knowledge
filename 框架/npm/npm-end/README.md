@@ -1,3 +1,11 @@
+# 注意
+
+**cnpm 安装包不会生成 `package-lock.json` - 2020/11/30**
+
+**npm 安装包是会生成 `package-lock.json`**
+
+
+
 ## 2. npm 中的依赖包
 
 ### 2.1 依赖包分类
@@ -111,3 +119,69 @@ npm5+ 新增功能，`package-lock.json` 文件和 `node_module` 目录结果是
 定义在 scripts 字段中，用阿里自定义脚本命令
 
 > `npm run` 是 `npm run-script` 的缩写，一般都使用前者，但是后者可以更好的反应这个命令的本质
+
+* 多命令执行 - 串行执行 - `&&`
+
+  > 前一个任务执行成功后才能执行下一个任务，**只要有一个命令执行失败，则整个脚本终止**
+  >
+  > `npm run script1 && npm run run script2`
+
+* 多命令执行 - 并行执行 - `&`
+
+  > 多个命令同时的平行执行
+  >
+  > `npm run script1 && npm run script2`
+
+* & 和 && 是 `Bash` 的内置功能。此外，还可以使用第三方的任务管理器模块：[script-runner](https://github.com/paulpflug/script-runner)、[npm-run-all](https://github.com/mysticatea/npm-run-all)、[redrun](https://github.com/mysticatea/npm-run-all)。
+
+* env 环境变量
+
+  在执行 `npm run` 脚本时，`npm`会设置一些特殊的 `env` 环境变量（**可通过 `process.env` 访问**）。
+
+  **其中 `package.json` 中的所有字段，都会被设置为 `npm_package_` 开头的环境变量**
+
+  ```javascript
+  {
+    "name": "sh",
+    "version": "1.1.1",
+    "description": "shenhao",
+    "main": "index.js",
+    "repository": {
+      "type": "git",
+      "url": "git+ssh://git@gitlab.com/xxxx/sh.git"
+    }
+  }
+  ```
+
+  可以通过`process.env.npm_package_name` 可以获取到`package.json`中`name`字段的值`sh`，也可以通过`process.env.npm_package_repository_type`获取到嵌套属性`type`的值`git`。
+
+  同时，`npm`相关的所有配置也会被设置为以`npm_config_`开头的环境变量。
+
+* 指令钩子
+
+  在执行`npm scripts`命令（无论是自定义还是内置）时，都经历了`pre`和`post`两个钩子，在这两个钩子中可以定义某个命令执行前后的命令。
+
+  比如在执行`npm run serve`命令时，会依次执行`npm run preserve`、`npm run serve`、`npm run postserve`，所以可以在这两个钩子中自定义一些动作：
+
+  ```
+  "scripts": {
+    "preserve": "xxxxx",
+    "serve": "vue-cli-service serve",
+    "postserve": "xxxxxx"
+  }
+  复制代码
+  ```
+
+  当然，如果没有指定`preserve`、`postserve`，会默默的跳过。如果想要指定钩子，必须严格按照`pre`和`post`前缀来添加。
+
+  上面提到过一个环境变量`process.env.npm_lifecycle_event`可以配合钩子来一起使用：
+
+  ```
+  const event = process.env.npm_lifecycle_event
+  
+  if (event === 'preserve') {
+      console.log('Running the preserve task!')
+  } else if (_event === 'serve') {
+      console.log('Running the serve task!')
+  }
+  ```
