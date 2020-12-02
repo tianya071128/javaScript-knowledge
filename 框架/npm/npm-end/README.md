@@ -30,9 +30,14 @@
 
 
 
-## 2. npm 中的依赖包
 
-### 2.1 依赖包分类
+## 2. package.json 文件详解
+
+
+
+## 3. npm 中的依赖包
+
+### 3.1 依赖包分类
 
 * dependencies - 业务依赖：其中的依赖项应该属于线上代码的一部分
 
@@ -51,7 +56,7 @@
 
 * optionalDependencies - 可选依赖： 这种依赖中的依赖项即使安装失败了，也不影响整个安装的过程。
 
-### 2.2 依赖包版本号
+### 3.2 依赖包版本号
 
 采用了 `semver` 规范作为依赖版本管理方案，格式为：`主版本号.次版本号.修订号(x.y.z)`
 
@@ -98,47 +103,9 @@
 
 > 详细的文档可以参见[语义化版本(semver)](https://semver.org/lang/zh-CN/)。
 
-## 3. package-lock.json 
-
-npm5+ 新增功能，`package-lock.json` 文件和 `node_module` 目录结果是一致的，即项目目录下存在`package-lock.json` 可以让每次安装生成的依赖目录结构保持相同。
-
-* 在开发应用项目时，应该使用 `package-lock.json` 提交至版本仓库中，从而使团队成员安装的依赖版本一致
-* 在开发库时，一般不使用 `package-lock.json` 锁死版本，**是因为库项目一般是被其他项目依赖的，在不写死的情况下，就可以复用主项目已经加载过的包，而一旦库依赖的是精确的版本号那么可能会造成包的冗余。**
-
-```javascript
-"dependencies": {
-  "sass-loader": {
-    "version": "7.1.0", // 包唯一的版本号
-    "resolved": "http://registry.npm.taobao.org/sass-loader/download/sass-loader-7.1.0.tgz", // 安装源
-    "integrity": "sha1-Fv1ROMuLQkv4p1lSihly1yqtBp0=", // 表明包完整性的 hash 值（验证包是否已失效）
-    "dev": true, // 如果为 true，则此依赖关系仅是顶级模块的开发依赖关系或者是一个传递依赖关系
-    "requires": { // 依赖包所需要的所有依赖项，对应依赖包package.json里dependencies中的依赖项
-      "clone-deep": "^2.0.1",
-      "loader-utils": "^1.0.1",
-      "lodash.tail": "^4.1.1",
-      "neo-async": "^2.5.0",
-      "pify": "^3.0.0",
-      "semver": "^5.5.0"
-    },
-    "dependencies": { // sass-loader 依赖包 node_modules 中依赖的包
-      "pify": {
-        "version": "3.0.0",
-        "resolved": "http://registry.npm.taobao.org/pify/download/pify-3.0.0.tgz",
-        "integrity": "sha1-5aSs0sEB/fPZpNB/DbxNtJ3SgXY=",
-        "dev": true
-      }
-    }
-  }
-}
-```
 
 
-
-## 4. 
-
-
-
-## 5. npm scripts 脚本
+## 4. npm scripts 脚本
 
 定义在 scripts 字段中，用阿里自定义脚本命令
 
@@ -209,3 +176,39 @@ npm5+ 新增功能，`package-lock.json` 文件和 `node_module` 目录结果是
       console.log('Running the serve task!')
   }
   ```
+
+
+
+## 5. package-lock.json 
+
+npm5+ 新增功能，`package-lock.json` 文件和 `node_module` 目录结果是一致的，即项目目录下存在`package-lock.json` 可以让每次安装生成的依赖目录结构保持相同。
+
+* 在开发应用项目时，应该使用 `package-lock.json` 提交至版本仓库中，从而使团队成员安装的依赖版本一致
+* 在开发库时，一般不使用 `package-lock.json` 锁死版本，**是因为库项目一般是被其他项目依赖的，在不写死的情况下，就可以复用主项目已经加载过的包，而一旦库依赖的是精确的版本号那么可能会造成包的冗余。**
+
+```javascript
+"dependencies": {
+  "sass-loader": {
+    "version": "7.1.0", // 包唯一的版本号
+    "resolved": "http://registry.npm.taobao.org/sass-loader/download/sass-loader-7.1.0.tgz", // 安装源
+    "integrity": "sha1-Fv1ROMuLQkv4p1lSihly1yqtBp0=", // 表明包完整性的 hash 值（验证包是否已失效）
+    "dev": true, // 如果为 true，则此依赖关系仅是顶级模块的开发依赖关系或者是一个传递依赖关系
+    "requires": { // 依赖包所需要的所有依赖项，对应依赖包package.json里dependencies中的依赖项
+      "clone-deep": "^2.0.1",
+      "loader-utils": "^1.0.1",
+      "lodash.tail": "^4.1.1",
+      "neo-async": "^2.5.0",
+      "pify": "^3.0.0",
+      "semver": "^5.5.0"
+    },
+    "dependencies": { // sass-loader 依赖包 node_modules 中依赖的包
+      "pify": {
+        "version": "3.0.0",
+        "resolved": "http://registry.npm.taobao.org/pify/download/pify-3.0.0.tgz",
+        "integrity": "sha1-5aSs0sEB/fPZpNB/DbxNtJ3SgXY=",
+        "dev": true
+      }
+    }
+  }
+}
+```
