@@ -1,8 +1,32 @@
-# 注意
+## 1. npm 常用命令
 
-**cnpm 安装包不会生成 `package-lock.json` - 2020/11/30**
+### 1.1 查找、安装、更新、卸载、发布操作模块
 
-**npm 安装包是会生成 `package-lock.json`**
+* 安装
+
+  `npm install(i,add) <name>@<version> [-g|-global]/[-D|--save-dev|-S|--save]`
+
+  > -g  | -global: 安装全局包
+  >
+  > -D | --save-dev：安装 devDependencies 开发依赖包
+  >
+  > -S | --save: 安装 dependencies 生产依赖包
+
+* 更新
+
+  `npm update(up, upgrade) <name>@<version> [-g|-global]/[-D|--save-dev|-S|--save]`
+
+* 卸载
+
+  `npm uninstall(r,un,rm,unlink,remove) <name>@<version>[-g|-global]/[-D|--save-dev|-S|--save]`
+
+**注意点：**
+
+* **cnpm 安装包不会生成 `package-lock.json` - 2020/11/30**
+
+* **cnpm 安装一个包会生成两个包，一个 _<pageName\>， 另一个就是 <pageName\> , 内容没有区别**
+
+* **npm 安装包是会生成 `package-lock.json`**
 
 
 
