@@ -1,10 +1,10 @@
 ## 1. npm 常用命令
 
-### 1.1 查找、安装、更新、卸载、发布操作模块
+### 1.1 安装、更新、卸载操作模块
 
 * 安装
 
-  `npm install(i,add) <name>@<version> [-g|-global]/[-D|--save-dev|-S|--save]`
+  `npm install(i,add) <name>@<version> [-g|-global]/[-D|--save-dev|-S|--save|-f|--force（强制重新安装)]`
 
   > -g  | -global: 安装全局包
   >
@@ -20,6 +20,69 @@
 
   `npm uninstall(r,un,rm,unlink,remove) <name>@<version>[-g|-global]/[-D|--save-dev|-S|--save]`
 
+
+
+### 1.2 查看模块信息
+
+* 查看已安装的所有模块 - 实操作用不大
+
+  `npm list/ls/la/ll [-g]/[--depth int(整数)]`
+
+* 查看模块安装的路径
+
+  `npm root [-g]`
+
+  ![image-20201204221939935](C:\Users\天涯游子君莫问\Desktop\学习\javaScript-knowledge\框架\npm\npm-end\image\01.png)
+
+* 查看具体模块信息
+
+  `npm view(info, show, v) <name> [package.json 字段] `
+
+  ![image-20201204222325101](C:\Users\天涯游子君莫问\Desktop\学习\javaScript-knowledge\框架\npm\npm-end\image\02.png)
+
+* 查看 npm 版本
+
+  `npm -v`
+
+* 搜索 npm 仓库
+
+  `npm search(s, se, find) <搜索词>`
+
+​	
+
+### 1.3 配置 npm
+
+```bash
+npm config set <key> <value> [-g|--global]
+npm config get <key>
+npm config delete <key>
+npm config list [-l] [--json]
+npm config edit
+npm get <key>
+npm set <key> <value> [-g|--global]
+aliases: c
+```
+
+
+
+### 1.4 其他常用命令
+
+* 初始化项目
+
+  `npm init [--force|-f|--yes|-y]`
+
+* 查看 npm 命令列表
+
+  `npm help`
+
+* 查看 npm 各个命令的简单用法
+
+  `npm -l`
+
+* 缓存操作 
+
+  。。。
+
 **注意点：**
 
 * **cnpm 安装包不会生成 `package-lock.json` - 2020/11/30**
@@ -32,6 +95,8 @@
 
 
 ## 2. package.json 文件详解
+
+
 
 
 
