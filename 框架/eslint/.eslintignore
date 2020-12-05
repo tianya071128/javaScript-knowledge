@@ -1,0 +1,12 @@
+# 注意，在 vscode 中 eslint插件 不能识别每个目录中的 .eslintignore 文件，只会识别根目录中的 .eslintignore 文件
+# 因此，有时会出现在编辑器中 eslint 中不能识别 .eslintignore 文件
+# 解决方案：
+# eslint 配置项 eslint.workingDirectories - 指定 eslint 使用的工作目录
+
+
+# 在这里备注一下，vscode
+
+build/*.js
+config/*.js
+dist/
+src/assets

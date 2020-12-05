@@ -32,13 +32,13 @@
 
   `npm root [-g]`
 
-  ![image-20201204221939935](C:\Users\天涯游子君莫问\Desktop\学习\javaScript-knowledge\框架\npm\npm-end\image\01.png)
+  ![image-20201204221939935](.\image\01.png)
 
 * 查看具体模块信息
 
   `npm view(info, show, v) <name> [package.json 字段] `
 
-  ![image-20201204222325101](C:\Users\天涯游子君莫问\Desktop\学习\javaScript-knowledge\框架\npm\npm-end\image\02.png)
+  ![image-20201204222325101](.\image\02.png)
 
 * 查看 npm 版本
 
@@ -47,6 +47,10 @@
 * 搜索 npm 仓库
 
   `npm search(s, se, find) <搜索词>`
+
+* 列出有哪些还没有升级到最新版本的依赖
+
+  `npm outdated`
 
 ​	
 
@@ -93,10 +97,125 @@ aliases: c
 
 
 
-
 ## 2. package.json 文件详解
 
+必备属性：name 和 version
 
+```json
+{
+    "name": 'axios', // 包名
+    "version": "0.21.0", // 版本
+    /* 描述信息 */
+    "description": "Promise based HTTP client for the browser and node.js", // 描述信息
+    "keywords": [
+    	"xhr",
+    	"http",
+    	"ajax",
+    	"promise",
+    	"node"
+  	], // 关键字 - description 和 keywords 有利于模块检索
+    "author": { // 作者， 就是一个人
+        "name" : "Matt Zabriskie", 
+    	"email" : "...", 
+    	"url" : "..."
+    },
+    "contributors": [{ // 贡献者信息 - 可以为多个
+		"name" : "...", 
+    	"email" : "...",
+    	"url" : "..."
+    }],
+    "homepage": "https://github.com/axios/axios", // 模块的主页
+  	"bugs": { // 一个地址或者一个邮箱，对你的模块存在疑问的人可以到这里提出问题
+    	"url": "https://github.com/axios/axios/issues"
+  	},
+  	"repository": { // 模块的代码仓库
+    	"type": "git",
+    	"url": "git+https://github.com/axios/axios.git"
+  	},
+    /* 描述信息 end */
+    
+    /* 项目依赖 */
+    "dependencies": { // 生产依赖
+    	"follow-redirects": "^1.10.0"
+  	},
+    "devDependencies": { // 开发依赖
+    	"bundlesize": "^0.17.0",
+    	"coveralls": "^3.0.0",
+    },
+    "peerDependencies": { // 项目依赖模块 - 即该模块需要运行在这些模块的环境下
+        "react": ">=16.0.0", // 在 npm2 中会强制安装
+    	"vue": "^2.0.0" // 但是在 npm3 中不会安装，而是在未安装的时候给出警告
+    },
+    "optionalDependencies": {}, // 可选依赖
+    "bundledDependencies": ["package1", "package2"], // 这些模块将在这个包发布时一起打包
+    /* 项目依赖 end */
+    
+    /* 协议: 开源协议里面详尽表述了其他人获得你代码后拥有的权利 */
+    /* 以下就是几种主流的开源协议
+     * 1. MIT：只要用户在项目副本中包含了版权声明和许可声明，他们就可以拿你的代码做任何想做的事情，你也无需承担任何责任。
+     * 2. Apache：类似于 MIT，同时还包含了贡献者向用户提供专利授权相关的条款。
+     * 3. GPL：修改项目代码的用户再次分发源码或二进制代码时，必须公布他的相关修改。
+     */
+    "license": "MIT",
+    /* 协议 end */
+    
+    /* 目录、文件相关 */
+    "main": "index.js", // 程序入口文件
+    "bin": { // 命令行工具入口
+   		"webpack-cli": "bin/cli.js"
+ 	},
+    "files":["bin", "lib"], // npm publish 后推送模块时的文件列表，或者用 .npmignore 文件排除一些文件
+	"man": [ // Linux 下的帮助指令
+    	"/Users/isaacs/dev/npm/cli/man/man1/npm-access.1",
+  	],
+	"directories": { // 指定你的目录结构和上述的规范结构的对应情况
+    	"lib": "src/lib/", // 存放可执行二进制文件的目录
+    	"bin": "src/bin/", // 存放js代码的目录
+    	"man": "src/man/", 
+    	"doc": "src/doc/",
+    	"example": "src/example/"
+  	},
+    /* 目录、文件相关 end */
+
+	/* 脚本配置 */
+    "script": {}, // 脚本配置
+    "config": { "port": "8080" }, // 配置脚本中使用的环境变量，可通过 process.env.npm_package_config_port 获取
+    /* 脚本配置 end */
+    
+    /* 发布配置 */
+    "preferGlobal": "false", // true 表示主要用于安装到全局的命令行工具，安装到本地不会阻止安装，是发出一个警告
+    "private": "true", // true 表示为私有模块， npm 将会拒绝发布
+    "publishConfig": { // 发布模式时更详细的配置
+        "registry": "https://registry.npmjs.org/"
+    },
+    "os": ["!win32"], // 表示该模块不能安装在 win32 系统上
+    "cpu": ["x64", "ia32"], // 和 os 类似，可以使用 cpu 属性更加限制用户安装环境
+    "engines": { // 限制用户的环境配置，但不会阻止其安装，会发出警告
+    	"node": ">=10.13.0"
+  	},
+    /* 发布配置 end */
+}
+```
+
+![img](.\image\03.png)
+
+### 2.1 browser，module，main 字段优先级
+
+- `main` : 定义了 `npm` 包的入口文件，browser 环境和 node 环境均可使用
+- `module` : 定义 `npm` 包的 ESM 规范的入口文件，browser 环境和 node 环境均可使用
+- `browser` : 定义 `npm` 包在 browser 环境下的入口文件
+
+> [在 webpack 中，会依据 resolve.mainFields 字段来判断通过哪个字段导入](https://webpack.docschina.org/configuration/resolve/#resolvemainfields)
+
+总结：
+
+- 如果 `npm` 包导出的是 ESM 规范的包，使用 module
+- 如果 `npm` 包只在 web 端使用，并且严禁在 server 端使用，使用 browser。
+- 如果 `npm` 包只在 server 端使用，使用 main
+- 如果 `npm` 包在 web 端和 server 端都允许使用，使用 browser 和 main
+- 其他更加复杂的情况，如`npm` 包需要提供 commonJS 与 ESM 等多个规范的多个代码文件，请参考上述使用场景或流程图
+
+参考：[CSDN-文章](https://blog.csdn.net/weixin_34396902/article/details/93170277)
 
 
 
@@ -277,3 +396,13 @@ npm5+ 新增功能，`package-lock.json` 文件和 `node_module` 目录结果是
   }
 }
 ```
+
+
+
+
+
+参考文档：
+
+* [掘金文章 - 前端工程化（5）：你所需要的npm知识储备都在这了](https://juejin.cn/post/6844903870578032647#heading-14)
+* [前端工程化 - 剖析npm的包管理机制](https://juejin.cn/post/6844904022080667661#heading-17)
+* [npm 官网](https://docs.npmjs.com/cli/v6/configuring-npm/package-json#dependencies)
