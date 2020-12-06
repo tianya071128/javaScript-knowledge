@@ -52,7 +52,7 @@
 
   `npm outdated`
 
-​	
+​	![image-20201205224838508](C:\Users\天涯游子君莫问\Desktop\学习\javaScript-knowledge\框架\npm\npm-end\image\04.png)
 
 ### 1.3 配置 npm
 
@@ -221,26 +221,7 @@ aliases: c
 
 ## 3. npm 中的依赖包
 
-### 3.1 依赖包分类
-
-* dependencies - 业务依赖：其中的依赖项应该属于线上代码的一部分
-
-* devDependencies - 开发依赖：只在项目开发时所需要
-
-* peerDependencies - 同伴依赖：提示宿主环境去安装插件在`peerDependencies`中所指定依赖的包
-
-  ```js
-  // 例如 element-ui@2.6.3 中的 package.json 中
-  "peerDependencies": {
-      "vue": "^2.5.16" // 提示需要安装 vue 依赖，但不会在 npm install 时下载
-  }
-  ```
-
-* bundledDependencies / bundleDependencies - 打包依赖： 跟`npm pack`打包命令有关
-
-* optionalDependencies - 可选依赖： 这种依赖中的依赖项即使安装失败了，也不影响整个安装的过程。
-
-### 3.2 依赖包版本号
+### 3.1 依赖包版本号
 
 采用了 `semver` 规范作为依赖版本管理方案，格式为：`主版本号.次版本号.修订号(x.y.z)`
 
@@ -365,7 +346,7 @@ aliases: c
 
 ## 5. package-lock.json 
 
-npm5+ 新增功能，`package-lock.json` 文件和 `node_module` 目录结果是一致的，即项目目录下存在`package-lock.json` 可以让每次安装生成的依赖目录结构保持相同。
+npm5+ 新增功能，**`package-lock.json` 文件和 `node_module` 目录结果是一致的，即项目目录下存在`package-lock.json` 可以让每次安装生成的依赖目录结构保持相同**
 
 * 在开发应用项目时，应该使用 `package-lock.json` 提交至版本仓库中，从而使团队成员安装的依赖版本一致
 * 在开发库时，一般不使用 `package-lock.json` 锁死版本，**是因为库项目一般是被其他项目依赖的，在不写死的情况下，就可以复用主项目已经加载过的包，而一旦库依赖的是精确的版本号那么可能会造成包的冗余。**
@@ -399,10 +380,63 @@ npm5+ 新增功能，`package-lock.json` 文件和 `node_module` 目录结果是
 
 
 
+## 6. npm install 流程
+
+![img](.\image\05.png)
+
+* 检查 `.npmrc` 文件：优先级为：项目级的 `.npmrc` 文件 > 用户级的 `.npmrc` 文件> 全局级的 `.npmrc` 文件 > npm 内置的 `.npmrc` 文件
+
+* 检查项目中有无 `lock` 文件。
+
+* 无 `lock` 文件：
+
+  * 从 `npm` 远程仓库获取包信息
+
+  * 根据 `package.json`构建依赖树，构建过程：
+
+    * 构建依赖树时，不管其是直接依赖还是子依赖的依赖，优先将其放置在 `node_modules` 根目录。
+
+    * 当遇到相同模块时，判断已放置在依赖树的模块版本是否符合新模块的版本范围，如果符合则跳过，不符合则在当前模块的 `node_modules` 下放置该模块。
+
+    * 注意这一步只是确定逻辑上的依赖树，并非真正的安装，后面会根据这个依赖结构去下载或拿到缓存中的依赖包
+
+  * 在缓存中依次查找依赖树中的每个包
+
+      * 不存在缓存：
+  * 从 `npm` 远程仓库下载包
+    
+  * 校验包的完整性
+    
+  * 校验不通过：
+        * 重新下载
+
+      * 校验通过：
+    * 将下载的包复制到 `npm` 缓存目录
+        * 将下载的包按照依赖结构解压到 `node_modules`
+
+    * 存在缓存：将缓存按照依赖结构解压到 `node_modules`
+  
+* 将包解压到 `node_modules`
+  
+* 生成 `lock` 文件
+
+* 有 `lock` 文件：
+  * 检查 `package.json` 中的依赖版本是否和 `package-lock.json` 中的依赖有冲突。
+  * 如果没有冲突，直接跳过获取包信息、构建依赖树过程，开始在缓存中查找包信息，后续过程相同
 
 
-参考文档：
+
+## 7. npm 配置
+
+配置优先级：**优先级为：项目级的 `.npmrc` 文件 > 用户级的 `.npmrc` 文件> 全局级的 `.npmrc` 文件 > npm 内置的 `.npmrc` 文件**
+
+未完待续
+
+
+
+### 参考文档：
 
 * [掘金文章 - 前端工程化（5）：你所需要的npm知识储备都在这了](https://juejin.cn/post/6844903870578032647#heading-14)
-* [前端工程化 - 剖析npm的包管理机制](https://juejin.cn/post/6844904022080667661#heading-17)
+* [掘金文章 - 前端工程化 - 剖析npm的包管理机制](https://juejin.cn/post/6844904022080667661#heading-17)
+* [掘金文章 - 2018 年了，你还是只会 npm install 吗？](https://juejin.cn/post/6844903582337237006#heading-12)
 * [npm 官网](https://docs.npmjs.com/cli/v6/configuring-npm/package-json#dependencies)
