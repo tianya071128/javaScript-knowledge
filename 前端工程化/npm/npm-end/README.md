@@ -32,13 +32,13 @@
 
   `npm root [-g]`
 
-  ![image-20201204221939935](.\image\01.png)
+  ![image-20201204221939935](./image/01.png)
 
 * 查看具体模块信息
 
   `npm view(info, show, v) <name> [package.json 字段] `
 
-  ![image-20201204222325101](.\image\02.png)
+  ![image-20201204222325101](./image/02.png)
 
 * 查看 npm 版本
 
@@ -52,7 +52,7 @@
 
   `npm outdated`
 
-​	![image-20201205224838508](C:\Users\天涯游子君莫问\Desktop\学习\javaScript-knowledge\框架\npm\npm-end\image\04.png)
+​	![image-20201205224838508](./image/04.png)
 
 ### 1.3 配置 npm
 
@@ -197,7 +197,7 @@ aliases: c
 }
 ```
 
-![img](.\image\03.png)
+![img](./image/03.png)
 
 ### 2.1 browser，module，main 字段优先级
 
@@ -382,7 +382,7 @@ npm5+ 新增功能，**`package-lock.json` 文件和 `node_module` 目录结果�
 
 ## 6. npm install 流程
 
-![img](.\image\05.png)
+![img](./image/05.png)
 
 * 检查 `.npmrc` 文件：优先级为：项目级的 `.npmrc` 文件 > 用户级的 `.npmrc` 文件> 全局级的 `.npmrc` 文件 > npm 内置的 `.npmrc` 文件
 

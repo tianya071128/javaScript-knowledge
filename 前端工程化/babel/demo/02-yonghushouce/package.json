@@ -1,5 +1,5 @@
 {
-  "name": "01-shiyongzhinan",
+  "name": "02-yonghushouce",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,11 +12,7 @@
   "devDependencies": {
     "@babel/cli": "^7.12.10",
     "@babel/core": "^7.12.10",
-    "@babel/plugin-transform-runtime": "^7.12.10",
-    "@babel/preset-env": "^7.12.10"
-  },
-  "dependencies": {
-    "@babel/polyfill": "^7.12.1",
-    "@babel/runtime": "^7.12.5"
+    "@babel/node": "^7.12.10",
+    "@babel/register": "^7.12.10"
   }
 }
