@@ -15,12 +15,12 @@
 
 <script>
 export default {
-     name: "",
-     methods: {
-       test() {
-         var a = 1;  
-       }
-     },
+  name: "",
+  methods: {
+    test() {
+      var a = 1;
+    },
+  },
 };
 </script>
 
