@@ -1,0 +1,1 @@
+备注：electron-pdf resume.html resume.pdf -> 生成 pdf 文件
