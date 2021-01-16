@@ -3,7 +3,7 @@
  * 接口的作用就是为这些类型命名和为你的代码或第三方代码定义契约
  */
 
-// 1. 定义接口 - 类型检查器不会去检查属性的顺序，只要相应的属性存在并且类型也是对的就可以
+// !1. 定义接口 - 类型检查器不会去检查属性的顺序，只要相应的属性存在并且类型也是对的就可以
 interface interfaceName {
   label: string;
 }
@@ -11,7 +11,7 @@ const myObj: interfaceName = {
   label: "s"
 };
 
-// 2. 可选属性
+// !2. 可选属性
 interface interfaceName2 {
   color?: string;
   widht?: number;
@@ -20,7 +20,7 @@ const myObj2: interfaceName2 = {
   color: "#red"
 };
 
-// 3. 只读属性 - 在接口中定义 readonly 关键字
+// !3. 只读属性 - 在接口中定义 readonly 关键字
 interface interfaceName3 {
   readonly x: number;
 }
@@ -28,7 +28,7 @@ const myObj3: interfaceName3 = { x: 5 };
 // myObj3.x = 6; // error
 // 3.1 readonly VS const - 最简单判断该用readonly还是const的方法是看要把它做为变量使用还是做为一个属性。 做为变量使用的话用 const，若做为属性则使用readonly。
 
-// 4. 允许加入任意值
+// !4. 允许加入任意值
 interface interfaceName4 {
   name: string;
   waistline?: number;
@@ -39,15 +39,30 @@ const myObj4: interfaceName4 = {
   sex: "女"
 };
 
-// 5. 函数类型 - 不仅能够描述 js 中的对象，还可以用来描述函数类型
+// !5. 函数类型 - 不仅能够描述 js 中的对象，还可以用来描述函数类型
 interface interfaceName5 {
   (source: string, subString: string): boolean;
 }
 // 与直接注解函数类型类似 - 在接口中定义的参数不需要与接口里定义的名字匹配
-const myFn: interfaceName5 = function(src: string, sub: string): boolean {
+const myFn: interfaceName5 = function (src: string, sub: string): boolean {
   return src.search(sub) > -1;
 };
 // 或者通过类型推断，让 ts 推断出参数与返回值类型
-const myFn2: interfaceName5 = function(src, sub) {
+const myFn2: interfaceName5 = function (src, sub) {
   return src.search(sub) > -1;
 };
+
+// !6. 类类型接口：对类的约束
+// !接口描述了类的公共部分，而不是公共和私有两部分。 它不会帮你检查类是否具有某些私有成员。
+// !因为当一个类实现了一个接口时，只对其实例部分进行类型检查 -- private 和 protected 属性或方法只可以在类内部使用，不会影响实例属性
+interface Animal {
+  name: string;
+  eat(str: string): void;
+}
+
+class Dog3 implements Animal {
+  constructor(public name: string) { };
+  eat() {
+    // return ;
+  }
+}

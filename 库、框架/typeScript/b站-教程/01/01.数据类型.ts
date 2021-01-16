@@ -35,7 +35,7 @@ let arr3: [string, number, boolean] = ["ts", 3, true];
 enum Flag { success = '成功', error = '错误' }; // 定义一个枚举类型
 let f: Flag = Flag.success;
 
-// !任意类型
+// !任意类型 - any 其实是相当于放弃了类型检查
 let oBox: any = document.getElementById('box');
 
 // !null 和 undefined 其他(never 类型) 数据类型的子类型

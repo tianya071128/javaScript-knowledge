@@ -3,7 +3,7 @@
  * @Author: 温祖彪
  * @Date: 2021-01-14 20:48:35
  * @LastEditors: sueRimn
- * @LastEditTime: 2021-01-14 23:23:18
+ * @LastEditTime: 2021-01-16 10:00:06
  */
 // !1. 定义 class
 class Person {
@@ -36,3 +36,31 @@ class Person3 {
   protected protectedAttr: string = '受保护的属性';
   private privateAttr: string = '私有属性';
 }
+
+// !4.静态属性和静态方法
+class Person4 {
+  public name: string;
+  constructor(name: string) {
+    this.name = name;
+  }
+  static print() { // 静态方法
+    console.log('静态方法会继承吗？'); // 静态方法也会继承
+  }
+}
+
+class Person5 extends Person4 {
+}
+console.log(Person5.print());
+
+// !5. 抽象类 - abstract 关键字定义抽象类和抽象方法
+// !抽象类是无法被实例的，并且子类必须自定义抽象方法和属性 - 与接口不同，抽象类可以包含成员的实现细节
+abstract class Person6 {
+  abstract eat(name: string): string; // 抽象方法不能有具体实现
+}
+
+class Person7 extends Person6 {
+  eat(name: string) {
+    return name;
+  }
+}
+
