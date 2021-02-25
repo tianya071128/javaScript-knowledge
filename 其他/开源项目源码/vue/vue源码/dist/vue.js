@@ -45,16 +45,17 @@
   }
 
   /**
-   * Quick object check - this is primarily used to tell
-   * Objects from primitive values when we know the value
-   * is a JSON-compliant type.
+   * Quick object check - this is primarily used to tell 快速对象检查-这主要用于告诉
+   * Objects from primitive values when we know the value 对象从我们知道的原始值的值
+   * is a JSON-compliant type. 是符合json的类型吗
+   * 作用：检测是否为对象(包含基于 Array, Set 等基于 Object 的)
    */
   function isObject (obj) {
     return obj !== null && typeof obj === 'object'
   }
 
   /**
-   * Get the raw type string of a value, e.g., [object Object].
+   * Get the raw type string of a value, e.g., [object Object]. 获取一个值的原始类型字符串，例如[object object]。
    */
   var _toString = Object.prototype.toString;
 
@@ -63,8 +64,9 @@
   }
 
   /**
-   * Strict object type check. Only returns true
-   * for plain JavaScript objects.
+   * Strict object type check. Only returns true 严格对象类型检查。只返回true
+   * for plain JavaScript objects. 对于普通JavaScript对象
+   * 作用：检测是否指定值是否为 Object 对象
    */
   function isPlainObject (obj) {
     return _toString.call(obj) === '[object Object]'
@@ -91,50 +93,51 @@
   }
 
   /**
-   * Convert a value to a string that is actually rendered.
+   * Convert a value to a string that is actually rendered. 将值转换为实际呈现的字符串
+   * 作用：转化为字符串
    */
   function toString (val) {
     return val == null
-      ? ''
-      : Array.isArray(val) || (isPlainObject(val) && val.toString === _toString)
-        ? JSON.stringify(val, null, 2)
-        : String(val)
+      ? '' // 为 null 或 undefind 情况，返回 ''
+      : Array.isArray(val) || (isPlainObject(val) && val.toString === _toString) // 数组 || 对象
+        ? JSON.stringify(val, null, 2) // 序列化
+        : String(val) // 否则直接 String 转化
   }
 
   /**
-   * Convert an input value to a number for persistence.
-   * If the conversion fails, return original string.
+   * Convert an input value to a number for persistence. 将输入值转换为一个数字以实现持久性
+   * If the conversion fails, return original string. 如果转换失败，返回原始字符串
    */
   function toNumber (val) {
-    var n = parseFloat(val);
-    return isNaN(n) ? val : n
+    var n = parseFloat(val); // 尝试转化为 number
+    return isNaN(n) ? val : n // 失败则返回原值
   }
 
-  /**
-   * Make a map and return a function for checking if a key
-   * is in that map.
+  /**返回一个验证函数，用于检测指定值是否包含在 str 集合中
+   * Make a map and return a function for checking if a key 创建一个映射并返回一个函数来检查是否有键
+   * is in that map. 在地图上
    */
   function makeMap (
-    str,
-    expectsLowerCase
+    str, // 字符串，格式为 xxx,xxx,xxx
+    expectsLowerCase // 是否将验证值转化为小写
   ) {
-    var map = Object.create(null);
-    var list = str.split(',');
+    var map = Object.create(null); // 创建一个对象
+    var list = str.split(','); // 拆分 str 参数
     for (var i = 0; i < list.length; i++) {
-      map[list[i]] = true;
+      map[list[i]] = true; // 将拆分的 list 添加到 map 对象中
     }
-    return expectsLowerCase
+    return expectsLowerCase 
       ? function (val) { return map[val.toLowerCase()]; }
       : function (val) { return map[val]; }
   }
 
   /**
-   * Check if a tag is a built-in tag.
+   * Check if a tag is a built-in tag. 检查标签是否为内置标签
    */
   var isBuiltInTag = makeMap('slot,component', true);
 
   /**
-   * Check if an attribute is a reserved attribute.
+   * Check if an attribute is a reserved attribute. 检查一个属性是否为保留属性
    */
   var isReservedAttribute = makeMap('key,ref,slot,slot-scope,is');
 
@@ -151,41 +154,46 @@
   }
 
   /**
-   * Check whether an object has the property.
+   * Check whether an object has the property. 检查一个对象是否具有该属性
    */
-  var hasOwnProperty = Object.prototype.hasOwnProperty;
+  var hasOwnProperty = Object.prototype.hasOwnProperty; // 借用 hasOwnProperty：对象是否具有该属性，并且不是从原型链中继承
   function hasOwn (obj, key) {
-    return hasOwnProperty.call(obj, key)
+    return hasOwnProperty.call(obj, key) // 借用 hasOwnProperty
   }
 
-  /**
-   * Create a cached version of a pure function.
+  /** 创建一个缓存求值结果值的缓存函数
+   * Create a cached version of a pure function. 创建纯函数的缓存版本
    */
-  function cached (fn) {
-    var cache = Object.create(null);
+  function cached (
+    fn // 需要缓存的函数
+  ) {
+    var cache = Object.create(null); // 缓存对象，缓存其结果
     return (function cachedFn (str) {
-      var hit = cache[str];
-      return hit || (cache[str] = fn(str))
+      var hit = cache[str]; // 判断是否存在缓存值
+      return hit || (cache[str] = fn(str)) // 如果不存在缓存值，则求值并缓存
     })
   }
 
   /**
-   * Camelize a hyphen-delimited string.
+   * Camelize a hyphen-delimited string. Camelize 一个以连字符分隔的字符串
+   * 作用：将 - 连接的字符串转化为驼峰字符串，例如：v-model 转化为 vModel
    */
-  var camelizeRE = /-(\w)/g;
+  var camelizeRE = /-(\w)/g; // 检测 - 连接的字符串：xx-xx-xx
   var camelize = cached(function (str) {
     return str.replace(camelizeRE, function (_, c) { return c ? c.toUpperCase() : ''; })
   });
 
-  /**
-   * Capitalize a string.
+  /** 
+   * Capitalize a string. 利用一个字符串
+   * 作用：将首字母变成大写，并缓存其结果
    */
   var capitalize = cached(function (str) {
     return str.charAt(0).toUpperCase() + str.slice(1)
   });
 
   /**
-   * Hyphenate a camelCase string.
+   * Hyphenate a camelCase string. 驼峰字符串用连字符
+   * 作用：将驼峰字符串转化为 - 连接的字符串，例如 vModel 转化为 v-module
    */
   var hyphenateRE = /\B([A-Z])/g;
   var hyphenate = cached(function (str) {
@@ -193,35 +201,42 @@
   });
 
   /**
-   * Simple bind polyfill for environments that do not support it,
-   * e.g., PhantomJS 1.x. Technically, we don't need this anymore
-   * since native bind is now performant enough in most browsers.
-   * But removing it would mean breaking code that was able to run in
-   * PhantomJS 1.x, so this must be kept for backward compatibility.
+   * Simple bind polyfill for environments that do not support it, 用于不支持它的环境的简单绑定填充
+   * e.g., PhantomJS 1.x. Technically, we don't need this anymore 例如,PhantomJS 1.x 严格来说，我们不需要这个了
+   * since native bind is now performant enough in most browsers. 因为本机绑定现在在大多数浏览器中已经具备了足够的性能
+   * But removing it would mean breaking code that was able to run in 但是删除它意味着破坏能够运行的代码
+   * PhantomJS 1.x, so this must be kept for backward compatibility. PhantomJS 1x，因此为了向后兼容，必须保留它
    */
 
   /* istanbul ignore next */
+  // 自定义实现 bind 方法，改变上下文
   function polyfillBind (fn, ctx) {
     function boundFn (a) {
-      var l = arguments.length;
+      var l = arguments.length; // 提取参数
       return l
-        ? l > 1
-          ? fn.apply(ctx, arguments)
-          : fn.call(ctx, a)
-        : fn.call(ctx)
+        ? l > 1 // 存在多个参数时
+          ? fn.apply(ctx, arguments) // 使用 apply 调用 - 似乎不管几个参数，都可以直接使用 apply() 调用，不知道这样调用的原因
+          : fn.call(ctx, a) // 使用 call 调用 - 似乎不管几个参数，都可以直接使用 apply() 调用，不知道这样调用的原因
+        : fn.call(ctx) // 不存在参数时，则直接改变 this 调用
     }
 
     boundFn._length = fn.length;
     return boundFn
   }
 
+  // 原生 bind 的调用方式
   function nativeBind (fn, ctx) {
     return fn.bind(ctx)
   }
 
-  var bind = Function.prototype.bind
-    ? nativeBind
-    : polyfillBind;
+  // 借用 bind 方法，用于返回指定 this 指针的函数，但是注意调用方式改变，并且不能添加了预设参数
+  /**
+   * 例如，原生 bind 调用 fn.bind(ctx[,arg1[,arg2[...]]]) 可以预设多个参数
+   * 而在这里，bind(fn, ctx) 并没有提供预设参数的作用
+   */
+  var bind = Function.prototype.bind // 检测原生是否支持 bind 方法
+    ? nativeBind // 支持取原生
+    : polyfillBind; // 不支持则 polyfill 一下
 
   /**
    * Convert an Array-like object to a real Array.
@@ -262,21 +277,21 @@
   /* eslint-disable no-unused-vars */
 
   /**
-   * Perform no operation.
-   * Stubbing args to make Flow happy without leaving useless transpiled code
+   * Perform no operation. 执行任何操作
+   * Stubbing args to make Flow happy without leaving useless transpiled code 存根参数使流愉快，而不会留下无用的编译代码
    * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/).
    */
   function noop (a, b, c) {}
 
   /**
-   * Always return false.
+   * Always return false. 总是返回错误
    */
   var no = function (a, b, c) { return false; };
 
   /* eslint-enable no-unused-vars */
 
   /**
-   * Return the same value.
+   * Return the same value. 返回相同的值
    */
   var identity = function (_) { return _; };
 
@@ -290,30 +305,31 @@
   }
 
   /**
-   * Check if two values are loosely equal - that is,
-   * if they are plain objects, do they have the same shape?
+   * Check if two values are loosely equal - that is, 检查两个值是否大致相等——也就是说
+   * if they are plain objects, do they have the same shape? 如果它们是普通物体，它们是否具有相同的形状
+   * 作用：判断 a 和 b 是否大致相等，
    */
   function looseEqual (a, b) {
-    if (a === b) { return true }
-    var isObjectA = isObject(a);
-    var isObjectB = isObject(b);
+    if (a === b) { return true } // 如果严格相等，则为 true
+    var isObjectA = isObject(a); // 检测是否为对象
+    var isObjectB = isObject(b); // 检测是否为对象
     if (isObjectA && isObjectB) {
       try {
-        var isArrayA = Array.isArray(a);
-        var isArrayB = Array.isArray(b);
-        if (isArrayA && isArrayB) {
-          return a.length === b.length && a.every(function (e, i) {
+        var isArrayA = Array.isArray(a); // 检测是否为数组
+        var isArrayB = Array.isArray(b); // 检测是否为数组
+        if (isArrayA && isArrayB) { // 当两者都为数组时
+          return a.length === b.length && a.every(function (e, i) { // 判断两者长度，并且对数组每项都进行比较
             return looseEqual(e, b[i])
           })
-        } else if (a instanceof Date && b instanceof Date) {
-          return a.getTime() === b.getTime()
-        } else if (!isArrayA && !isArrayB) {
-          var keysA = Object.keys(a);
-          var keysB = Object.keys(b);
-          return keysA.length === keysB.length && keysA.every(function (key) {
+        } else if (a instanceof Date && b instanceof Date) { // 当都为 Date 时
+          return a.getTime() === b.getTime() // 通过时间戳来判断
+        } else if (!isArrayA && !isArrayB) { // 其他情况
+          var keysA = Object.keys(a); // 提取出所有属性 key
+          var keysB = Object.keys(b); // 提取出所有属性 key
+          return keysA.length === keysB.length && keysA.every(function (key) { // 判断两者长度，并且对每项进行判断
             return looseEqual(a[key], b[key])
           })
-        } else {
+        } else { // 两者类型不同时，直接返回 false
           /* istanbul ignore next */
           return false
         }
@@ -321,23 +337,24 @@
         /* istanbul ignore next */
         return false
       }
-    } else if (!isObjectA && !isObjectB) {
-      return String(a) === String(b)
+    } else if (!isObjectA && !isObjectB) { // 都不是对象的话
+      return String(a) === String(b) // 转化为字符串比较
     } else {
-      return false
+      return false // 其余情况(一个是对象，一个是其他类型(包含 function, typeof 检测为 function))，都认为不是相等的
     }
   }
 
   /**
-   * Return the first index at which a loosely equal value can be
-   * found in the array (if value is a plain object, the array must
-   * contain an object of the same shape), or -1 if it is not present.
+   * Return the first index at which a loosely equal value can be 返回一个大致相等的值所在的第一个索引
+   * found in the array (if value is a plain object, the array must 在数组中找到(如果value是普通对象，则数组必须
+   * contain an object of the same shape), or -1 if it is not present. 包含相同形状的对象)，如果不存在，则为-1
+   * 作用：返回 arr 数组中是否存在某一项与指定值 val 大致相等的索引，如果没有找到返回 -1
    */
   function looseIndexOf (arr, val) {
-    for (var i = 0; i < arr.length; i++) {
-      if (looseEqual(arr[i], val)) { return i }
+    for (var i = 0; i < arr.length; i++) { // 循环
+      if (looseEqual(arr[i], val)) { return i } // arr 每项值都与指定值 val 比较
     }
-    return -1
+    return -1 // 不存在情况下返回 -1
   }
 
   /**
@@ -353,123 +370,126 @@
     }
   }
 
+  // SSR 标记属性
   var SSR_ATTR = 'data-server-rendered';
 
+  // 资源列表
   var ASSET_TYPES = [
-    'component',
-    'directive',
-    'filter'
+    'component', // 组件
+    'directive', // 指令
+    'filter' // 过滤器
   ];
 
+  // 生命周期列表
   var LIFECYCLE_HOOKS = [
-    'beforeCreate',
-    'created',
-    'beforeMount',
-    'mounted',
-    'beforeUpdate',
-    'updated',
-    'beforeDestroy',
-    'destroyed',
-    'activated',
-    'deactivated',
-    'errorCaptured',
-    'serverPrefetch'
+    'beforeCreate', // 实例初始化之后，数据初始化前
+    'created', // 数据初始化完成
+    'beforeMount', // 在挂在之前调用
+    'mounted', // 实例被挂在之后调用，此时 DOM 可访问，但是不能保证所有的子组件也已经被挂载
+    'beforeUpdate', // 更新之前，虚拟 DOM 打补丁之前
+    'updated', // 已经重新渲染
+    'beforeDestroy', // 实例销毁前，此时 this 还可用
+    'destroyed', // 实例销毁后
+    'activated', // 被 keep-alive 缓存的组件激活时调用
+    'deactivated', // 被 keep-alive 缓存的组件停用时调用
+    'errorCaptured', // 铺货到子孙组件错误时调用
+    'serverPrefetch' // 
   ];
 
-  /*  */
-
-
-
+  /* Vue 的全局配置 */
   var config = ({
     /**
-     * Option merge strategies (used in core/util/options)
+     * Option merge strategies (used in core/util/options) 选择合并策略
      */
     // $flow-disable-line
-    optionMergeStrategies: Object.create(null),
+    optionMergeStrategies: Object.create(null), // 自定义合并策略的选项。
 
     /**
-     * Whether to suppress warnings.
+     * Whether to suppress warnings. 是否抑制警告
      */
-    silent: false,
+    silent: false, // 取消 Vue 所有的日志与警告。
 
     /**
-     * Show production mode tip message on boot?
+     * Show production mode tip message on boot? 在启动时显示生产模式提示信息
      */
-    productionTip: "development" !== 'production',
+    productionTip: "development" !== 'production', // 设置为 false 以阻止 vue 在启动时生成生产提示
 
     /**
-     * Whether to enable devtools
+     * Whether to enable devtools 是否启用devtools
      */
-    devtools: "development" !== 'production',
+    devtools: "development" !== 'production', // 是否允许 vue-devtools 检查代码
 
     /**
-     * Whether to record perf
+     * Whether to record perf 是否记录 perf
      */
-    performance: false,
+    performance: false, // 设置为 true 以在浏览器开发工具的性能/时间线面板中启用对组件初始化、编译、渲染和打补丁的性能追踪。只适用于开发模式和支持 performance.mark API 的浏览器上。
 
     /**
-     * Error handler for watcher errors
+     * Error handler for watcher errors 监视程序错误的错误处理程序
      */
-    errorHandler: null,
+    errorHandler: null, // 指定组件的渲染和观察期间未捕获错误的处理函数。这个处理函数被调用时，可获取错误信息和 Vue 实例。
 
     /**
-     * Warn handler for watcher warns
+     * Warn handler for watcher warns 对于观察和警告的Warn处理程序
      */
-    warnHandler: null,
+    warnHandler: null, // 为 Vue 的运行时警告赋予一个自定义处理函数。注意这只会在开发者环境下生效，在生产环境下它会被忽略。
 
     /**
-     * Ignore certain custom elements
+     * Ignore certain custom elements 忽略某些自定义元素
      */
-    ignoredElements: [],
+    ignoredElements: [], // 须使 Vue 忽略在 Vue 之外的自定义元素 (e.g. 使用了 Web Components APIs)。否则，它会假设你忘记注册全局组件或者拼错了组件名称，从而抛出一个关于 Unknown custom element 的警告。
 
     /**
-     * Custom user key aliases for v-on
+     * Custom user key aliases for v-on v-on的自定义用户密钥别名
      */
     // $flow-disable-line
-    keyCodes: Object.create(null),
+    keyCodes: Object.create(null), // 给 v-on 自定义键位别名。
 
     /**
-     * Check if a tag is reserved so that it cannot be registered as a
-     * component. This is platform-dependent and may be overwritten.
+     * Check if a tag is reserved so that it cannot be registered as a 检查标签是否被保留，以便它不能被注册为
+     * component. This is platform-dependent and may be overwritten. 组件。这是依赖于平台的，可能会被覆盖
+     * 就是检测一个保留标签，这个标签是不能被注册为组件的
      */
     isReservedTag: no,
 
     /**
-     * Check if an attribute is reserved so that it cannot be used as a component
-     * prop. This is platform-dependent and may be overwritten.
+     * Check if an attribute is reserved so that it cannot be used as a component 检查属性是否被保留，以便不能将其用作组件
+     * prop. This is platform-dependent and may be overwritten. 道具。这是依赖于平台的，可能会被覆盖
+     * 就是检测一个属性，这个属性不能用作组件支持
      */
     isReservedAttr: no,
 
     /**
-     * Check if a tag is an unknown element.
-     * Platform-dependent.
+     * Check if a tag is an unknown element. 检查标签是否为未知元素
+     * Platform-dependent. 平台相关的
      */
     isUnknownElement: no,
 
     /**
-     * Get the namespace of an element
+     * Get the namespace of an element 获取元素的名称空间
      */
     getTagNamespace: noop,
 
     /**
-     * Parse the real tag name for the specific platform.
+     * Parse the real tag name for the specific platform. 解析特定平台的真实标记名
      */
     parsePlatformTagName: identity,
 
     /**
-     * Check if an attribute must be bound using property, e.g. value
-     * Platform-dependent.
+     * Check if an attribute must be bound using property, e.g. value 检查一个属性是否必须使用 property 绑定，例如value
+     * Platform-dependent. 平台相关的
      */
     mustUseProp: no,
 
     /**
-     * Perform updates asynchronously. Intended to be used by Vue Test Utils
-     * This will significantly reduce performance if set to false.
+     * Perform updates asynchronously. Intended to be used by Vue Test Utils 异步执行更新。用于Vue测试Utils
+     * This will significantly reduce performance if set to false. 如果设置为false，这将显著降低性能。
      */
     async: true,
 
     /**
-     * Exposed for legacy reasons
+     * Exposed for legacy reasons 由于遗留原因而暴露
+     * 生命周期列表
      */
     _lifecycleHooks: LIFECYCLE_HOOKS
   });
@@ -477,9 +497,9 @@
   /*  */
 
   /**
-   * unicode letters used for parsing html tags, component names and property paths.
+   * unicode letters used for parsing html tags, component names and property paths. 用于解析html标签、组件名称和属性路径的unicode字母
    * using https://www.w3.org/TR/html53/semantics-scripting.html#potentialcustomelementname
-   * skipping \u10000-\uEFFFF due to it freezing up PhantomJS
+   * 跳过 \u10000-\uEFFFF due to it freezing up PhantomJS 跳绳 \u10000- uEFFFF，因为它冻结 PhantomJS
    */
   var unicodeRegExp = /a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD/;
 
@@ -504,7 +524,7 @@
   }
 
   /**
-   * Parse simple path.
+   * Parse simple path. 解析简单路径
    */
   var bailRE = new RegExp(("[^" + (unicodeRegExp.source) + ".$_\\d]"));
   function parsePath (path) {
@@ -523,28 +543,33 @@
 
   /*  */
 
-  // can we use __proto__?
+  // can we use __proto__? 我们可以使用__proto__吗？ 
+  // __proto__ 不是个标准属性，有些浏览器是不支持的
   var hasProto = '__proto__' in {};
 
-  // Browser environment sniffing
-  var inBrowser = typeof window !== 'undefined';
-  var inWeex = typeof WXEnvironment !== 'undefined' && !!WXEnvironment.platform;
-  var weexPlatform = inWeex && WXEnvironment.platform.toLowerCase();
-  var UA = inBrowser && window.navigator.userAgent.toLowerCase();
-  var isIE = UA && /msie|trident/.test(UA);
-  var isIE9 = UA && UA.indexOf('msie 9.0') > 0;
-  var isEdge = UA && UA.indexOf('edge/') > 0;
-  var isAndroid = (UA && UA.indexOf('android') > 0) || (weexPlatform === 'android');
-  var isIOS = (UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform === 'ios');
-  var isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge;
-  var isPhantomJS = UA && /phantomjs/.test(UA);
-  var isFF = UA && UA.match(/firefox\/(\d+)/);
+  // Browser environment sniffing 浏览器环境中嗅探
+  var inBrowser = typeof window !== 'undefined'; // 判断是否为浏览器环境
 
-  // Firefox has a "watch" function on Object.prototype...
+  var inWeex = typeof WXEnvironment !== 'undefined' && !!WXEnvironment.platform; // 判断是否为 weex 环境
+  var weexPlatform = inWeex && WXEnvironment.platform.toLowerCase(); // weex 环境
+
+  var UA = inBrowser && window.navigator.userAgent.toLowerCase(); // 提取出 UA 信息，用于判断浏览器环境
+  var isIE = UA && /msie|trident/.test(UA); // 判断是否为 IE 环境
+  var isIE9 = UA && UA.indexOf('msie 9.0') > 0; // 判断是否为 IE9 环境
+  var isEdge = UA && UA.indexOf('edge/') > 0; // 判断是否是否为 IE10+ 环境
+  var isAndroid = (UA && UA.indexOf('android') > 0) || (weexPlatform === 'android'); // 安卓
+  var isIOS = (UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform === 'ios'); // ios
+  var isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge; // 谷歌浏览器
+  var isPhantomJS = UA && /phantomjs/.test(UA); // Phantom JS是一个服务器端的 JavaScript API 的 WebKit。 
+  var isFF = UA && UA.match(/firefox\/(\d+)/); // firefox 浏览器
+
+  // Firefox has a "watch" function on Object.prototype... Firefox在Object.prototype上有一个“watch”功能
   var nativeWatch = ({}).watch;
 
+  // 检测浏览器是否支持 passive(可以标识事件监听器不会 preventDefault 方法阻止默认行为，这样事件监听就可以开两个线程分别处理默认行为和事件监听性) 特性
+  // 具体可见 https://www.cnblogs.com/ziyunfei/p/5545439.html
   var supportsPassive = false;
-  if (inBrowser) {
+  if (inBrowser) { // 浏览器环境
     try {
       var opts = {};
       Object.defineProperty(opts, 'passive', ({
@@ -553,12 +578,20 @@
           supportsPassive = true;
         }
       })); // https://github.com/facebook/flow/issues/285
-      window.addEventListener('test-passive', null, opts);
+      /**
+       * addEventListener 的第三个参数支持对象形式，16 年新特性
+       * {
+       *    capture: false, // 等价于以前的 useCapture 参数, 触发事件阶段
+       *    passive: false, // 是“顺从的”，表示它不会对事件的默认行为说 no，浏览器知道了一个监听器是 passive 的，它就可以在两个线程里同时执行监听器中的 JavaScript 代码和浏览器的默认行为了。
+       *    once: false // 表明该监听器是一次性的
+       * }
+       */
+      window.addEventListener('test-passive', null, opts); // 通过 addEventListener 方式注册事件，主要是为了检查是否支持 opts 对象参数，addEventListener 内部会读取 opts 的 passive 属性，这样就可以判断是否支持 passive 属性
     } catch (e) {}
   }
 
-  // this needs to be lazy-evaled because vue may be required before
-  // vue-server-renderer can set VUE_ENV
+  // this needs to be lazy-evaled because vue may be required before 这需要进行延迟评估，因为以前可能需要 vue
+  // vue-server-renderer can set VUE_ENV vue-server-renderer 可以设置 VUE_ENV
   var _isServer;
   var isServerRendering = function () {
     if (_isServer === undefined) {
@@ -574,36 +607,42 @@
     return _isServer
   };
 
-  // detect devtools
-  var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
+  // detect devtools 检测 devtools
+  var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__; // 是否为 浏览器环境 && 是否安装了 devtools
 
   /* istanbul ignore next */
+  // 检测是否为原生内置函数
   function isNative (Ctor) {
+    // 通过打印函数源码来判断，原生函数源码是带有 native code 标识的
+    /**
+     * function Symbol() { [native code] }
+     */
     return typeof Ctor === 'function' && /native code/.test(Ctor.toString())
   }
 
+  // 是否支持 Symbol 特性，ES6 新增语法
   var hasSymbol =
-    typeof Symbol !== 'undefined' && isNative(Symbol) &&
-    typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys);
+    typeof Symbol !== 'undefined' && isNative(Symbol) && // 检测 Symbol 对象是否存在 && Symbol 是否为内置函数
+    typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys); // 检测 Relect && Reflect.ownKeys(用于返回对象自身所有属性，包括 Symbol) 是否为内置函数
 
-  var _Set;
+  var _Set; // Set 语法，如果不支持则 自定义一下
   /* istanbul ignore if */ // $flow-disable-line
-  if (typeof Set !== 'undefined' && isNative(Set)) {
+  if (typeof Set !== 'undefined' && isNative(Set)) { // 是否原生支持 Set
     // use native Set when available.
-    _Set = Set;
+    _Set = Set; // 优先使用原生特性，性能更佳
   } else {
-    // a non-standard Set polyfill that only works with primitive keys.
+    // a non-standard Set polyfill that only works with primitive keys. 一个非标准的集合填充，只对原始键有效
     _Set = /*@__PURE__*/(function () {
       function Set () {
         this.set = Object.create(null);
       }
-      Set.prototype.has = function has (key) {
+      Set.prototype.has = function has (key) { // has 方法：判断是否存在该值
         return this.set[key] === true
       };
-      Set.prototype.add = function add (key) {
+      Set.prototype.add = function add (key) { // add 方法：添加一个值
         this.set[key] = true;
       };
-      Set.prototype.clear = function clear () {
+      Set.prototype.clear = function clear () { // clear 方法：清空所有值
         this.set = Object.create(null);
       };
 
@@ -619,7 +658,8 @@
   var formatComponentName = (noop);
 
   {
-    var hasConsole = typeof console !== 'undefined';
+    var hasConsole = typeof console !== 'undefined'; //  是否支持 console
+    // 过滤掉 class 中的 -_ 符号，并且把字母开头的改成大写
     var classifyRE = /(?:^|[-_])(\w)/g;
     var classify = function (str) { return str
       .replace(classifyRE, function (c) { return c.toUpperCase(); })
@@ -707,7 +747,7 @@
 
   /*  */
 
-  var uid = 0;
+  var uid = 0; // 组件 id
 
   /**
    * A dep is an observable that can have multiple
@@ -2624,7 +2664,7 @@
   /*  */
 
   /**
-   * Runtime helper for rendering v-for lists.
+   * Runtime helper for rendering v-for lists. 用于呈现v-for列表的运行时助手
    */
   function renderList (
     val,
@@ -2669,7 +2709,7 @@
   /*  */
 
   /**
-   * Runtime helper for rendering <slot>
+   * Runtime helper for rendering <slot> 渲染的运行时助手 <slot>
    */
   function renderSlot (
     name,
@@ -2706,7 +2746,7 @@
   /*  */
 
   /**
-   * Runtime helper for resolving filters
+   * Runtime helper for resolving filters 用于解析过滤器的运行时助手
    */
   function resolveFilter (id) {
     return resolveAsset(this.$options, 'filters', id, true) || identity
@@ -2803,7 +2843,7 @@
   /*  */
 
   /**
-   * Runtime helper for rendering static trees.
+   * Runtime helper for rendering static trees. 渲染静态树的运行时助手
    */
   function renderStatic (
     index,
@@ -2827,8 +2867,8 @@
   }
 
   /**
-   * Runtime helper for v-once.
-   * Effectively it means marking the node as static with a unique key.
+   * Runtime helper for v-once. v-once的运行时助手
+   * Effectively it means marking the node as static with a unique key. 实际上，这意味着用唯一键将节点标记为静态节点
    */
   function markOnce (
     tree,
@@ -2936,19 +2976,19 @@
   }
 
   /*  */
-
+  // 安装渲染助手
   function installRenderHelpers (target) {
-    target._o = markOnce;
-    target._n = toNumber;
-    target._s = toString;
-    target._l = renderList;
-    target._t = renderSlot;
-    target._q = looseEqual;
-    target._i = looseIndexOf;
-    target._m = renderStatic;
-    target._f = resolveFilter;
-    target._k = checkKeyCodes;
-    target._b = bindObjectProps;
+    target._o = markOnce; // 实际上，意味着使用唯一键将节点标记为静态 * 标志 v-once 指令
+    target._n = toNumber; // 转化为 number，失败则返回原字符串
+    target._s = toString; // 转化为字符串，一定转化成功
+    target._l = renderList; // 根据 val 传入值判断是数字，数组，对象，字符串，循环渲染
+    target._t = renderSlot; // 用于呈现 <slot> 的运行时帮助程序，创建虚拟 slot vnode
+    target._q = looseEqual; // 比较 a 和 b 是否大致相等，会对数组和对象进行检测每项的值
+    target._i = looseIndexOf; // 检测数组 arr 的每一项是否与指定值 val 大致相等(使用 looseEqual 方法)并返回索引，没有找到返回 -1
+    target._m = renderStatic; // 用于呈现静态树的运行时助手，创建静态虚拟 vnode
+    target._f = resolveFilter; // 用于解析过滤器的运行时助手
+    target._k = checkKeyCodes; // 用于检测两个 key 是否相等，如果不相等返回 true
+    target._b = bindObjectProps; 
     target._v = createTextVNode;
     target._e = createEmptyVNode;
     target._u = resolveScopedSlots;
@@ -3516,14 +3556,17 @@
 
   var currentRenderingInstance = null;
 
+  // 为 Vue 原型添加渲染助手，$nextTick 和 _render 方法
   function renderMixin (Vue) {
-    // install runtime convenience helpers
+    // install runtime convenience helpers 安装运行时方便帮助程序
     installRenderHelpers(Vue.prototype);
 
+    // 添加原型方法 $nextTick
     Vue.prototype.$nextTick = function (fn) {
       return nextTick(fn, this)
     };
 
+    // 条件原型方法 _render
     Vue.prototype._render = function () {
       var vm = this;
       var ref = vm.$options;
@@ -3800,8 +3843,10 @@
     target = undefined;
   }
 
+  // 添加原型方法 $on, $once, $off, $emit
   function eventsMixin (Vue) {
-    var hookRE = /^hook:/;
+    var hookRE = /^hook:/; // 检查匹配 hook: 开头字符串
+    // 添加原型方法 $on
     Vue.prototype.$on = function (event, fn) {
       var vm = this;
       if (Array.isArray(event)) {
@@ -3818,7 +3863,7 @@
       }
       return vm
     };
-
+    // 添加原型方法 $once
     Vue.prototype.$once = function (event, fn) {
       var vm = this;
       function on () {
@@ -3829,7 +3874,7 @@
       vm.$on(event, on);
       return vm
     };
-
+    // 添加原型方法 $off
     Vue.prototype.$off = function (event, fn) {
       var vm = this;
       // all
@@ -3865,7 +3910,7 @@
       }
       return vm
     };
-
+    // 添加原型方法 $emit
     Vue.prototype.$emit = function (event) {
       var vm = this;
       {
@@ -3932,7 +3977,9 @@
     vm._isBeingDestroyed = false;
   }
 
+  // 添加原型方法 _update, $forceUpdate, $destroy
   function lifecycleMixin (Vue) {
+    // 添加原型方法 _update
     Vue.prototype._update = function (vnode, hydrating) {
       var vm = this;
       var prevEl = vm.$el;
@@ -3964,6 +4011,7 @@
       // updated in a parent's updated hook.
     };
 
+    // 添加原型方法 $forceUpdate
     Vue.prototype.$forceUpdate = function () {
       var vm = this;
       if (vm._watcher) {
@@ -3971,6 +4019,7 @@
       }
     };
 
+    // 添加原型方法 $destroy
     Vue.prototype.$destroy = function () {
       var vm = this;
       if (vm._isBeingDestroyed) {
@@ -4902,33 +4951,34 @@
     return vm.$watch(expOrFn, handler, options)
   }
 
+  // 添加原型属性 $data, $props, 添加原型方法 $set, $del
   function stateMixin (Vue) {
-    // flow somehow has problems with directly declared definition object
-    // when using Object.defineProperty, so we have to procedurally build up
-    // the object here.
-    var dataDef = {};
-    dataDef.get = function () { return this._data };
-    var propsDef = {};
-    propsDef.get = function () { return this._props };
+    // flow somehow has problems with directly declared definition object flow 在使用直接声明的定义对象时存在问题
+    // when using Object.defineProperty, so we have to procedurally build up 当使用 Object.defineProperty 定义属性，所以我们必须程序地建立
+    // the object here. 这里的对象
+    var dataDef = {}; // 定义一个对象，用于设置 $data 属性描述符
+    dataDef.get = function () { return this._data }; // 定义获取 _data 属性
+    var propsDef = {}; // 定义一个对象，用于设置 $props 属性描述符
+    propsDef.get = function () { return this._props }; // 获取 _props 属性
     {
-      dataDef.set = function () {
+      dataDef.set = function () { // 不能设置 $data 属性
         warn(
           'Avoid replacing instance root $data. ' +
           'Use nested data properties instead.',
           this
         );
       };
-      propsDef.set = function () {
+      propsDef.set = function () { // 不能设置 $props
         warn("$props is readonly.", this);
       };
     }
-    Object.defineProperty(Vue.prototype, '$data', dataDef);
-    Object.defineProperty(Vue.prototype, '$props', propsDef);
+    Object.defineProperty(Vue.prototype, '$data', dataDef); // 为 Vue 实例设置 $data 属性，只读属性
+    Object.defineProperty(Vue.prototype, '$props', propsDef); // 为 Vue 实例设置 $props 属性，只读属性
 
-    Vue.prototype.$set = set;
-    Vue.prototype.$delete = del;
+    Vue.prototype.$set = set; // 添加原型方法 $set
+    Vue.prototype.$delete = del; // 添加原型方法 $del
 
-    Vue.prototype.$watch = function (
+    Vue.prototype.$watch = function ( // 添加原型方法 $watch
       expOrFn,
       cb,
       options
@@ -4957,6 +5007,7 @@
 
   var uid$3 = 0;
 
+  // 为 Vue 添加实例方法 _init 
   function initMixin (Vue) {
     Vue.prototype._init = function (options) {
       var vm = this;
@@ -5070,6 +5121,8 @@
     return modified
   }
 
+  debugger;
+  // 从这里入手，定义 Vue 构造函数
   function Vue (options) {
     if (!(this instanceof Vue)
     ) {
@@ -5078,11 +5131,11 @@
     this._init(options);
   }
 
-  initMixin(Vue);
-  stateMixin(Vue);
-  eventsMixin(Vue);
-  lifecycleMixin(Vue);
-  renderMixin(Vue);
+  initMixin(Vue); // 为 Vue 添加实例方法 _init
+  stateMixin(Vue); // 添加原型属性 $data, $props, 添加原型方法 $set, $del
+  eventsMixin(Vue); // 添加原型方法 $on, $once, $off, $emit
+  lifecycleMixin(Vue); // 添加原型方法 _update, $forceUpdate, $destroy
+  renderMixin(Vue); // 为 Vue 原型添加渲染助手，$nextTick 和 _render 方法
 
   /*  */
 
@@ -5425,7 +5478,7 @@
     initAssetRegisters(Vue);
   }
 
-  initGlobalAPI(Vue);
+  initGlobalAPI(Vue); // 为 Vue 添加静态方法(也是全局 API)
 
   Object.defineProperty(Vue.prototype, '$isServer', {
     get: isServerRendering
