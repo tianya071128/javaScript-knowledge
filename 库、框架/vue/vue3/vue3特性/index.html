@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="counter">
+        Counter: {{ counter }}
+
+        <!-- 修订内容 -->
+        <!-- 1. ref 在 for 上的注册区分：不会在 $refs 中注册为一个数组，可以由开发人员自行处理 -->
+        <div v-for="item in list" :ref="setItemRef"></div>
+        <!-- 如果传入的不是函数，则会注册在 $refs 上，并且其只会注册最后一个元素，并且 key 为传入的值 -->
+        <!-- <div v-for="item in list" ref="setItemRef"></div> -->
+
+        <!-- 2. $attrs 包括 class 和 style：主要解决 class， style 和 其他 attribute 行为不一致的问题 -->
+
+        <!-- 3. 自定义指令：指令钩子修正了，移除了 update，新增了几个，以达到跟组件生命周期对应，但是是从 beforeMount 生命周期钩子对应的 -->
+
+        <!-- 4. data 选项：只支持 function 声明，并且 data 选项 mixin 或 extend 合并时是浅合并 -->
+
+        <!-- 5. 函数式组件：语法变化，并且不建议使用，因为函数式组件在 vue3 时代，性能上并不比有状态组件快 -->
+
+        <!-- 6. v-model 变化：内容较多，可参考文档 -->
+
+        <!-- 7. v-if 与 v-for 优先级变化：vue3 中，v-if 优先级比 v-for 高，这意味着，当 v-if 不通过时，v-for 将不起作用 -->
+
+
+        <!-- 删除内容 -->
+        <!-- 1. $children：不再支持，在 2.0 中可以通过 $children 访问组件的子组件 -->
+
+        <!-- 2. $on，$off 和 $once 不再支持，可以使用其他库或自定义来实现 发布-订阅模式 -->
+
+        <!-- 3. 过滤器：不再支持过滤器 -->
+
+        <!-- 4. $listeners：不再支持，事件监听器现在也是 $attrs 中的一部分，事件监听器行为也跟其他 attribute 相同  -->
+
+        <!-- 5. 移除 v-on.native 修饰符：在 vue2 中，要将要将原生 DOM 监听器添加到子组件的根元素中，可以使用 .native 修饰符。 在 vue3 中，默认会将没有注册到 emits 的事件监听器添加到根元素中，除非定义了 inheritAttrs: false -->
+
+
+        <!-- 新增内容 -->
+        <!-- 1. emits：类似于 props 选项，注册父组件监听事件  -- 在 vue3.0 中，去除了 .native 修饰符，未声明的事件都会绑定到根元素上 -->
+        <!-- 测试情况：貌似不是强制在 emits 选项上定义才能监听事件，如果没有在 emits 中定义，则会存在于 $attrs 属性中 -->
+        <my-common @my-emit="handleClick" my-prop="测试"></my-common>
+
+        <!-- 2. 片段：支持多个根节点，但同时在片段中需要显示定义 attrbute 应该分布在哪里 -->
+
+    </div>
+</body>
+
+</html>
+<script>
+    const Counter = {
+        components: {
+            'my-common': {
+                template: `
+                    <div>
+                        <div  @click="$emit('my-emit')">测试 emits</div>    
+                    </div>
+                `,
+                created() {
+                    console.log(this);
+                },
+                emits: ['myEmit'],
+                props: ['my-prop']
+            },
+            // 片段
+            'my-pianduan': {
+                template: `
+                <header>...</header>
+                <main v-bind="$attrs">...</main>
+                <footer>...</footer>
+                `,
+            }
+        },
+        data() {
+            return {
+                counter: 0,
+                list: [1,2,3,4],
+                refs: [],
+            }
+        },
+        methods: {
+            // 会在每次渲染时重新调用，所以教程中会在 beforeUpdate 重新渲染钩子中清空以前的数组
+            setItemRef(el) {
+                console.log(el, this.$refs);
+                this.refs.push(el);
+            },
+            handleClick() {
+                console.log('测试 emits');
+            }
+        },
+        mounted() {
+            console.log(this.$refs);
+        }
+    }
+
+    const app = Vue.createApp(Counter).mount('#counter')
+</script>
