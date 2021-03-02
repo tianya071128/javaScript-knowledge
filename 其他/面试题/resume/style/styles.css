@@ -91,7 +91,7 @@ ul.evaluate li::before {
 }
 
 .big-title {
-  margin: 5% 25%;
+  margin: 3% 25%;
   border-radius: 15px;
   text-align: center;
   font-size: 18px;
@@ -101,16 +101,16 @@ ul.evaluate li::before {
   color: #468871;
 }
 ul.skill {
-  margin: 15px 0 0 5%;
+  margin: 15px 3% 0 3%;
 }
 ul.skill li {
   margin: 6px 0;
   display: flex;
   /* align-items: center; */
-  font-size: 15px;
-  line-height: 1.4;
-  color: #1d7d71;
+  font-size: 14px;
+  line-height: 1.6;
   position: relative;
+  color: #333;
 }
 ul.skill li::after {
   content: "";
@@ -173,13 +173,13 @@ ul.company .job-content {
   font-size: 16px;
 }
 .xiangmu-item {
-  margin: 5%;
+  margin: 3%;
 }
 .xiangmu-title {
   font-size: 20px;
   color: #5dc3b1;
   font-weight: bold;
-  margin: 5% 0;
+  margin: 3% 0;
 }
 .jishu {
   margin: 3% 0;
@@ -237,4 +237,9 @@ ul.company .job-content {
   flex: 2;
   background: #f1eee8;
   height: 100%;
+}
+
+
+.jineng {
+
 }
