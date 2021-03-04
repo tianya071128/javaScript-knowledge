@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Document</title>
-    <script src="./dist/vue.js"></script>
-  </head>
-  <body>
-    <div id="app">{{test}}{{ object.b }}{{ array[0] }}</div>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Document</title>
+  <script src="./dist/vue.js"></script>
+</head>
+
+<body>
+  <div id="app">
+    {{test}}{{ object.b.c }}{{ array[0] }}
+    <my-components test='5' :test2="object"></my-components>
+  </div>
+</body>
+
 </html>
 <script>
   var vm = new Vue({
@@ -19,7 +25,41 @@
       array: [1, 2, 3],
       object: {
         a: 1,
-        b: 2
+        b: {
+          c: 2
+        }
+      }
+    },
+    beforeUpdate() {
+      console.log('数据更新了？');
+    },
+    components: {
+      'my-components': {
+        template: `
+          <div>这是一个子组件</div>
+        `,
+        props: {
+          test: String,
+          test2: {
+            type: Object,
+          }
+        },
+        data() {
+          return {
+            shuju: 5,
+            shuzu: [2, 3, { a: 5 }]
+          }
+        },
+        watch: {
+          shuju() {
+            console.log('监听者');
+          }
+        },
+        computed: {
+          jisuan() {
+            return this.shuju + 1;
+          }
+        }
       }
     }
   });

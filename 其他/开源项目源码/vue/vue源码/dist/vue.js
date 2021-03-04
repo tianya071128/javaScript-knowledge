@@ -12,7 +12,7 @@
 
   /*  */
 
-  var emptyObject = Object.freeze({});
+  var emptyObject = Object.freeze({}); // 已冻结的空对象
 
   // These helpers produce better VM code in JS engines due to their
   // explicitness and function inlining.
@@ -20,6 +20,7 @@
     return v === undefined || v === null
   }
 
+  // 指定值不为 undefined 或 null
   function isDef(v) {
     return v !== undefined && v !== null
   }
@@ -85,11 +86,12 @@
     return n >= 0 && Math.floor(n) === n && isFinite(val)
   }
 
+  // 指定值是否为 promise
   function isPromise(val) {
     return (
-      isDef(val) &&
-      typeof val.then === 'function' &&
-      typeof val.catch === 'function'
+      isDef(val) && // val 不为undefined 或 null
+      typeof val.then === 'function' && // val 具有 then 方法
+      typeof val.catch === 'function' // val 具有 catch 方法
     )
   }
 
@@ -143,7 +145,7 @@
   var isReservedAttribute = makeMap('key,ref,slot,slot-scope,is');
 
   /**
-   * Remove an item from an array.
+   * Remove an item from an array. 从数组中移除项
    */
   function remove(arr, item) {
     if (arr.length) {
@@ -507,7 +509,7 @@
   var unicodeRegExp = /a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD/;
 
   /**
-   * Check if a string starts with $ or _
+   * Check if a string starts with $ or _ 检查字符串是否以$或_开头
    */
   function isReserved(str) {
     var c = (str + '').charCodeAt(0);
@@ -528,17 +530,18 @@
 
   /**
    * Parse simple path. 解析简单路径
+   * 用于 watch 选项时，将监听属性转化为函数形式
    */
-  var bailRE = new RegExp(("[^" + (unicodeRegExp.source) + ".$_\\d]"));
+  var bailRE = new RegExp(("[^" + (unicodeRegExp.source) + ".$_\\d]")); // 匹配不是 数字字母下划线 $符号   开头的为true
   function parsePath(path) {
-    if (bailRE.test(path)) {
+    if (bailRE.test(path)) { // 不能监听内部属性
       return
     }
-    var segments = path.split('.');
+    var segments = path.split('.'); // 分割 . 属性
     return function (obj) {
       for (var i = 0; i < segments.length; i++) {
         if (!obj) { return }
-        obj = obj[segments[i]];
+        obj = obj[segments[i]]; // 通过 obj[segments[i]] 触发 getter 求值操作，用来通知 dep 来收集这个 watcher 观察者
       }
       return obj
     }
@@ -754,59 +757,65 @@
 
   /*  */
 
-  var uid = 0; // 组件 id
+  var uid = 0; // dep id
 
   /**
-   * A dep is an observable that can have multiple
-   * directives subscribing to it.
+   * A dep is an observable that can have multiple dep是一个可以有多个的可见对象
+   * directives subscribing to it. 订阅它的指令
    */
   var Dep = function Dep() {
-    this.id = uid++;
-    this.subs = [];
+    this.id = uid++; // 设置 id
+    this.subs = []; // 观察者集合
   };
 
+  // 添加一个观察对象
   Dep.prototype.addSub = function addSub(sub) {
     this.subs.push(sub);
   };
 
+  // 进行观察者回收
   Dep.prototype.removeSub = function removeSub(sub) {
-    remove(this.subs, sub);
+    remove(this.subs, sub); // 从观察者队列 subs 中删除 sub 项
   };
 
+  // 依赖收集
   Dep.prototype.depend = function depend() {
-    if (Dep.target) {
-      Dep.target.addDep(this);
+    if (Dep.target) { // 存在观察对象
+      Dep.target.addDep(this); // 借用 Dep.target(观察对象) 进行依赖收集(收集在 subs 集合中) -- 这样借用是因为观察对象也需要收集所有观察到的属性并且防止重复收集
     }
   };
 
+  // 触发依赖
   Dep.prototype.notify = function notify() {
-    // stabilize the subscriber list first
-    var subs = this.subs.slice();
+    // stabilize the subscriber list first 首先稳定订阅服务器列表
+    var subs = this.subs.slice(); // 返回订阅列表副本
     if (!config.async) {
-      // subs aren't sorted in scheduler if not running async
-      // we need to sort them now to make sure they fire in correct
-      // order
-      subs.sort(function (a, b) { return a.id - b.id; });
+      // subs aren't sorted in scheduler if not running async 如果不运行异步，子程序不会在调度器中排序
+      // we need to sort them now to make sure they fire in correct 我们现在需要对它们进行分类，以确保它们正确发射
+      // order 订单
+      subs.sort(function (a, b) { return a.id - b.id; }); // 进行排序
     }
     for (var i = 0, l = subs.length; i < l; i++) {
-      subs[i].update();
+      subs[i].update(); // 触发依赖
     }
   };
 
-  // The current target watcher being evaluated.
-  // This is globally unique because only one watcher
-  // can be evaluated at a time.
-  Dep.target = null;
-  var targetStack = [];
+  // The current target watcher being evaluated. 正在评估当前的目标观察者
+  // This is globally unique because only one watcher 这在全球是独一无二的，因为只有一个观察者
+  // can be evaluated at a time. 可以一次评估吗
+  Dep.target = null; // 用于存储全局唯一的观察者
+  var targetStack = []; // 观察者队列 -- 用于当需要禁用依赖收集时
 
+  // 重置观察者队列 -- 如果传入空之类的 false 值，表示不进行依赖收集
   function pushTarget(target) {
-    targetStack.push(target);
-    Dep.target = target;
+    targetStack.push(target); // 添加进观察者队列
+    Dep.target = target; // 目前观察者
   }
 
+  // 去除最后一个观察者
   function popTarget() {
-    targetStack.pop();
-    Dep.target = targetStack[targetStack.length - 1];
+    targetStack.pop(); // 去除最后一个观察者
+    Dep.target = targetStack[targetStack.length - 1]; // 将最顶部观察者置为全局观察者
   }
 
   /*  */
@@ -904,8 +913,8 @@
    * dynamically accessing methods on Array prototype
    */
 
-  var arrayProto = Array.prototype;
-  var arrayMethods = Object.create(arrayProto);
+  var arrayProto = Array.prototype; // Array 实例方法
+  var arrayMethods = Object.create(arrayProto); // 继承至 Array.prototype 的对象
 
   var methodsToPatch = [
     'push',
@@ -918,139 +927,146 @@
   ];
 
   /**
-   * Intercept mutating methods and emit events
+   * Intercept mutating methods and emit events 拦截突变的方法并发出事件
    */
   methodsToPatch.forEach(function (method) {
-    // cache original method
-    var original = arrayProto[method];
+    // cache original method 缓存的原方法
+    var original = arrayProto[method]; // 原始数组方法缓存
+    // 拦截部分数组原生方法，进行额外操作
     def(arrayMethods, method, function mutator() {
       var args = [], len = arguments.length;
-      while (len--) args[len] = arguments[len];
+      while (len--) args[len] = arguments[len]; // 处理参数
 
-      var result = original.apply(this, args);
-      var ob = this.__ob__;
+      var result = original.apply(this, args); // 调用原生数组方法
+      var ob = this.__ob__; // 获取 ob 响应式对象
       var inserted;
       switch (method) {
         case 'push':
         case 'unshift':
-          inserted = args;
+          inserted = args; // 如果是这两个方法，说明参数都是新增值
           break
         case 'splice':
-          inserted = args.slice(2);
+          inserted = args.slice(2); // 如果是这个方法，就需要对参数截取除了前两位的值
           break
       }
-      if (inserted) { ob.observeArray(inserted); }
-      // notify change
-      ob.dep.notify();
+      if (inserted) { ob.observeArray(inserted); } // 如果具有新增值，则通过 observeArray 来将新增值也进行响应式
+      // notify change 通知更改
+      ob.dep.notify(); // 这里就会触发对依赖这个数组的订阅者，例如：a: [2, 3], 因为这些原生方法不会触发 setter 方法，所以在调用方法后，手动更新对数组 a 的订阅者
       return result
     });
   });
 
   /*  */
 
-  var arrayKeys = Object.getOwnPropertyNames(arrayMethods);
+  var arrayKeys = Object.getOwnPropertyNames(arrayMethods); // 获取 arrayMethods 自身所有属性，不包括原型属性
 
   /**
-   * In some cases we may want to disable observation inside a component's
-   * update computation.
+   * In some cases we may want to disable observation inside a component's 在某些情况下，我们可能想要禁用组件内部的观察功能
+   * update computation. 更新计算
    */
   var shouldObserve = true;
 
+  // 对进行 observer 响应式控制 true：会深度转化为响应式 | false: 不会
   function toggleObserving(value) {
     shouldObserve = value;
   }
 
   /**
-   * Observer class that is attached to each observed
-   * object. Once attached, the observer converts the target
-   * object's property keys into getter/setters that
-   * collect dependencies and dispatch updates.
+   * Observer class that is attached to each observed 附加到每个被观察者的观察者类
+   * object. Once attached, the observer converts the target 对象。一旦连接上，观察者就会转换目标
+   * object's property keys into getter/setters that 对象的属性键化为getter/setter
+   * collect dependencies and dispatch updates. 收集依赖项并分发更新
    */
   var Observer = function Observer(value) {
-    this.value = value;
-    this.dep = new Dep();
-    this.vmCount = 0;
-    def(value, '__ob__', this);
-    if (Array.isArray(value)) {
-      if (hasProto) {
+    this.value = value; // 保留源值
+    this.dep = new Dep(); // 依赖收集集合
+    this.vmCount = 0; // 标识
+    def(value, '__ob__', this); // 为 value 添加一个 __ob__ 属性
+    if (Array.isArray(value)) { // 如果是数组额外处理
+      if (hasProto) { // 是否支持 __proto__ 非标准属性
+        // 通过 __proto__ 拦截数组方法操作，这样的话，访问数组原生方法是访问 arrayMethods 对象，这里的部分原生方法是访问的已经处理响应式的方法
         protoAugment(value, arrayMethods);
       } else {
+        // 直接将处理好的原生方法附加到 value 上，这样过的话，这样的话，访问数组原生方法是直接从 数组本身 上调用，而不是从 Array.prototype 上调用，没有处理的方法才会从 Array.prototype 上调用
         copyAugment(value, arrayMethods, arrayKeys);
       }
       this.observeArray(value);
     } else {
-      this.walk(value);
+      this.walk(value); // 对象处理
     }
   };
 
   /**
-   * Walk through all properties and convert them into
-   * getter/setters. This method should only be called when
-   * value type is Object.
+   * Walk through all properties and convert them into 遍历所有属性并将它们转换为
+   * getter/setters. This method should only be called when getter / setter。这个方法应该只在
+   * value type is Object. 值类型为Object
    */
   Observer.prototype.walk = function walk(obj) {
-    var keys = Object.keys(obj);
-    for (var i = 0; i < keys.length; i++) {
-      defineReactive$$1(obj, keys[i]);
+    var keys = Object.keys(obj); // 获取所有的属性
+    for (var i = 0; i < keys.length; i++) { // 遍历
+      defineReactive$$1(obj, keys[i]); // 设置可观察属性
     }
   };
 
   /**
-   * Observe a list of Array items.
+   * Observe a list of Array items. 观察数组项的列表
    */
   Observer.prototype.observeArray = function observeArray(items) {
     for (var i = 0, l = items.length; i < l; i++) {
-      observe(items[i]);
+      observe(items[i]); // 对数组每项值进行响应式转化
     }
   };
 
   // helpers
 
   /**
-   * Augment a target Object or Array by intercepting
-   * the prototype chain using __proto__
+   * Augment a target Object or Array by intercepting 通过拦截增强一个目标对象或数组
+   * the prototype chain using __proto__ 使用__proto__的原型链
+   * src：是一个已经处理好的数组原生方法集合
    */
   function protoAugment(target, src) {
     /* eslint-disable no-proto */
-    target.__proto__ = src;
+    target.__proto__ = src; // 通过 __proto__ 拦截数组方法操作
     /* eslint-enable no-proto */
   }
 
   /**
-   * Augment a target Object or Array by defining
-   * hidden properties.
+   * Augment a target Object or Array by defining 通过定义来扩充目标对象或数组
+   * hidden properties. 隐藏属性
    */
   /* istanbul ignore next */
   function copyAugment(target, src, keys) {
-    for (var i = 0, l = keys.length; i < l; i++) {
+    for (var i = 0, l = keys.length; i < l; i++) { // 遍历已经处理好的原生方法集合 keys
       var key = keys[i];
-      def(target, key, src[key]);
+      def(target, key, src[key]); // 手动将处理好的原生方法添加到 target 上
     }
   }
 
   /**
-   * Attempt to create an observer instance for a value,
-   * returns the new observer if successfully observed,
-   * or the existing observer if the value already has one.
+   * Attempt to create an observer instance for a value, 尝试为一个值创建一个观察者实例
+   * returns the new observer if successfully observed, 如果成功观察到，返回新的观察者
+   * or the existing observer if the value already has one. 或者是现有的观察者(如果值已经为1)
+   * 作用：对对象进行响应式转化
    */
   function observe(value, asRootData) {
-    if (!isObject(value) || value instanceof VNode) {
-      return
+    if (!isObject(value) || value instanceof VNode) { // 如果 value 不是对象 或者 属于 VNode 则不对其进行响应式
+      return // 直接返回
     }
     var ob;
-    if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
-      ob = value.__ob__;
+    if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) { // value 存在 __ob__ 属性 && value.__ob__ 属于 Observer 属性 --- 表示该对象已经响应式
+      ob = value.__ob__; // 直接返回已经响应式对象
     } else if (
-      shouldObserve &&
-      !isServerRendering() &&
-      (Array.isArray(value) || isPlainObject(value)) &&
-      Object.isExtensible(value) &&
-      !value._isVue
+      shouldObserve && // shouldObserve 是否可以进行转化响应式
+      !isServerRendering() && // 是否是 SSR
+      (Array.isArray(value) || isPlainObject(value)) && // value 是对象 || value 是对象
+      Object.isExtensible(value) && // value 是否可扩展的
+      !value._isVue // value 不是 vue 实例
     ) {
-      ob = new Observer(value);
+      ob = new Observer(value); // 此时进行响应式转化
     }
-    if (asRootData && ob) {
-      ob.vmCount++;
+    if (asRootData && ob) { // 如果进行转化是一个组件的根数据，则需要对 ob 设置个 ID
+      ob.vmCount++; // 统计有几个vm？？应该不是这个意思
+      // 应该是说这个对象应用在那几个 vm 上，因为 data 选项可以定义为对象形式，这样各个组件的 data 共有这个对象
     }
     return ob
   }
@@ -1059,62 +1075,77 @@
    * Define a reactive property on an Object. 在对象上定义一个反应性属性
    */
   function defineReactive$$1(
-    obj,
-    key,
-    val,
-    customSetter,
-    shallow
+    obj, // 对象
+    key, // key
+    val, // key 对应的值 - 通过闭包引用，在 get 取值函数中给用户
+    customSetter, // 设置值后回调
+    shallow // 不进行深度响应式
   ) {
-    var dep = new Dep();
+    var dep = new Dep(); // 闭包引用 dep 依赖收集集合
 
-    var property = Object.getOwnPropertyDescriptor(obj, key);
-    if (property && property.configurable === false) {
-      return
+    var property = Object.getOwnPropertyDescriptor(obj, key); // 获取属性描述
+    if (property && property.configurable === false) { // 如果属性描述 configurable 设置了 false ，表示无法进行配置
+      return // 静默失败
     }
 
-    // cater for pre-defined getter/setters
-    var getter = property && property.get;
-    var setter = property && property.set;
-    if ((!getter || setter) && arguments.length === 2) {
-      val = obj[key];
+    // cater for pre-defined getter/setters 适用于预定义的getter/setter
+    var getter = property && property.get; // get 取值函数
+    var setter = property && property.set; // set 赋值函数
+    if ((!getter || setter) && arguments.length === 2) { // 没有取值函数 && 只传递两个参数
+      val = obj[key]; // 此时从 obj 中取值
     }
 
-    var childOb = !shallow && observe(val);
+    var childOb = !shallow && observe(val); // 深度响应式
     Object.defineProperty(obj, key, {
       enumerable: true,
       configurable: true,
-      get: function reactiveGetter() {
-        var value = getter ? getter.call(obj) : val;
-        if (Dep.target) {
-          dep.depend();
-          if (childOb) {
-            childOb.dep.depend();
-            if (Array.isArray(value)) {
+      get: function reactiveGetter() { // 在 get 取值函数中，当有观察对象监听该属性时，就会自动触发，此时在这里处理依赖收集的工作，并将值返回
+        var value = getter ? getter.call(obj) : val; // 获取 value 实际值
+        if (Dep.target) { // 如果此时存在观察对象的话(通过 Dep.target 全局存储)，则进行依赖收集
+          dep.depend(); // 通知闭包的 dep 进行依赖收集
+          if (childOb) { // 如果存在深度响应式转化
+            /**
+             * 此时要说明一个问题：如果该 key 对象的 value 是一个对象，并对其进行深度监听，此时 childOb 就表示这个 value 响应式后得 Observe 实例
+             * childOb.dep.depend() 的作用是将对这个 value 对应的 key 属性的依赖同样全部收集在 Observe 实例上的 dep 中
+             * 因为 value 是一个对象的话，就可以通过 set 或 del 来进行属性的增删，此时 value 里面的属性都不会触发 setter，也就不会触发依赖
+             * 就需要手动去调用 dep 收集依赖，但是这里是通过闭包引用的 dep，所以就需要将这里收集的依赖重复收集在 childOb.dep 上
+             * 用于在 set 和 del 以及通过数组原生方法添加元素时手动触发依赖
+             * 假如：对象 a: { b: 2, c: { d: 5 } } 这样的情况，在模板中，引用了 {{ a }}，此时如果通过 Set(a, 'e', 6) 设置了一个新属性
+             * 那么应该也能触发依赖，重新渲染模板
+             * 在这里，就需要在 Set 内部，手动触发所有引用了 a 对象的依赖
+             * 那么另一种情况，也会产生不必要的更新：例如引用了 {{ a.c.d }}，通过 Set(a.c, 'e', 6) 设置属性，在这种情况，也会触发依赖更新
+             */
+            childOb.dep.depend(); // 这句代码的用意是什么？
+            if (Array.isArray(value)) { // 如果 value 是数组
+              /**
+               * 对于数组而言，对每一项的获取是没有办法拦截的，所有需要将对数组属性的依赖全部也要收集到每一项中
+               * 例如：c: [{ a: { b: 2 } }] 中，如果 Set(c[0], 'e', 2) 添加属性，此时对于数组而言，是需要重新更新依赖的
+               */
               dependArray(value);
             }
           }
         }
         return value
       },
-      set: function reactiveSetter(newVal) {
-        var value = getter ? getter.call(obj) : val;
+      set: function reactiveSetter(newVal) { // 在 setter 中，通过对赋值的拦截，来进行依赖的更新
+        var value = getter ? getter.call(obj) : val; // 初始值
         /* eslint-disable no-self-compare */
-        if (newVal === value || (newVal !== newVal && value !== value)) {
+        if (newVal === value || (newVal !== newVal && value !== value)) { // 判断 value 是否没有变化，此时不需要更新依赖
           return
         }
         /* eslint-enable no-self-compare */
-        if (customSetter) {
+        if (customSetter) { // 设置回调
           customSetter();
         }
-        // #7981: for accessor properties without setter
-        if (getter && !setter) { return }
-        if (setter) {
-          setter.call(obj, newVal);
+        // #7981: for accessor properties without setter 对于没有setter的访问器属性
+        if (getter && !setter) { return } // 对于没有 setter 的访问器属性，应该对其赋值行为静默失败
+        if (setter) { // 设置了 setter 方法
+          setter.call(obj, newVal); // 通过 setter 设置值
         } else {
-          val = newVal;
+          val = newVal; // 否则直接设置值
         }
-        childOb = !shallow && observe(newVal);
-        dep.notify();
+        childOb = !shallow && observe(newVal); // 对新值进行深度响应式，并且更新 childOb
+        dep.notify(); // 触发依赖
       }
     });
   }
@@ -1186,14 +1217,14 @@
   }
 
   /**
-   * Collect dependencies on array elements when the array is touched, since
-   * we cannot intercept array element access like property getters.
+   * Collect dependencies on array elements when the array is touched, since 当数组被触动时，收集数组元素的依赖项
+   * we cannot intercept array element access like property getters. 我们不能像拦截属性 getter 那样拦截数组元素访问
    */
   function dependArray(value) {
-    for (var e = (void 0), i = 0, l = value.length; i < l; i++) {
-      e = value[i];
-      e && e.__ob__ && e.__ob__.dep.depend();
-      if (Array.isArray(e)) {
+    for (var e = (void 0), i = 0, l = value.length; i < l; i++) { // 遍历数组
+      e = value[i]; // 获取每项值
+      e && e.__ob__ && e.__ob__.dep.depend(); // 对每项值的 dep 依赖收集
+      if (Array.isArray(e)) { // 递归调用
         dependArray(e);
       }
     }
@@ -1225,30 +1256,31 @@
   }
 
   /**
-   * Helper that recursively merges two data objects together.
+   * Helper that recursively merges two data objects together. 递归地合并两个数据对象的助手
+   * 注意：to 的优先级更高，即当 from 和 to 都存在同一属性时，to 优先级更高
    */
   function mergeData(to, from) {
-    if (!from) { return to }
+    if (!from) { return to } // 如果 from 不存在，直接返回 to
     var key, toVal, fromVal;
 
-    var keys = hasSymbol
-      ? Reflect.ownKeys(from)
-      : Object.keys(from);
+    var keys = hasSymbol // 是否支持 symbol
+      ? Reflect.ownKeys(from) // 获取所有 key（包含 symbol）
+      : Object.keys(from); // 获取所有 key
 
-    for (var i = 0; i < keys.length; i++) {
-      key = keys[i];
-      // in case the object is already observed...
-      if (key === '__ob__') { continue }
+    for (var i = 0; i < keys.length; i++) { // 遍历 key
+      key = keys[i]; // 获取 key
+      // in case the object is already observed... 如果这个物体已经被观测到
+      if (key === '__ob__') { continue } // 不对 __ob__ 进行处理
       toVal = to[key];
       fromVal = from[key];
-      if (!hasOwn(to, key)) {
-        set(to, key, fromVal);
+      if (!hasOwn(to, key)) { // 当 to 中不存在 key 时
+        set(to, key, fromVal); // 此时通过 set 在 to 上设置属性，这样是为了兼容已经观测的对象
       } else if (
-        toVal !== fromVal &&
-        isPlainObject(toVal) &&
-        isPlainObject(fromVal)
+        toVal !== fromVal && // 当 fromVal 不等于 toVal
+        isPlainObject(toVal) && // toVal 为对象
+        isPlainObject(fromVal) // fromVal 为对象
       ) {
-        mergeData(toVal, fromVal);
+        mergeData(toVal, fromVal); // 递归合并
       }
     }
     return to
@@ -1256,45 +1288,45 @@
 
   /**
    * Data
-   * 作用：data 的合并策略
+   * 作用：data 的合并策略 -- provide 的合并策略
    */
   function mergeDataOrFn(
-    parentVal,
-    childVal,
-    vm
+    parentVal, // 父选项
+    childVal, // 子选项
+    vm // 可选参数，vue 实例
   ) {
-    if (!vm) {
-      // in a Vue.extend merge, both should be functions
-      if (!childVal) {
-        return parentVal
+    if (!vm) { // 当没有传递 vm 实例时，表示构造函数继承场景
+      // in a Vue.extend merge, both should be functions Vue.extend 合并，两者都应该是函数
+      if (!childVal) { // 当不存在子选项时，
+        return parentVal // 直接返回父选项
       }
-      if (!parentVal) {
-        return childVal
+      if (!parentVal) { // 当不存在父选项时，
+        return childVal // 直接返回子选项
       }
-      // when parentVal & childVal are both present,
-      // we need to return a function that returns the
-      // merged result of both functions... no need to
-      // check if parentVal is a function here because
-      // it has to be a function to pass previous merges.
-      return function mergedDataFn() {
+      // when parentVal & childVal are both present, 当 parentVal 和 childVal 都存在时
+      // we need to return a function that returns the 我们需要返回一个返回
+      // merged result of both functions... no need to 两个函数的合并结果…不需要
+      // check if parentVal is a function here because 检查 parentVal 是否为函数，因为
+      // it has to be a function to pass previous merges. 它必须是一个传递先前合并的函数
+      return function mergedDataFn() { // 返回一个函数，函数内部返回合并后的结果，这样保证了 data 必须是一个函数
         return mergeData(
           typeof childVal === 'function' ? childVal.call(this, this) : childVal,
           typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
         )
       }
-    } else {
-      return function mergedInstanceDataFn() {
+    } else { // 当为实例化场景时
+      return function mergedInstanceDataFn() { // 返回一个函数，用于确保 data 为函数，在之后的流程中，会调用这个函数获取 data 选项
         // instance merge
-        var instanceData = typeof childVal === 'function'
-          ? childVal.call(vm, vm)
-          : childVal;
-        var defaultData = typeof parentVal === 'function'
-          ? parentVal.call(vm, vm)
-          : parentVal;
-        if (instanceData) {
-          return mergeData(instanceData, defaultData)
+        var instanceData = typeof childVal === 'function' // 如果是函数
+          ? childVal.call(vm, vm) // 调用其函数，
+          : childVal; // 否则直接引用 childVal
+        var defaultData = typeof parentVal === 'function' // 如果是函数
+          ? parentVal.call(vm, vm) // 调用其函数
+          : parentVal; // 否则直接引用 parentVal
+        if (instanceData) { // 如果 childVal 子选项存在
+          return mergeData(instanceData, defaultData) // 使用 mergeData 合并选项
         } else {
-          return defaultData
+          return defaultData // 否则直接应用 parentVal 父选项
         }
       }
     }
@@ -1324,44 +1356,47 @@
   };
 
   /**
-   * Hooks and props are merged as arrays.
+   * Hooks and props are merged as arrays. 钩子和道具合并成阵列
+   * 作用：hook 合并策略
    */
   function mergeHook(
     parentVal,
     childVal
   ) {
-    var res = childVal
-      ? parentVal
-        ? parentVal.concat(childVal)
-        : Array.isArray(childVal)
-          ? childVal
-          : [childVal]
-      : parentVal;
+    var res = childVal // 如果存在子选项
+      ? parentVal // 并且存在父选项
+        ? parentVal.concat(childVal) // 直接将 childVal 和 parentVal 合并成一个数组
+        : Array.isArray(childVal) // 当只存在子选项时，判断 children 是否为数组
+          ? childVal // 此时直接使用 childVal
+          : [childVal] // 不是数组时，包装为数组
+      : parentVal; // 不存在子选项时，直接使用父选项
     return res
-      ? dedupeHooks(res)
+      ? dedupeHooks(res) // 删除重复的数据
       : res
   }
 
+  // 数组去重
   function dedupeHooks(hooks) {
     var res = [];
-    for (var i = 0; i < hooks.length; i++) {
-      if (res.indexOf(hooks[i]) === -1) {
+    for (var i = 0; i < hooks.length; i++) { // 遍历数组
+      if (res.indexOf(hooks[i]) === -1) { // 将重复项剔除
         res.push(hooks[i]);
       }
     }
     return res
   }
 
-  LIFECYCLE_HOOKS.forEach(function (hook) {
-    strats[hook] = mergeHook;
+  LIFECYCLE_HOOKS.forEach(function (hook) { // 生命周期的合并策略
+    strats[hook] = mergeHook; // 生命周期的合并策略
   });
 
   /**
-   * Assets
+   * Assets 资源
    *
-   * When a vm is present (instance creation), we need to do
-   * a three-way merge between constructor options, instance
-   * options and parent options.
+   * When a vm is present (instance creation), we need to do 当存在vm时(创建实例)，我们需要这样做
+   * a three-way merge between constructor options, instance 构造函数选项之间的三方向合并，实例
+   * options and parent options. 选项和父选项
+   * 作用：合并资源的策略
    */
   function mergeAssets(
     parentVal,
@@ -1369,24 +1404,29 @@
     vm,
     key
   ) {
-    var res = Object.create(parentVal || null);
-    if (childVal) {
-      assertObjectType(key, childVal, vm);
-      return extend(res, childVal)
-    } else {
-      return res
+    // 这样的话，最终会合并为 {组件name: val, __proto__: { KeepAlive: val, ... }}
+    // 如果通过 extend 创建 vue 子类的话，这个就会形成更长的原型链
+    // 这样做应该是为了节省内存，因为资源对象形式暂用的内存较大
+    var res = Object.create(parentVal || null); // 使用 Object.create 继承 parentVal
+    if (childVal) { // 存在子选项时
+      assertObjectType(key, childVal, vm); // 检测资源是否以规范注册
+      return extend(res, childVal) // 合并至 res 中
+    } else { // 否则
+      return res // 直接返回 res
     }
   }
 
-  ASSET_TYPES.forEach(function (type) {
-    strats[type + 's'] = mergeAssets;
+  // 资源的资源策略
+  ASSET_TYPES.forEach(function (type) { // 资源的资源策略
+    strats[type + 's'] = mergeAssets; // 组件、指令、过滤器 合并策略
   });
 
   /**
-   * Watchers.
+   * Watchers. watch 选项
    *
-   * Watchers hashes should not overwrite one
-   * another, so we merge them as arrays.
+   * Watchers hashes should not overwrite one 观察者散列不应该覆盖一个
+   * another, so we merge them as arrays. 另一个，我们把它们合并成数组
+   * 策略：不应该覆盖，应该将观察的同一个合并为一个数组
    */
   strats.watch = function (
     parentVal,
@@ -1394,32 +1434,33 @@
     vm,
     key
   ) {
-    // work around Firefox's Object.prototype.watch...
-    if (parentVal === nativeWatch) { parentVal = undefined; }
-    if (childVal === nativeWatch) { childVal = undefined; }
+    // work around Firefox's Object.prototype.watch... 使用Firefox的Object.prototype.watch...
+    if (parentVal === nativeWatch) { parentVal = undefined; } // 兼容 firefox 写法
+    if (childVal === nativeWatch) { childVal = undefined; } // 兼容 firefox 写法
     /* istanbul ignore if */
-    if (!childVal) { return Object.create(parentVal || null) }
+    if (!childVal) { return Object.create(parentVal || null) } // 不存在子选项时，直接返回父选项
     {
-      assertObjectType(key, childVal, vm);
+      assertObjectType(key, childVal, vm); // 检测 watch 选项注册是否符合规范
     }
-    if (!parentVal) { return childVal }
+    if (!parentVal) { return childVal } // 不存在父选项时，直接返回子选项
     var ret = {};
-    extend(ret, parentVal);
-    for (var key$1 in childVal) {
+    extend(ret, parentVal); // 先将 父选项 合并至 res 中
+    for (var key$1 in childVal) { // 遍历子选项
       var parent = ret[key$1];
       var child = childVal[key$1];
-      if (parent && !Array.isArray(parent)) {
-        parent = [parent];
+      if (parent && !Array.isArray(parent)) { // 父选项中也存在 && parent 不为数组
+        parent = [parent]; // 规范为数组
       }
-      ret[key$1] = parent
-        ? parent.concat(child)
-        : Array.isArray(child) ? child : [child];
+      ret[key$1] = parent // parent 是否存在
+        ? parent.concat(child) // 存在 - 直接合并父子选项为一个数组
+        : Array.isArray(child) ? child : [child]; // 不存在 - 返回 child 数组形式
     }
     return ret
   };
 
   /**
-   * Other object hashes.
+   * Other object hashes. 其他对象散列
+   * 策略：简单将 childVal 合并至 parentVal 中
    */
   strats.props =
     strats.methods =
@@ -1430,13 +1471,13 @@
       vm,
       key
     ) {
-      if (childVal && "development" !== 'production') {
-        assertObjectType(key, childVal, vm);
+      if (childVal && "development" !== 'production') { // 子选项存在
+        assertObjectType(key, childVal, vm); // 检测注册形式是否符合规范
       }
-      if (!parentVal) { return childVal }
+      if (!parentVal) { return childVal } // 父选项不存在时，返回子选项
       var ret = Object.create(null);
-      extend(ret, parentVal);
-      if (childVal) { extend(ret, childVal); }
+      extend(ret, parentVal); // 合并 parentVal 至 ret 中
+      if (childVal) { extend(ret, childVal); } // 如果子选项存在，则通过 extend 合并
       return ret
     };
   strats.provide = mergeDataOrFn;
@@ -1558,9 +1599,15 @@
     }
   }
 
+  /**
+   * name: 资源名称（组件、指令、过滤器）
+   * value：组件、指令、过滤器配置项
+   * vm：组件实例
+   * 作用：检测资源是否为对象形式注册
+   */
   function assertObjectType(name, value, vm) {
-    if (!isPlainObject(value)) {
-      warn(
+    if (!isPlainObject(value)) { // 检测 value 是否为对象，必须为对象形式
+      warn( // 否则发出警告
         "Invalid value for option \"" + name + "\": expected an Object, " +
         "but got " + (toRawType(value)) + ".",
         vm
@@ -1571,6 +1618,15 @@
   /**
    * Merge two option objects into a new one. 将两个选项对象合并为一个新的对象
    * Core utility used in both instantiation and inheritance. 在实例化和继承中使用的核心实用程序
+   * 返回一个合并好的选项，例如：
+   * {
+   *  components: {..., __proto__: {KeepAlive: ...}}
+   *  data: f mergedIn...()
+   *  directives: {},
+   *  el: '#app',
+   *  filters: {},
+   *  _base: f Vue(options)
+   * }
    */
   function mergeOptions(
     parent, // 父选项
@@ -1659,123 +1715,124 @@
   /*  */
 
 
-
+  // 验证 props 的值是否正确，并返回 prop 值
   function validateProp(
-    key,
-    propOptions,
-    propsData,
-    vm
+    key, // prop key
+    propOptions, // 子组件注册值
+    propsData, // 父组件传入值
+    vm // 实例
   ) {
-    var prop = propOptions[key];
-    var absent = !hasOwn(propsData, key);
-    var value = propsData[key];
-    // boolean casting
-    var booleanIndex = getTypeIndex(Boolean, prop.type);
-    if (booleanIndex > -1) {
-      if (absent && !hasOwn(prop, 'default')) {
-        value = false;
-      } else if (value === '' || value === hyphenate(key)) {
-        // only cast empty string / same name to boolean if
-        // boolean has higher priority
-        var stringIndex = getTypeIndex(String, prop.type);
-        if (stringIndex < 0 || booleanIndex < stringIndex) {
-          value = true;
+    var prop = propOptions[key]; // 提取用户注册信息
+    var absent = !hasOwn(propsData, key); // 注册值是否由父组件传入
+    var value = propsData[key]; // 提取 key 对应父组件传入值
+    // boolean casting 布尔铸造
+    var booleanIndex = getTypeIndex(Boolean, prop.type); // 判断 prop.type 中是否定义了 Boolean 值
+    if (booleanIndex > -1) { // 如果定义了 Boolean 值
+      if (absent && !hasOwn(prop, 'default')) { // 如果父组件没有传入 && 用户没有注册默认值
+        value = false; // 则取 false
+      } else if (value === '' || value === hyphenate(key)) { // 如果传入了 '' || value === key(转化为驼峰命名)
+        // only cast empty string / same name to boolean if 仅将空字符串/相同名称转换为boolean if
+        // boolean has higher priority 布尔值具有更高的优先级
+        var stringIndex = getTypeIndex(String, prop.type); // 判断 prop.type 中是否定义了 String 值
+        if (stringIndex < 0 || booleanIndex < stringIndex) { // 如果没有定义 String || 布尔值具有更高优先级
+          value = true; // 则取 true
         }
       }
     }
-    // check default value
-    if (value === undefined) {
-      value = getPropDefaultValue(vm, prop, key);
-      // since the default value is a fresh copy,
-      // make sure to observe it.
-      var prevShouldObserve = shouldObserve;
-      toggleObserving(true);
-      observe(value);
-      toggleObserving(prevShouldObserve);
+    // check default value 检查默认值
+    if (value === undefined) { // 如果父组件没有传入值
+      value = getPropDefaultValue(vm, prop, key); // 获取默认值
+      // since the default value is a fresh copy, 因为默认值是一个新拷贝
+      // make sure to observe it. 一定要观察它
+      var prevShouldObserve = shouldObserve; // 缓存 shouldObserve 标识位
+      toggleObserving(true); // 打开标识位，用于创建可观察对象
+      observe(value); // 对 value 进行观察
+      toggleObserving(prevShouldObserve); // 重置标识位
     }
     {
-      assertProp(prop, key, value, vm, absent);
+      assertProp(prop, key, value, vm, absent); // 判断 prop 是否有效
     }
     return value
   }
 
   /**
-   * Get the default value of a prop.
+   * Get the default value of a prop. 获取一个道具的默认值
    */
   function getPropDefaultValue(vm, prop, key) {
-    // no default, return undefined
-    if (!hasOwn(prop, 'default')) {
-      return undefined
+    // no default, return undefined 无默认值，返回undefined
+    if (!hasOwn(prop, 'default')) {// 没有定义默认值
+      return undefined // 返回 undefined
     }
-    var def = prop.default;
-    // warn against non-factory defaults for Object & Array
-    if (isObject(def)) {
-      warn(
+    var def = prop.default; // 提取定义的默认值
+    // warn against non-factory defaults for Object & Array 警告对象和数组的非工厂默认值
+    if (isObject(def)) { // 如果定义的默认值是对象形式
+      warn( // 则警告
         'Invalid default value for prop "' + key + '": ' +
         'Props with type Object/Array must use a factory function ' +
         'to return the default value.',
         vm
       );
     }
-    // the raw prop value was also undefined from previous render,
-    // return previous default value to avoid unnecessary watcher trigger
+    // the raw prop value was also undefined from previous render, 原始道具的价值也是未定义的从以前的渲染
+    // return previous default value to avoid unnecessary watcher trigger 返回以前的默认值，以避免不必要的监视触发器
+    // 大概意思是，在初始化组件时，就会提取出默认值，而在更新阶段，如果父组件还是没有传入的话，就没有必要重新提取，以避免不必要的监视触发器
     if (vm && vm.$options.propsData &&
       vm.$options.propsData[key] === undefined &&
       vm._props[key] !== undefined
     ) {
-      return vm._props[key]
+      return vm._props[key] // 使用缓存值
     }
-    // call factory function for non-Function types
-    // a value is Function if its prototype is function even across different execution context
+    // call factory function for non-Function types 对非函数类型调用工厂函数
+    // a value is Function if its prototype is function even across different execution context 如果一个值的原型是函数，那么它就是函数，即使在不同的执行上下文中也是如此
     return typeof def === 'function' && getType(prop.type) !== 'Function'
-      ? def.call(vm)
-      : def
+      ? def.call(vm) // 如果默认值是一个函数，并且定义的不是函数
+      : def // 否则返回 def
   }
 
   /**
-   * Assert whether a prop is valid.
+   * Assert whether a prop is valid. 断言一个道具是否有效
    */
   function assertProp(
-    prop,
-    name,
-    value,
-    vm,
-    absent
+    prop, // 用户注册值
+    name, // prop key
+    value, // prop value
+    vm, // 实例
+    absent // 是否由父组件传入 false: 是由父组件传入
   ) {
-    if (prop.required && absent) {
-      warn(
+    if (prop.required && absent) { // 如果 prop 是必传项 && 父组件没有传入
+      warn( // 发出警告
         'Missing required prop: "' + name + '"',
         vm
       );
       return
     }
-    if (value == null && !prop.required) {
+    if (value == null && !prop.required) { // 如果不是必传项 && 没有传入值
       return
     }
-    var type = prop.type;
-    var valid = !type || type === true;
-    var expectedTypes = [];
-    if (type) {
-      if (!Array.isArray(type)) {
-        type = [type];
+    var type = prop.type; // 定义 type 值
+    var valid = !type || type === true; // 没有定义 || type 定义为 true(表示不需要验证)
+    var expectedTypes = []; // 
+    if (type) { // 定义了 type 情况下
+      if (!Array.isArray(type)) { // 如果不是数组
+        type = [type]; // 将其转化为数组
       }
-      for (var i = 0; i < type.length && !valid; i++) {
-        var assertedType = assertType(value, type[i]);
+      for (var i = 0; i < type.length && !valid; i++) { // 遍历 - 需要满足 valid 为 false(此时需要验证)
+        var assertedType = assertType(value, type[i]); // 判断类型
         expectedTypes.push(assertedType.expectedType || '');
-        valid = assertedType.valid;
+        valid = assertedType.valid; // 是否验证通过
       }
     }
 
-    if (!valid) {
+    if (!valid) { // 如果判断不通过
       warn(
         getInvalidTypeMessage(name, value, expectedTypes),
         vm
       );
       return
     }
-    var validator = prop.validator;
+    var validator = prop.validator; // 自定义验证过函数
     if (validator) {
-      if (!validator(value)) {
+      if (!validator(value)) { // 自定义验证函数没有通过时
         warn(
           'Invalid prop: custom validator check failed for prop "' + name + '".',
           vm
@@ -1786,22 +1843,23 @@
 
   var simpleCheckRE = /^(String|Number|Boolean|Function|Symbol)$/;
 
+  // 断言类型 判断 value 是否符合 type
   function assertType(value, type) {
     var valid;
-    var expectedType = getType(type);
-    if (simpleCheckRE.test(expectedType)) {
-      var t = typeof value;
-      valid = t === expectedType.toLowerCase();
-      // for primitive wrapper objects
-      if (!valid && t === 'object') {
-        valid = value instanceof type;
+    var expectedType = getType(type); // 获取 type 原生类型
+    if (simpleCheckRE.test(expectedType)) { // 判断是否为 String|Number|Boolean|Function|Symbol 类型
+      var t = typeof value; // 此时可用 typeof 判断
+      valid = t === expectedType.toLowerCase(); // typeof 判断值 是否等于 type 原生类型值
+      // for primitive wrapper objects 对于原始包装器对象
+      if (!valid && t === 'object') { // valid false && value 类型为 object
+        valid = value instanceof type; // 还可以通过原型链判断
       }
-    } else if (expectedType === 'Object') {
-      valid = isPlainObject(value);
-    } else if (expectedType === 'Array') {
-      valid = Array.isArray(value);
+    } else if (expectedType === 'Object') { // 当为 Object 类型时
+      valid = isPlainObject(value); // 判断 value 是否严格为 Object 类型
+    } else if (expectedType === 'Array') { // Array 类型时
+      valid = Array.isArray(value); // 判断 value 是否为 Array 类型
     } else {
-      valid = value instanceof type;
+      valid = value instanceof type; // 直接通过原型链判断
     }
     return {
       valid: valid,
@@ -1810,31 +1868,35 @@
   }
 
   /**
-   * Use function string name to check built-in types,
-   * because a simple equality check will fail when running
-   * across different vms / iframes.
+   * Use function string name to check built-in types, 使用函数字符串名检查内置类型
+   * because a simple equality check will fail when running 因为简单的相等性检查在运行时会失败
+   * across different vms / iframes. 跨不同的vm / iframe
+   * 返回原生方法的名称 -- 例如 f String() 表示 string
    */
   function getType(fn) {
     var match = fn && fn.toString().match(/^\s*function (\w+)/);
     return match ? match[1] : ''
   }
 
+  // 表示两个原生方法是否相同
   function isSameType(a, b) {
     return getType(a) === getType(b)
   }
 
+  // 返回 type 在 expectedTypes 中的索引
   function getTypeIndex(type, expectedTypes) {
-    if (!Array.isArray(expectedTypes)) {
-      return isSameType(expectedTypes, type) ? 0 : -1
+    if (!Array.isArray(expectedTypes)) { // 判断 expectedTypes 是否为数组
+      return isSameType(expectedTypes, type) ? 0 : -1 // 不是数组的话，判断两者是否相同
     }
-    for (var i = 0, len = expectedTypes.length; i < len; i++) {
-      if (isSameType(expectedTypes[i], type)) {
-        return i
+    for (var i = 0, len = expectedTypes.length; i < len; i++) { // 如果是数组，则遍历数组
+      if (isSameType(expectedTypes[i], type)) { // 比较数组每一项是否与 type 相同
+        return i // 如果找到了则返回索引
       }
     }
-    return -1
+    return -1 // 否则返回 -1
   }
 
+  // 获取校验不通过时提示信息
   function getInvalidTypeMessage(name, value, expectedTypes) {
     var message = "Invalid prop: type check failed for prop \"" + name + "\"." +
       " Expected " + (expectedTypes.map(capitalize).join(', '));
@@ -1880,62 +1942,64 @@
 
   /*  */
 
+  // 错误处理策略 - 先由用户注册的 errorCaptured 钩子来处理错误，如果用户没有处理或选择向下处理，则由全局处理
   function handleError(err, vm, info) {
-    // Deactivate deps tracking while processing error handler to avoid possible infinite rendering.
+    // Deactivate deps tracking while processing error handler to avoid possible infinite rendering. 在处理错误处理程序时停用deps跟踪，以避免可能的无限渲染
     // See: https://github.com/vuejs/vuex/issues/1505
     pushTarget();
     try {
       if (vm) {
         var cur = vm;
-        while ((cur = cur.$parent)) {
-          var hooks = cur.$options.errorCaptured;
-          if (hooks) {
-            for (var i = 0; i < hooks.length; i++) {
+        while ((cur = cur.$parent)) { // 递归查找父组件
+          var hooks = cur.$options.errorCaptured; // 父组件是否注册了 errorCaptured
+          if (hooks) { // 如果注册了
+            for (var i = 0; i < hooks.length; i++) { // 遍历 hooks
               try {
-                var capture = hooks[i].call(cur, err, vm, info) === false;
+                var capture = hooks[i].call(cur, err, vm, info) === false; // 当返回了 false 后，阻止向上传递错误
                 if (capture) { return }
               } catch (e) {
-                globalHandleError(e, cur, 'errorCaptured hook');
+                globalHandleError(e, cur, 'errorCaptured hook'); // 用户不处理错误的话，就由全局错误处理
               }
             }
           }
         }
       }
-      globalHandleError(err, vm, info);
+      globalHandleError(err, vm, info); // 用户不处理错误的话，就由全局错误处理
     } finally {
       popTarget();
     }
   }
 
   function invokeWithErrorHandling(
-    handler,
-    context,
-    args,
-    vm,
-    info
+    handler, // 执行函数
+    context, // 上下文
+    args, // 参数
+    vm, // 实例
+    info // 描述信息
   ) {
     var res;
-    try {
-      res = args ? handler.apply(context, args) : handler.call(context);
-      if (res && !res._isVue && isPromise(res) && !res._handled) {
-        res.catch(function (e) { return handleError(e, vm, info + " (Promise/async)"); });
+    try { // try 包裹错误
+      res = args ? handler.apply(context, args) : handler.call(context); // 执行回调
+      if (res && !res._isVue && isPromise(res) && !res._handled) { // res 存在 && res 不为 vue 实例 && res 为 promise && 标识嵌套调用
+        res.catch(function (e) { return handleError(e, vm, info + " (Promise/async)"); }); // 在 catch 中捕获错误
         // issue #9511
-        // avoid catch triggering multiple times when nested calls
+        // avoid catch triggering multiple times when nested calls 避免在嵌套调用时多次触发catch
         res._handled = true;
       }
     } catch (e) {
-      handleError(e, vm, info);
+      handleError(e, vm, info); // 出错时交给 handleError 方法处理
     }
     return res
   }
 
+  // 全局错误处理 - 有全局 errorHandler 配置来处理错误，没有配置最终会通过 logError 来记录错误
   function globalHandleError(err, vm, info) {
-    if (config.errorHandler) {
+    if (config.errorHandler) { // errorHandler：指定组件的渲染和观察期间未捕获错误的处理函数。
       try {
-        return config.errorHandler.call(null, err, vm, info)
+        return config.errorHandler.call(null, err, vm, info) // 错误处理
       } catch (e) {
-        // if the user intentionally throws the original error in the handler,
-        // do not log it twice
+        // if the user intentionally throws the original error in the handler, 如果用户故意在处理程序中抛出原始错误
+        // do not log it twice 不要记录两次吗
         if (e !== err) {
           logError(e, null, 'config.errorHandler');
         }
@@ -1944,13 +2008,14 @@
     logError(err, vm, info);
   }
 
+  // 记录错误
   function logError(err, vm, info) {
     {
-      warn(("Error in " + info + ": \"" + (err.toString()) + "\""), vm);
+      warn(("Error in " + info + ": \"" + (err.toString()) + "\""), vm); // 打印错误
     }
     /* istanbul ignore else */
     if ((inBrowser || inWeex) && typeof console !== 'undefined') {
-      console.error(err);
+      console.error(err); // 通过控制台输出
     } else {
       throw err
     }
@@ -2088,11 +2153,12 @@
     }
   }
 
-  /* not type checking this file because flow doesn't play well with Proxy */
+  /* not type checking this file because flow doesn't play well with Proxy 不检查此文件，因为流不能很好地使用代理 */
 
   var initProxy;
 
   {
+    // 检测某个值是否是原生方法
     var allowedGlobals = makeMap(
       'Infinity,undefined,NaN,isFinite,isNaN,' +
       'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +
@@ -2100,6 +2166,7 @@
       'require' // for Webpack/Browserify
     );
 
+    // 发出警告：不是在实例上定义的不能访问
     var warnNonPresent = function (target, key) {
       warn(
         "Property or method \"" + key + "\" is not defined on the instance but " +
@@ -2111,6 +2178,7 @@
       );
     };
 
+    // 发出警告：key 只能用 $data 访问，不能直接访问
     var warnReservedPrefix = function (target, key) {
       warn(
         "Property \"" + key + "\" must be accessed with \"$data." + key + "\" because " +
@@ -2121,6 +2189,7 @@
       );
     };
 
+    // 检测是否原生支持 Proxy
     var hasProxy =
       typeof Proxy !== 'undefined' && isNative(Proxy);
 
@@ -2139,77 +2208,83 @@
       });
     }
 
+    // proxy has 拦截器：拦截HasProperty操作，即判断对象是否具有某个属性时，这个方法会生效，典型的就是 in 操作符
     var hasHandler = {
       has: function has(target, key) {
-        var has = key in target;
-        var isAllowed = allowedGlobals(key) ||
-          (typeof key === 'string' && key.charAt(0) === '_' && !(key in target.$data));
+        var has = key in target; // 判断 key 是否在 target 上
+        // 应该是标识是否可以访问属性 true(不可以访问)
+        var isAllowed = allowedGlobals(key) || // key 是否为原生方法
+          (typeof key === 'string' && key.charAt(0) === '_' && !(key in target.$data)); // (key 为 _ 开头的属性(内部属性) && 不是 data 中的属性)
         if (!has && !isAllowed) {
+          // 访问的 key 是否定义在 data 中
           if (key in target.$data) { warnReservedPrefix(target, key); }
           else { warnNonPresent(target, key); }
         }
-        return has || !isAllowed
+        return has || !isAllowed // 返回布尔值
       }
     };
 
+    // proxy get 拦截器：拦截获取操作
     var getHandler = {
       get: function get(target, key) {
-        if (typeof key === 'string' && !(key in target)) {
-          if (key in target.$data) { warnReservedPrefix(target, key); }
-          else { warnNonPresent(target, key); }
+        if (typeof key === 'string' && !(key in target)) { // 不存在 target 中
+          if (key in target.$data) { warnReservedPrefix(target, key); } // 是否存在 $data 中，发出警告
+          else { warnNonPresent(target, key); } // 否则也需要发出警告
         }
-        return target[key]
+        return target[key] // 返回目标值
       }
     };
 
+    // 初始化用户渲染的上下文环境 _renderProxy：用于渲染时的数据
     initProxy = function initProxy(vm) {
-      if (hasProxy) {
-        // determine which proxy handler to use
-        var options = vm.$options;
-        var handlers = options.render && options.render._withStripped
+      if (hasProxy) { // 是否原生支持 proxy
+        // determine which proxy handler to use 确定要使用哪个代理处理程序
+        var options = vm.$options; // 提取出 $options
+        // render 渲染 如果是渲染 并且含有 _withStripped
+        var handlers = options.render && options.render._withStripped // 这应该表示用户使用 render 渲染
           ? getHandler
           : hasHandler;
         vm._renderProxy = new Proxy(vm, handlers);
       } else {
-        vm._renderProxy = vm;
+        vm._renderProxy = vm; // 不支持 proxy，直接代理 vm，就无法做到属性的检查
       }
     };
   }
 
   /*  */
 
-  var seenObjects = new _Set();
+  var seenObjects = new _Set(); // depId 队列 -- 用于防止重复监听对象
 
-  /**
-   * Recursively traverse an object to evoke all converted
-   * getters, so that every nested property inside the object
-   * is collected as a "deep" dependency.
+  /** 
+   * Recursively traverse an object to evoke all converted 递归地遍历一个对象以唤起所有转换
+   * getters, so that every nested property inside the object getter，以便对象内的每个嵌套属性
+   * is collected as a "deep" dependency. 是否作为“深层”依赖收集
    */
   function traverse(val) {
     _traverse(val, seenObjects);
-    seenObjects.clear();
+    seenObjects.clear(); // 清空队列
   }
 
   function _traverse(val, seen) {
     var i, keys;
-    var isA = Array.isArray(val);
-    if ((!isA && !isObject(val)) || Object.isFrozen(val) || val instanceof VNode) {
-      return
+    var isA = Array.isArray(val); // 判断是否为数组
+    if ((!isA && !isObject(val)) || Object.isFrozen(val) || val instanceof VNode) { // 如果不是数组或对象 || 对象被冻结 || 对象为 VNode
+      return // 此时直接返回
     }
-    if (val.__ob__) {
-      var depId = val.__ob__.dep.id;
-      if (seen.has(depId)) {
-        return
+    if (val.__ob__) { // 是否已经转化为响应式数据
+      var depId = val.__ob__.dep.id; // 获取响应式对象的 dep id
+      if (seen.has(depId)) { // 用来判断此 dep 是否已经监听了
+        return // 不需要重新监听
       }
-      seen.add(depId);
+      seen.add(depId); // 进行缓存
     }
-    if (isA) {
+    if (isA) { // 如果是数组的话
       i = val.length;
-      while (i--) { _traverse(val[i], seen); }
-    } else {
-      keys = Object.keys(val);
+      while (i--) { _traverse(val[i], seen); } // 遍历数组进行处理 -- 数组是无法通过 val[i] 来触发 getter 的，所以只能遍历数组里的项进行深度监听
+    } else { // 否则的话
+      keys = Object.keys(val); // 对象属性集合
       i = keys.length;
-      while (i--) { _traverse(val[keys[i]], seen); }
+      while (i--) { _traverse(val[keys[i]], seen); } // 进行遍历，val[keys[i]] 这个操作就会触发 getter 进行依赖收集
     }
   }
 
@@ -2489,14 +2564,17 @@
     }
   }
 
+  // 初始化 inject -- 提取出 inject 选项(先从祖先组件中的 _provided 属性中找，没有找到则取默认值)，
+  // 然后将其赋值到 vm 实例上，在这里不对 inject 值进行深度转化为响应式，而是通过 defineReactive$$1 方式添加到 vm 实例上，保证其为只读属性
   function initInjections(vm) {
-    var result = resolveInject(vm.$options.inject, vm);
-    if (result) {
-      toggleObserving(false);
+    var result = resolveInject(vm.$options.inject, vm); // 加载出 inject 选项
+    if (result) { // 如果注册了 inject
+      toggleObserving(false); // 标记禁止转化为响应式 -- 用于对 result[key] 的值进行深度转化为响应式
       Object.keys(result).forEach(function (key) {
         /* istanbul ignore else */
         {
-          defineReactive$$1(vm, key, result[key], function () {
+          // 在 vm 实例上添加 key，用于直接通过 this.xxx 来获取 inject 值
+          defineReactive$$1(vm, key, result[key], function () { // 当设置值为，发出警告
             warn(
               "Avoid mutating an injected value directly since the changes will be " +
               "overwritten whenever the provided component re-renders. " +
@@ -2506,39 +2584,42 @@
           });
         }
       });
-      toggleObserving(true);
+      toggleObserving(true); // 重新启用转化为响应式
     }
   }
 
+  // 加载 inject 数据出来
   function resolveInject(inject, vm) {
-    if (inject) {
-      // inject is :any because flow is not smart enough to figure out cached
-      var result = Object.create(null);
-      var keys = hasSymbol
+    if (inject) { // 如果注册了 inject 选项
+      // inject is :any because flow is not smart enough to figure out cached inject是:任何，因为流不够聪明，无法计算出缓存
+      var result = Object.create(null); // 定义个空对象
+      var keys = hasSymbol // 是否支持 symbol -- 提取出所有属性
         ? Reflect.ownKeys(inject)
         : Object.keys(inject);
 
-      for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
-        // #6574 in case the inject object is observed...
-        if (key === '__ob__') { continue }
-        var provideKey = inject[key].from;
-        var source = vm;
-        while (source) {
-          if (source._provided && hasOwn(source._provided, provideKey)) {
-            result[key] = source._provided[provideKey];
+      for (var i = 0; i < keys.length; i++) { // 遍历 keys
+        var key = keys[i]; // 提取 keys 每项值
+        // #6574 in case the inject object is observed... 如果注射对象被观察到
+        if (key === '__ob__') { continue } // 如果 inject 值是响应式对象，则 __ob__ 不进行处理
+        var provideKey = inject[key].from; // inject 选项的 from：from property 是在可用的注入内容中搜索用的 key (字符串或 Symbol)
+        var source = vm; // 实例引用
+        while (source) { // 递归查找父组件注入的值
+          if (source._provided && hasOwn(source._provided, provideKey)) { // 通过 provide 注入的值会在实例的 _provided 属性上
+            // provide 和 inject 绑定并不是可响应的。然而，如果你传入了一个可监听的对象，那么其对象的 property 还是可响应的。
+            // 在这里可以看出上述话的意思，因为 inject 获取的值是直接从 祖先组件的 provided 中获取，并没有刻意的将其进行响应式，所以是无法进行响应式的
+            result[key] = source._provided[provideKey]; // 获取到父组件或上上级组件注入的值
             break
           }
-          source = source.$parent;
+          source = source.$parent; // 递归查找
         }
-        if (!source) {
-          if ('default' in inject[key]) {
-            var provideDefault = inject[key].default;
-            result[key] = typeof provideDefault === 'function'
-              ? provideDefault.call(vm)
-              : provideDefault;
+        if (!source) { // 当 source 为 false 时，此时说明已经查找到根组件（因为根组件的 $parent 为 undefined）
+          if ('default' in inject[key]) { // 是否注册了默认值
+            var provideDefault = inject[key].default; // 提取默认值
+            result[key] = typeof provideDefault === 'function' // 如果默认值注册为函数
+              ? provideDefault.call(vm) // 执行函数
+              : provideDefault; // 直接使用
           } else {
-            warn(("Injection \"" + key + "\" not found"), vm);
+            warn(("Injection \"" + key + "\" not found"), vm); // 否则发出警告
           }
         }
       }
@@ -3538,26 +3619,28 @@
   }
 
   /*  */
-
+  // 主要是初始化渲染相关的属性或方法
   function initRender(vm) {
-    vm._vnode = null; // the root of the child tree
-    vm._staticTrees = null; // v-once cached trees
-    var options = vm.$options;
-    var parentVnode = vm.$vnode = options._parentVnode; // the placeholder node in parent tree
+    // 一个属性，
+    vm._vnode = null; // the root of the child tree 子树的根
+    vm._staticTrees = null; // v-once cached trees v-once 缓存的树
+    var options = vm.$options; // 提取出 options 参数
+    var parentVnode = vm.$vnode = options._parentVnode; // the placeholder node in parent tree 父树中的占位符节点
     var renderContext = parentVnode && parentVnode.context;
+    // 解决插槽问题
     vm.$slots = resolveSlots(options._renderChildren, renderContext);
-    vm.$scopedSlots = emptyObject;
-    // bind the createElement fn to this instance
-    // so that we get proper render context inside it.
-    // args order: tag, data, children, normalizationType, alwaysNormalize
-    // internal version is used by render functions compiled from templates
+    vm.$scopedSlots = emptyObject; // 空对象
+    // bind the createElement fn to this instance 将 createElement fn 绑定到这个实例
+    // so that we get proper render context inside it. 这样我们就得到了适当的渲染上下文
+    // args order: tag, data, children, normalizationType, alwaysNormalize 参数顺序:tag, data, children, normalizationType, alwaysNormalize
+    // internal version is used by render functions compiled from templates 内部版本由模板编译的渲染函数使用
     vm._c = function (a, b, c, d) { return createElement(vm, a, b, c, d, false); };
-    // normalization is always applied for the public version, used in
-    // user-written render functions.
+    // normalization is always applied for the public version, used in 规范化总是应用于公共版本，用于
+    // user-written render functions. 用户编写的显示功能
     vm.$createElement = function (a, b, c, d) { return createElement(vm, a, b, c, d, true); };
 
-    // $attrs & $listeners are exposed for easier HOC creation.
-    // they need to be reactive so that HOCs using them are always updated
+    // $attrs & $listeners are exposed for easier HOC creation. $attrs和$listeners被公开，以便于更容易地创建
+    // they need to be reactive so that HOCs using them are always updated 它们需要是反应性的，这样使用它们的hoc就会一直更新
     var parentData = parentVnode && parentVnode.data;
 
     /* istanbul ignore else */
@@ -3820,10 +3903,11 @@
 
   /*  */
 
+  // 初始化事件
   function initEvents(vm) {
-    vm._events = Object.create(null);
-    vm._hasHookEvent = false;
-    // init parent attached events
+    vm._events = Object.create(null); // 为实例添加 _events 私有属性，保存着 event 事件
+    vm._hasHookEvent = false; // 一个标识，用于标识是否通过类似 @hook:create 方式监听子组件的生命周期
+    // init parent attached events 初始化父附加事件
     var listeners = vm.$options._parentListeners;
     if (listeners) {
       updateComponentListeners(vm, listeners);
@@ -3968,25 +4052,27 @@
     }
   }
 
+  // 初始化相关属性以及一些生命周期标识符
   function initLifecycle(vm) {
-    var options = vm.$options;
+    var options = vm.$options; // 提取 options 参数
 
-    // locate first non-abstract parent
-    var parent = options.parent;
-    if (parent && !options.abstract) {
-      while (parent.$options.abstract && parent.$parent) {
-        parent = parent.$parent;
+    // locate first non-abstract parent 定位第一个非抽象父节点
+    var parent = options.parent; // 组件的父组件，在创建子组件时，内部会创建 parent 属性
+    if (parent && !options.abstract) { // 当存在父组件，并且当组件不是抽象组件(抽象组件：内部组件-keepalive...)
+      while (parent.$options.abstract && parent.$parent) { // 如果父组件为抽象组件 && 父组件也存在父组件
+        parent = parent.$parent; // 此时找出不是抽象组件的组件
       }
-      parent.$children.push(vm);
+      parent.$children.push(vm); // 将当组件添加到 $children 集合中，表示当前组件的子组件集合
     }
 
-    vm.$parent = parent;
-    vm.$root = parent ? parent.$root : vm;
+    vm.$parent = parent; // $parent：当前组件的父组件
+    vm.$root = parent ? parent.$root : vm; // 当前组件树的根 Vue 实例
 
-    vm.$children = [];
-    vm.$refs = {};
+    vm.$children = []; // 当前组件的子组件
+    vm.$refs = {}; // 当前组件 ref 集合
 
-    vm._watcher = null;
+    // 下面就是一些内部属性
+    vm._watcher = null; // 组件的 watcher 观察对象集合
     vm._inactive = null;
     vm._directInactive = false;
     vm._isMounted = false;
@@ -4276,20 +4362,21 @@
     }
   }
 
+  // 执行生命周期函数
   function callHook(vm, hook) {
-    // #7573 disable dep collection when invoking lifecycle hooks
-    pushTarget();
-    var handlers = vm.$options[hook];
+    // #7573 disable dep collection when invoking lifecycle hooks 在调用生命周期钩子时禁用dep集合
+    pushTarget(); // 禁用依赖收集
+    var handlers = vm.$options[hook]; // 提取出生命周期函数
     var info = hook + " hook";
     if (handlers) {
-      for (var i = 0, j = handlers.length; i < j; i++) {
-        invokeWithErrorHandling(handlers[i], vm, null, vm, info);
+      for (var i = 0, j = handlers.length; i < j; i++) { // 遍历 hooks
+        invokeWithErrorHandling(handlers[i], vm, null, vm, info); // 执行 hooks
       }
     }
-    if (vm._hasHookEvent) {
-      vm.$emit('hook:' + hook);
+    if (vm._hasHookEvent) { // 标识是否通过类似 @hook:create 方式监听子组件的生命周期
+      vm.$emit('hook:' + hook); // 发送事件
     }
-    popTarget();
+    popTarget(); // 重新收集依赖
   }
 
   /*  */
@@ -4478,49 +4565,52 @@
   var uid$2 = 0;
 
   /**
-   * A watcher parses an expression, collects dependencies,
-   * and fires callback when the expression value changes.
-   * This is used for both the $watch() api and directives.
+   * A watcher parses an expression, collects dependencies, 观察者解析表达式，收集依赖项
+   * and fires callback when the expression value changes. 并在表达式值改变时触发回调
+   * This is used for both the $watch() api and directives. 这用于$watch() api和指令
+   * 
+   * 在 watcher 中，主要是通过将 Dep.target 设置为该观察者，然后通过 getter 求值，这样就会收集到相应的 dep
+   * 并将其收集在 depids 之类的集合中，通过 dep 集合就可以发现这个 watcher 所依赖的属性列表，并在不需要的时候通知 dep 进行观察对象删除
    */
   var Watcher = function Watcher(
-    vm,
-    expOrFn,
-    cb,
-    options,
-    isRenderWatcher
+    vm, // 实例
+    expOrFn, // 获取值的函数，或者是更新viwe试图函数
+    cb, // 所观察到的依赖改变后的回调
+    options, // 配置项，
+    isRenderWatcher // 是否是渲染函数观察对象
   ) {
-    this.vm = vm;
-    if (isRenderWatcher) {
-      vm._watcher = this;
+    this.vm = vm; // 保存 vm 实例引用
+    if (isRenderWatcher) { // 是否是渲染函数观察对象 
+      vm._watcher = this; // 如果是，则为 vm 实例添加 _watcher 属性
     }
-    vm._watchers.push(this);
+    vm._watchers.push(this); // 将当前观察对象推入 vm 组件实例的 _watchers 集合中
     // options
-    if (options) {
-      this.deep = !!options.deep;
-      this.user = !!options.user;
-      this.lazy = !!options.lazy;
-      this.sync = !!options.sync;
-      this.before = options.before;
+    if (options) { // 如果存在配置项
+      this.deep = !!options.deep; // 深度监听
+      this.user = !!options.user; // 用户自定义 watcher 观察对象
+      this.lazy = !!options.lazy; // 惰性求值 -- 例如计算属性
+      this.sync = !!options.sync; // 
+      this.before = options.before; // 这应该是一个钩子 - 表示在观察对象改变后此依赖执行之前调用
     } else {
-      this.deep = this.user = this.lazy = this.sync = false;
+      this.deep = this.user = this.lazy = this.sync = false; // 否则全部为 false
     }
-    this.cb = cb;
-    this.id = ++uid$2; // uid for batching
-    this.active = true;
-    this.dirty = this.lazy; // for lazy watchers
-    this.deps = [];
-    this.newDeps = [];
-    this.depIds = new _Set();
-    this.newDepIds = new _Set();
-    this.expression = expOrFn.toString();
-    // parse expression for getter
-    if (typeof expOrFn === 'function') {
-      this.getter = expOrFn;
-    } else {
+    this.cb = cb; // 求值后的回调
+    this.id = ++uid$2; // uid for batching uid为批处理 -- 设置 id
+    this.active = true; // 是否是激活状态，如果为 false -- 表示不需要执行操作
+    this.dirty = this.lazy; // for lazy watchers 对于懒惰的观察者
+    this.deps = []; // 观察者集合
+    this.newDeps = []; // 新的观察者队列
+    this.depIds = new _Set(); // 观察者id
+    this.newDepIds = new _Set(); // 新的观察者id
+    this.expression = expOrFn.toString(); // 求值函数的字符串表示
+    // parse expression for getter getter的解析表达式
+    if (typeof expOrFn === 'function') { // 如果是函数形式
+      this.getter = expOrFn; // 则直接使用
+    } else { // 否则转化为函数形式
       this.getter = parsePath(expOrFn);
-      if (!this.getter) {
-        this.getter = noop;
-        warn(
+      if (!this.getter) { // 如果转化失败
+        this.getter = noop; // 重置为空函数
+        warn( // 并且发出警告
           "Failed watching path: \"" + expOrFn + "\" " +
           'Watcher only accepts simple dot-delimited paths. ' +
           'For full control, use a function instead.',
@@ -4528,67 +4618,72 @@
         );
       }
     }
-    this.value = this.lazy
-      ? undefined
-      : this.get();
+    this.value = this.lazy // 如果是惰性求值
+      ? undefined // 此时暂不进行求值操作
+      : this.get(); // 否则进行求值操作，用于触发收集依赖项
   };
 
   /**
-   * Evaluate the getter, and re-collect dependencies.
+   * Evaluate the getter, and re-collect dependencies. 计算 getter，并重新收集依赖项
+   * 作用：用于触发 get 求值，来进行依赖收集
    */
   Watcher.prototype.get = function get() {
-    pushTarget(this);
+    pushTarget(this); // 设置观察对象
     var value;
-    var vm = this.vm;
+    var vm = this.vm; // vue 实例
     try {
-      value = this.getter.call(vm, vm);
-    } catch (e) {
-      if (this.user) {
-        handleError(e, vm, ("getter for watcher \"" + (this.expression) + "\""));
-      } else {
+      value = this.getter.call(vm, vm); // 触发 getter 操作，并且将 value 获取
+    } catch (e) { // 如果出错
+      if (this.user) { // 如果是用户定义的
+        handleError(e, vm, ("getter for watcher \"" + (this.expression) + "\"")); // 出错则由 handleError 暴露给用户
+      } else { // 不是用户定义的，则抛出错误
         throw e
       }
     } finally {
-      // "touch" every property so they are all tracked as
-      // dependencies for deep watching
-      if (this.deep) {
-        traverse(value);
+      // "touch" every property so they are all tracked as “触摸”每个属性，这样它们都被跟踪为
+      // dependencies for deep watching 对深度观察的依赖
+      if (this.deep) { // 深度监听
+        traverse(value); // value：通过 parsePath 转化的函数，会返回一个目前深度的 obj
       }
-      popTarget();
-      this.cleanupDeps();
+      popTarget(); // 出栈一个 观察者
+      this.cleanupDeps(); // 进行 dep 的操作
     }
-    return value
+    return value // 返回结果值
   };
 
   /**
-   * Add a dependency to this directive.
+   * Add a dependency to this directive. 给这个指令添加一个依赖项
    */
   Watcher.prototype.addDep = function addDep(dep) {
-    var id = dep.id;
-    if (!this.newDepIds.has(id)) {
-      this.newDepIds.add(id);
-      this.newDeps.push(dep);
-      if (!this.depIds.has(id)) {
-        dep.addSub(this);
+    var id = dep.id; // 依赖项 id
+    if (!this.newDepIds.has(id)) { // 判断 newDepIds 中是否已经收集
+      this.newDepIds.add(id); // 如果没有则推入 newDepIds 集合中
+      this.newDeps.push(dep); // 同理推入 newDeps 中
+      if (!this.depIds.has(id)) { // 该 id 是否不在旧的 depIds 集合中
+        dep.addSub(this); // 此时说明是新加入的依赖项，就需要通知 dep 对这个观察者 watch 进行收集
       }
     }
   };
 
   /**
-   * Clean up for dependency collection.
+   * Clean up for dependency collection. 清理依赖项集合
+   * 当每次求值操作结束后，都需要将老旧的 dep 进行重置，去除以前 dep 收集的
    */
   Watcher.prototype.cleanupDeps = function cleanupDeps() {
-    var i = this.deps.length;
-    while (i--) {
-      var dep = this.deps[i];
-      if (!this.newDepIds.has(dep.id)) {
-        dep.removeSub(this);
+    var i = this.deps.length; // 当前依赖项
+    while (i--) { // 遍历
+      var dep = this.deps[i]; // 提取出 dep 项
+      if (!this.newDepIds.has(dep.id)) { // 通过 id 判断是否已经不存在 newDepIds 中
+        dep.removeSub(this); // 此时说明，该 dep 项已经不在被该观察者观察到，通知 dep 进行观察者回收
       }
     }
+    // 进行 depIds 和 newDepIds 队列交换
     var tmp = this.depIds;
     this.depIds = this.newDepIds;
     this.newDepIds = tmp;
     this.newDepIds.clear();
+
+    // 同理，进行 deps 和 newDeps 队列交换
     tmp = this.deps;
     this.deps = this.newDeps;
     this.newDeps = tmp;
@@ -4642,16 +4737,18 @@
   };
 
   /**
-   * Evaluate the value of the watcher.
-   * This only gets called for lazy watchers.
+   * Evaluate the value of the watcher. 评估观察者的价值
+   * This only gets called for lazy watchers. 只有懒惰的观察者才会这么做
    */
   Watcher.prototype.evaluate = function evaluate() {
-    this.value = this.get();
-    this.dirty = false;
+    this.value = this.get(); // 惰性的在这一步进行求值
+    this.dirty = false; // 暂时关闭惰性值 -- 通过这个标识位，来标识已经求过值，重复使用计算属性时，不会再次求值，而当依赖项改变时，会重置这个标识位，进行重新求值
   };
 
   /**
-   * Depend on all deps collected by this watcher.
+   * Depend on all deps collected by this watcher. 依赖于此监视器收集的所有 deps
+   * 这里是实现计算属性的，在这一步，Dep.target 已经不在引用该计算属性，而是依赖计算属性的
+   * 将此计算属性的 deps 转接到依赖计算属性的 watcher 观察对象中
    */
   Watcher.prototype.depend = function depend() {
     var i = this.deps.length;
@@ -4661,7 +4758,7 @@
   };
 
   /**
-   * Remove self from all dependencies' subscriber list.
+   * Remove self from all dependencies' subscriber list. 从所有依赖项的订阅者列表中删除self
    */
   Watcher.prototype.teardown = function teardown() {
     if (this.active) {
@@ -4688,59 +4785,91 @@
     set: noop
   };
 
-  function proxy(target, sourceKey, key) {
-    sharedPropertyDefinition.get = function proxyGetter() {
-      return this[sourceKey][key]
+  // 将对 key 的访问实际上访问 sourceKey，例如：访问 target.key 实际上内部访问的是 target.sourceKey.key
+  function proxy(
+    target, // 目标值
+    sourceKey, // 实际访问的源 key
+    key // 访问的 key
+  ) {
+    sharedPropertyDefinition.get = function proxyGetter() { // 获取值
+      return this[sourceKey][key] // 返回对 sourceKey 的访问
     };
-    sharedPropertyDefinition.set = function proxySetter(val) {
-      this[sourceKey][key] = val;
+    sharedPropertyDefinition.set = function proxySetter(val) { // 设置值
+      this[sourceKey][key] = val; // 实际对 sourceKey 的设置
     };
-    Object.defineProperty(target, key, sharedPropertyDefinition);
+    Object.defineProperty(target, key, sharedPropertyDefinition); // 设置
   }
 
+  // 这个初始化较为重要，初始化了相关数据(props, methods, data, watch)
   function initState(vm) {
-    vm._watchers = [];
-    var opts = vm.$options;
-    if (opts.props) { initProps(vm, opts.props); }
+    vm._watchers = []; // 实例的监听对象集合
+    var opts = vm.$options; // 提取 options
+    // 初始化 prop 策略：
+    // 首先通过父组件传入(在options.propsData 中,在注册子组件时定义) 和 用户注册(optons.props) 两个信息中提取出 value 并进行校验
+    // 然后将 props 遍历赋值在 vm._props 中，并且通过 Object.defineProperty 将对 vm.prop 的访问转化为 vm._props.prop 访问
+    // 而 props 的响应式问题：
+    // 1. 如果是通过用户注册默认值获取的 value，就需要子组件通过放开 toggleObserving(true) 限制来对 value 进行观察
+    // 2. 如果是由父组件传入，则由父组件决定 value 是否可观察
+    // 3. 而对于 props 的 key 而言，就通过 defineReactive$$1 来给 vm._props 添加响应式属性，这样就可以对 vm._props.propKey 的操作进行观察
+    if (opts.props) { initProps(vm, opts.props); } // 如果存在 props，则初始化 props
+
+    // 初始化 methods 策略：很简单，只需要定义的是函数 && 定义的 key 不能与 vm 实例上的其他属性或 prop 上的属性同名即可
     if (opts.methods) { initMethods(vm, opts.methods); }
-    if (opts.data) {
+
+    // 初始化 data 数据
+    // 简单来讲，就是通过 options.data 中获取 data 值，然后不能与 methods 和 props 属性同名，最后通过 observe 来创建响应式数据
+    if (opts.data) { // 如果没有定义 data 属性
       initData(vm);
     } else {
-      observe(vm._data = {}, true /* asRootData */);
+      observe(vm._data = {}, true /* asRootData */); // 则直接定义一个空对象
     }
+
+    // 初始化 computed 
+    // 策略：
+    // 惰性求值：一开始不求值，当使用计算属性时，就会触发 getter 函数，进行求值
+    // 一次求值：通过 watcher.dirty 标识位，只进行一次求值，保存在 watcher.value 中，而当计算属性依赖的属性变动时， watcher.dirty 标识位会重置，此时就会进行重新求值
+    // 响应式：通过将计算属性的依赖项 deps 转接给依赖计算属性的 watcher 观察对象，这样当计算属性的依赖项变动时(此时计算属性不会重新 getter 依赖收集，只是重置 watcher.dirty 标识位)，
+    //        依赖计算属性的 watcher 观察对象也会重新求值，这样又会触发计算属性的重新求值以及依赖项收集，
+    //        而且这样做，还可以当依赖计算属性的不是 watcher 观察对象时，就不需要对计算属性进行响应式，节省了一点内存
     if (opts.computed) { initComputed(vm, opts.computed); }
+
+    // 初始化 watch -- 比较简单，就是根据不同的参数创建不同的 watcher 观察者
     if (opts.watch && opts.watch !== nativeWatch) {
       initWatch(vm, opts.watch);
     }
   }
 
+  // 初始化 props -- propsOptions: 组件定义的 props
+  // 对于采用 prop 默认值，就需要使用 observe 进行响应式转化
+  // 而对于从父组件传入的 prop，prop 是否可观察就由父组件决定，如果传入了可观察的对象，就可以观察，不需要由子组件去决定
   function initProps(vm, propsOptions) {
-    var propsData = vm.$options.propsData || {};
-    var props = vm._props = {};
-    // cache prop keys so that future props updates can iterate using Array
-    // instead of dynamic object key enumeration.
-    var keys = vm.$options._propKeys = [];
-    var isRoot = !vm.$parent;
-    // root instance props should be converted
+    var propsData = vm.$options.propsData || {}; // 父组件传入的 prop，也就是实际值
+    var props = vm._props = {}; // 为实例添加 _props 属性
+    // cache prop keys so that future props updates can iterate using Array 缓存道具键，以便将来的道具更新可以使用Array进行迭代
+    // instead of dynamic object key enumeration. 代替动态对象键枚举
+    var keys = vm.$options._propKeys = []; // 缓存 propKey 键
+    var isRoot = !vm.$parent; // 判断是否为 根组件
+    // root instance props should be converted 应该转换根实例的道具
     if (!isRoot) {
-      toggleObserving(false);
+      toggleObserving(false); // 实例子组件时，不进行深度转化为响应式
     }
     var loop = function (key) {
-      keys.push(key);
-      var value = validateProp(key, propsOptions, propsData, vm);
+      keys.push(key); // 对键进行缓存
+      var value = validateProp(key, propsOptions, propsData, vm); // 验证 prop 并且获取 prop 值
       /* istanbul ignore else */
       {
-        var hyphenatedKey = hyphenate(key);
-        if (isReservedAttribute(hyphenatedKey) ||
-          config.isReservedAttr(hyphenatedKey)) {
-          warn(
+        var hyphenatedKey = hyphenate(key); // 将 key 转化为 驼峰命名
+        if (isReservedAttribute(hyphenatedKey) || // 检查 hyphenatedKey 是否为保留属性(key,ref,slot,slot-scope,is)
+          config.isReservedAttr(hyphenatedKey)) { // 或者平台(或用户)定义的保留属性
+          warn( // 此时发出警告
             ("\"" + hyphenatedKey + "\" is a reserved attribute and cannot be used as component prop."),
             vm
           );
         }
+        // 在 props(vm._props) 上添加响应式属性 value -- 不会对 value 深度响应(toggleObserving(false) 限制了)
         defineReactive$$1(props, key, value, function () {
-          if (!isRoot && !isUpdatingChildComponent) {
-            warn(
+          if (!isRoot && !isUpdatingChildComponent) { // 不是根组件 && 不是在更新阶段
+            warn( // 此时就不允许进行设置值
               "Avoid mutating a prop directly since the value will be " +
               "overwritten whenever the parent component re-renders. " +
               "Instead, use a data or computed property based on the prop's " +
@@ -4750,93 +4879,98 @@
           }
         });
       }
-      // static props are already proxied on the component's prototype
-      // during Vue.extend(). We only need to proxy props defined at
-      // instantiation here.
+      // static props are already proxied on the component's prototype 静态道具已经代理在组件的原型上
+      // during Vue.extend(). We only need to proxy props defined at 在Vue.extend()。我们只需要定义在的代理道具
+      // instantiation here. 这里的实例化
       if (!(key in vm)) {
-        proxy(vm, "_props", key);
+        proxy(vm, "_props", key); // 用于在 vm 上设置 key，但是实际上是对 _props 的访问，在 vm 上方便访问
       }
     };
 
-    for (var key in propsOptions) loop(key);
-    toggleObserving(true);
+    for (var key in propsOptions) loop(key); // 对 props 进行遍历
+    toggleObserving(true); // 启用深度转化响应式
   }
 
+  // 初始化 data -- options.data 是 data 数据(一般而言是一个函数)
   function initData(vm) {
-    var data = vm.$options.data;
-    data = vm._data = typeof data === 'function'
-      ? getData(data, vm)
-      : data || {};
-    if (!isPlainObject(data)) {
-      data = {};
-      warn(
+    var data = vm.$options.data; // 提取 data 
+    data = vm._data = typeof data === 'function' // 为 vm 实例创建一个 _data 属性
+      ? getData(data, vm) // 如果 data 是函数，则调用函数，获取 data 值
+      : data || {}; // 不是函数情况下，直接获取 data 值
+
+    if (!isPlainObject(data)) { // 如果 data 不是一个对象的话
+      data = {}; // 重置为对象
+      warn( // 并且发出警告
         'data functions should return an object:\n' +
         'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
         vm
       );
     }
-    // proxy data on instance
-    var keys = Object.keys(data);
-    var props = vm.$options.props;
-    var methods = vm.$options.methods;
+    // proxy data on instance 实例上的代理数据
+    var keys = Object.keys(data); //　获取 kyes
+    var props = vm.$options.props; // props
+    var methods = vm.$options.methods; // methods
     var i = keys.length;
-    while (i--) {
-      var key = keys[i];
+    while (i--) { // 遍历
+      var key = keys[i]; // 提取 keys 的每一项
       {
-        if (methods && hasOwn(methods, key)) {
-          warn(
+        if (methods && hasOwn(methods, key)) { // data 的 key 不能与 methods 同名
+          warn( // 否则发出警告
             ("Method \"" + key + "\" has already been defined as a data property."),
             vm
           );
         }
       }
-      if (props && hasOwn(props, key)) {
-        warn(
+      if (props && hasOwn(props, key)) { // data 的 key 不能与 props 同名
+        warn( // 否则发出警告
           "The data property \"" + key + "\" is already declared as a prop. " +
           "Use prop default value instead.",
           vm
         );
-      } else if (!isReserved(key)) {
-        proxy(vm, "_data", key);
+      } else if (!isReserved(key)) { // 并且 key 没有与 vm 实例属性同名
+        proxy(vm, "_data", key); // 此时在 vm 实例访问 data key 时代理到 _data 的访问
       }
     }
-    // observe data
+    // observe data 对 data 进行响应式转化
     observe(data, true /* asRootData */);
   }
 
+  // 获取 data 值
   function getData(data, vm) {
-    // #7573 disable dep collection when invoking data getters
-    pushTarget();
+    // #7573 disable dep collection when invoking data getters 在调用数据获取器时禁用dep收集
+    pushTarget(); // 暂时禁用依赖收集
     try {
-      return data.call(vm, vm)
+      return data.call(vm, vm) // 获取值
     } catch (e) {
-      handleError(e, vm, "data()");
+      handleError(e, vm, "data()"); // 如果出错的，交给 handleError 错误处理程序
       return {}
     } finally {
-      popTarget();
+      popTarget(); // 重新启用依赖收集
     }
   }
 
-  var computedWatcherOptions = { lazy: true };
+  var computedWatcherOptions = { lazy: true }; // watcher 配置项
 
+  // 初始化 computed
   function initComputed(vm, computed) {
     // $flow-disable-line
-    var watchers = vm._computedWatchers = Object.create(null);
-    // computed properties are just getters during SSR
-    var isSSR = isServerRendering();
+    var watchers = vm._computedWatchers = Object.create(null); // 为 vm 实例添加 _computedWatchers 属性
+    // computed properties are just getters during SSR 计算属性只是 SSR 期间的 getter
+    var isSSR = isServerRendering(); // 是否是 SSR 环境
 
-    for (var key in computed) {
-      var userDef = computed[key];
-      var getter = typeof userDef === 'function' ? userDef : userDef.get;
-      if (getter == null) {
-        warn(
+    for (var key in computed) { // 遍历 computed
+      var userDef = computed[key]; // 提取注册值
+      var getter = typeof userDef === 'function' ? userDef : userDef.get; // 提取取值函数
+      if (getter == null) { // 没有设置取值函数
+        warn( // 必须设置取值函数
           ("Getter is missing for computed property \"" + key + "\"."),
           vm
         );
       }
 
       if (!isSSR) {
-        // create internal watcher for the computed property.
+        // create internal watcher for the computed property. 为 computed 属性创建内部监视程序
+        // 创建 Watcher 观察对象，使得计算属性可观察
         watchers[key] = new Watcher(
           vm,
           getter || noop,
@@ -4845,127 +4979,136 @@
         );
       }
 
-      // component-defined computed properties are already defined on the
-      // component prototype. We only need to define computed properties defined
-      // at instantiation here.
+      // component-defined computed properties are already defined on the 组件定义的计算属性已经在
+      // component prototype. We only need to define computed properties defined 组件原型。我们只需要定义已定义的计算属性
+      // at instantiation here. 在实例化
       if (!(key in vm)) {
-        defineComputed(vm, key, userDef);
-      } else {
-        if (key in vm.$data) {
-          warn(("The computed property \"" + key + "\" is already defined in data."), vm);
-        } else if (vm.$options.props && key in vm.$options.props) {
-          warn(("The computed property \"" + key + "\" is already defined as a prop."), vm);
+        defineComputed(vm, key, userDef); // 处理计算属性的特性，并且将属性定义在 vm 实例上
+      } else { // 如果当前 key 已经定义在 vm 实例上
+        if (key in vm.$data) { // 与 data 中属性同名时
+          warn(("The computed property \"" + key + "\" is already defined in data."), vm); // 发出警告
+        } else if (vm.$options.props && key in vm.$options.props) { // 与 props 属性同名
+          warn(("The computed property \"" + key + "\" is already defined as a prop."), vm); // 发出警告
         }
       }
     }
   }
 
+  // 将计算属性添加到目标值上，并且添加计算属性可响应的特性
   function defineComputed(
-    target,
+    target, // 目标值
     key,
-    userDef
+    userDef // 用户注册值
   ) {
-    var shouldCache = !isServerRendering();
-    if (typeof userDef === 'function') {
+    var shouldCache = !isServerRendering(); // 是否是 SSR 环境
+    if (typeof userDef === 'function') { // 用户注册的是函数
       sharedPropertyDefinition.get = shouldCache
-        ? createComputedGetter(key)
-        : createGetterInvoker(userDef);
-      sharedPropertyDefinition.set = noop;
+        ? createComputedGetter(key) // 不是 SSR 环境
+        : createGetterInvoker(userDef); // SSR 环境下
+      sharedPropertyDefinition.set = noop; // 不能设置值
     } else {
       sharedPropertyDefinition.get = userDef.get
         ? shouldCache && userDef.cache !== false
-          ? createComputedGetter(key)
-          : createGetterInvoker(userDef.get)
+          ? createComputedGetter(key) // 不是 SSR 环境
+          : createGetterInvoker(userDef.get) // SSR 环境下
         : noop;
-      sharedPropertyDefinition.set = userDef.set || noop;
+      sharedPropertyDefinition.set = userDef.set || noop; // 用户注册 setter
     }
     if (sharedPropertyDefinition.set === noop) {
-      sharedPropertyDefinition.set = function () {
+      sharedPropertyDefinition.set = function () { // 重置 setter，不能赋值，发出警告
         warn(
           ("Computed property \"" + key + "\" was assigned to but it has no setter."),
           this
         );
       };
     }
+    // 在目标值中添加值
     Object.defineProperty(target, key, sharedPropertyDefinition);
   }
 
+  // 非 SSR 环境下，这个就是实现计算属性可响应，惰性求值的关键
   function createComputedGetter(key) {
     return function computedGetter() {
-      var watcher = this._computedWatchers && this._computedWatchers[key];
-      if (watcher) {
-        if (watcher.dirty) {
-          watcher.evaluate();
+      var watcher = this._computedWatchers && this._computedWatchers[key]; // 取出这个计算属性的观察对象
+      if (watcher) { // 如果存在的话
+        if (watcher.dirty) { // 通过这个标识位，来标识已经求过值，重复使用计算属性时，不会再次求值，而当依赖项改变时，会重置这个标识位，进行重新求值
+          watcher.evaluate(); // 在这一步进行 getter 求值，同时会将计算属性的结果值缓存到 value
         }
-        if (Dep.target) {
+        if (Dep.target) { // 在这里判断一下，依赖计算属性的是否是观察对象
+          // 如果是的话，就可以将计算属性依赖的 deps 转接到当前 Dep.target 引用的观察对象上，此时
+          // 就完成了当计算属性依赖属性变动时，依赖计算属性的 watcher 也会触发
           watcher.depend();
         }
-        return watcher.value
+        return watcher.value // 返回 value 值
       }
     }
   }
 
+  // 在 SSR 环境下，计算属性是直接求值的
   function createGetterInvoker(fn) {
     return function computedGetter() {
       return fn.call(this, this)
     }
   }
 
+  // 初始化 method
   function initMethods(vm, methods) {
-    var props = vm.$options.props;
-    for (var key in methods) {
+    var props = vm.$options.props; // 提取出注册的 props,用来判断 method 不能与 prop 同名
+    for (var key in methods) { // 遍历
       {
-        if (typeof methods[key] !== 'function') {
-          warn(
+        if (typeof methods[key] !== 'function') { // 如果 method 注册的不是函数
+          warn( // 则发出警告
             "Method \"" + key + "\" has type \"" + (typeof methods[key]) + "\" in the component definition. " +
             "Did you reference the function correctly?",
             vm
           );
         }
-        if (props && hasOwn(props, key)) {
-          warn(
+        if (props && hasOwn(props, key)) { // 判断 method 是否与 prop 同名
+          warn( // 否则发出警告
             ("Method \"" + key + "\" has already been defined as a prop."),
             vm
           );
         }
-        if ((key in vm) && isReserved(key)) {
-          warn(
+        if ((key in vm) && isReserved(key)) { // method key 是否已经存在 vm 实例上 && key 是否以$或_开头
+          warn( // 否则发出警告
             "Method \"" + key + "\" conflicts with an existing Vue instance method. " +
             "Avoid defining component methods that start with _ or $."
           );
         }
       }
-      vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm);
+      vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm); // 如果不是函数 ? 去一个空函数 : 硬绑定 this
     }
   }
 
+  // 初始化 watch
   function initWatch(vm, watch) {
-    for (var key in watch) {
-      var handler = watch[key];
-      if (Array.isArray(handler)) {
-        for (var i = 0; i < handler.length; i++) {
-          createWatcher(vm, key, handler[i]);
+    for (var key in watch) { // 遍历 watch
+      var handler = watch[key]; // 提取出回调
+      if (Array.isArray(handler)) { // 如果回调是一个列表的话
+        for (var i = 0; i < handler.length; i++) { // 遍历回调列表 
+          createWatcher(vm, key, handler[i]); // 给每个回调都创建一个 watcher 观察者对象
         }
       } else {
-        createWatcher(vm, key, handler);
+        createWatcher(vm, key, handler); // 给每个回调都创建一个 watcher 观察者对象
       }
     }
   }
 
+  // 对参数进行规范化，后进行 watcher 创建
   function createWatcher(
     vm,
     expOrFn,
     handler,
     options
   ) {
-    if (isPlainObject(handler)) {
-      options = handler;
-      handler = handler.handler;
+    if (isPlainObject(handler)) { // 如果注册的是一个对象的话
+      options = handler; // 重组参数
+      handler = handler.handler; // 提取回调
     }
-    if (typeof handler === 'string') {
-      handler = vm[handler];
+    if (typeof handler === 'string') { // 如果是一个字符串
+      handler = vm[handler]; // 则在 vm 实例上查找到
     }
-    return vm.$watch(expOrFn, handler, options)
+    return vm.$watch(expOrFn, handler, options) // 通过 $watch 方法创建 watcher
   }
 
   // 添加原型属性 $data, $props, 添加原型方法 $set, $del
@@ -5028,6 +5171,7 @@
   function initMixin(Vue) {
     // 当 new Vue 时，是从这里开始的
     Vue.prototype._init = function (options) {
+      debugger;
       var vm = this; // 实例
       // a uid
       vm._uid = uid$3++; // 组件 id
@@ -5049,7 +5193,7 @@
         // internal component options needs special treatment.
         initInternalComponent(vm, options);
       } else {
-        // 合并选项至 $options
+        // 合并选项至 $options, 最终这个组件的配置项 $options 中
         vm.$options = mergeOptions(
           resolveConstructorOptions(vm.constructor), // 提取出构造函数中的 options
           options || {}, // options 参数
@@ -5058,16 +5202,22 @@
       }
       /* istanbul ignore else */
       {
-        initProxy(vm);
+        initProxy(vm); // 初始化 _renderProxy：用于生成 Vnode 使用
       }
-      // expose real self
+      // expose real self 暴露真实的 self
       vm._self = vm;
-      initLifecycle(vm);
-      initEvents(vm);
-      initRender(vm);
+
+      initLifecycle(vm); // 初始化相关属性以及一些生命周期标识符
+      initEvents(vm); // 初始化父组件传递的事件
+      initRender(vm); // 主要是初始化渲染相关的属性或方法
+
+      // 执行 callHook 生命周期 --- 在这一步，数据都还没有准备好
       callHook(vm, 'beforeCreate');
-      initInjections(vm); // resolve injections before data/props
-      initState(vm);
+
+      // 初始化 inject 选项 -- 提取出 inject 选项(先从祖先组件中的 _provided 属性中找，没有找到则取默认值)，
+      // 然后将其赋值到 vm 实例上，在这里不对 inject 值进行深度转化为响应式，而是通过 defineReactive$$1 方式添加到 vm 实例上，保证其为只读属性
+      initInjections(vm); // resolve injections before data/props 在 data/props 前解析注册
+      initState(vm); // 初始化了相关数据(props, methods, data, watch)
       initProvide(vm); // resolve provide after data/props
       callHook(vm, 'created');
 
