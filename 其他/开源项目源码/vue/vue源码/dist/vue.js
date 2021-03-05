@@ -2554,11 +2554,11 @@
   }
 
   /*  */
-
+  // 初始化 provide 选项
   function initProvide(vm) {
     var provide = vm.$options.provide;
     if (provide) {
-      vm._provided = typeof provide === 'function'
+      vm._provided = typeof provide === 'function' // 很简单，就是将provided 的值赋值到 vm 实例的 _provided 上，这样子组件注入的时候就会在这里取
         ? provide.call(vm)
         : provide;
     }
@@ -5217,19 +5217,24 @@
       // 初始化 inject 选项 -- 提取出 inject 选项(先从祖先组件中的 _provided 属性中找，没有找到则取默认值)，
       // 然后将其赋值到 vm 实例上，在这里不对 inject 值进行深度转化为响应式，而是通过 defineReactive$$1 方式添加到 vm 实例上，保证其为只读属性
       initInjections(vm); // resolve injections before data/props 在 data/props 前解析注册
-      initState(vm); // 初始化了相关数据(props, methods, data, watch)
-      initProvide(vm); // resolve provide after data/props
+      // 初始化了相关数据(props, methods, data, computed, watch)
+      initState(vm);
+      // 初始化 provide
+      initProvide(vm); // resolve provide after data/props 解决后提供数据/道具
+      // 执行 created 声明周期 --- 在这一步，数据已经准备完成(inject, props, methods, data, computed, watch, provide)
       callHook(vm, 'created');
 
       /* istanbul ignore if */
+      // 性能追踪
       if (config.performance && mark) {
         vm._name = formatComponentName(vm, false);
         mark(endTag);
         measure(("vue " + (vm._name) + " init"), startTag, endTag);
       }
-
+      // 是否存在 el 选项 -- 在指令式组件时，通常当前不会传递一个 el 选项，而是手动调用 $mount() 来创建 DOM，此时并不会挂载，可以手动挂载
+      // 以及在创建子组件时，也不会在这里挂载
       if (vm.$options.el) {
-        vm.$mount(vm.$options.el);
+        vm.$mount(vm.$options.el); // 生成 DOM，并且挂载到 el 中
       }
     };
   }
@@ -5898,20 +5903,21 @@
   /*  */
 
   /**
-   * Query an element selector if it's not an element already.
+   * Query an element selector if it's not an element already. 查询一个元素选择器，如果它还不是一个元素
+   * 作用：根据 el, 查找到元素
    */
   function query(el) {
-    if (typeof el === 'string') {
-      var selected = document.querySelector(el);
-      if (!selected) {
-        warn(
+    if (typeof el === 'string') { // 如果是 string
+      var selected = document.querySelector(el); // 查找到元素
+      if (!selected) { // 如果没有找到
+        warn( // 发出警告
           'Cannot find element: ' + el
         );
-        return document.createElement('div')
+        return document.createElement('div') // 新创建一个 div
       }
-      return selected
+      return selected // 返回
     } else {
-      return el
+      return el // 其他情况，直接返回
     }
   }
 
@@ -9276,7 +9282,7 @@
   // install platform patch function
   Vue.prototype.__patch__ = inBrowser ? patch : noop;
 
-  // public mount method
+  // public mount method 公共方法 -- 通用 $mount
   Vue.prototype.$mount = function (
     el,
     hydrating
@@ -11896,6 +11902,12 @@
     }
   }
 
+  /** 主要作用:
+   *  1. 缓存编译结果，通过 createCompileToFunctionFn 函数内声明的 cache 常量实现。
+   *  2. 调用 compile 函数将模板字符串转成渲染函数字符串
+   *  3. 调用 createFunction 函数将渲染函数字符串转成真正的渲染函数
+   *  4. 打印编译错误，包括：模板字符串 -> 渲染函数字符串 以及 渲染函数字符串 -> 渲染函数 这两个阶段的错误
+   */
   function createCompileToFunctionFn(compile) {
     var cache = Object.create(null);
 
@@ -11997,9 +12009,17 @@
   }
 
   /*  */
-
+  // 根据基础编译器创建编译器
   function createCompilerCreator(baseCompile) {
+    // 直接返回一个函数，函数科里化，预设一个 baseCompile 参数
+    // 在下面的 createCompiler(baseOptions); 中，就会执行这个方法来生成编译器了
     return function createCompiler(baseOptions) {
+      // 定义 compile 编译函数并返回
+      /** 作用
+       * 1. 生成最终编译器选项 finalOptions
+       * 2. 对错误的收集
+       * 3. 调用 baseCompile 编译模板，生成 ast，errors，render，tips,staticRenderFns 信息
+       */
       function compile(
         template,
         options
@@ -12062,52 +12082,69 @@
       }
 
       return {
-        compile: compile,
+        compile: compile, // 这个是通过 baseCompile 封装，新增了一些功能(错误收集，最终编译器选项等)
+        // 最终生成的编译器，对 compile 函数又进一步封装了一些功能，例如缓存编译结果，将 compile 生成的 render 渲染字符串转化为函数
         compileToFunctions: createCompileToFunctionFn(compile)
       }
     }
   }
 
-  /*  */
 
-  // `createCompilerCreator` allows creating compilers that use alternative
-  // parser/optimizer/codegen, e.g the SSR optimizing compiler.
-  // Here we just export a default compiler using the default parts.
-  var createCompiler = createCompilerCreator(function baseCompile(
-    template,
-    options
-  ) {
-    var ast = parse(template.trim(), options);
-    if (options.optimize !== false) {
-      optimize(ast, options);
-    }
-    var code = generate(ast, options);
-    return {
-      ast: ast,
-      render: code.render,
-      staticRenderFns: code.staticRenderFns
-    }
-  });
+  // `createCompilerCreator` allows creating compilers that use alternative “createCompilerCreator”允许创建使用 alternative 的编译器
+  // parser/optimizer/codegen, e.g the SSR optimizing compiler. 解析器/优化器/代码根，例如SSR优化编译器
+  // Here we just export a default compiler using the default parts. 这里我们只导出一个使用默认部分的默认编译器
+  // 编译器创建的创造者
+  var createCompiler = createCompilerCreator(
+    // 这是函数一个基础编译器，把 html 变成 ast 模板对象，然后再转换成 虚拟DOM 渲染的函数参数形式
+    // 返回一个对象：
+    // { ast: ast // ast模板, 
+    //   render: code.render // code 虚拟 DOM 需要渲染的参数函数,
+    //   staticRenderFns: code.staticRenderFns // 空数组
+    // }
+    function baseCompile(
+      template, // 模板
+      options // 解析参数
+    ) {
+      var ast = parse(template.trim(), options); // 生成 ast 模板
+      if (options.optimize !== false) { // optimize 的主要作用是标记 static 静态节点
+        optimize(ast, options); // 优化器：循环递归虚拟node，标记是不是静态节点 - 根据node.static或者 node.once 标记staticRoot的状态
+      }
+      var code = generate(ast, options);
+      return {
+        ast: ast,
+        render: code.render,
+        staticRenderFns: code.staticRenderFns
+      }
+    });
 
-  /*  */
+  /** 
+   * 通过对上面的简单分析，可以看出，通过 createCompiler(baseOptions) 传递不同平台(web 和 weex)的 baseOptions 用于依据不同的平台生成不同的编译器
+   * 在 createCompiler 方法中，通过调用 createCompilerCreator 方法，传递给 createCompilerCreator 方法一个基础编译器(这个编译器主要负责对 template 模板进行编译成 ast, render字符串, staticRenderFns)
+   * 在 createCompilerCreator 方法中，主要作用是通过闭包生成函数科里化，给 createCompiler 方法预设一个 baseCompile(基础编译器) 参数并执行 createCompiler 方法
+   * 在 createCompiler 方法中，最终生成编译器，也主要是在 baseCompile 编译器的基础上再做一些额外处理，例如: 编译器选项的生成，对错误的收集等作用，最终生成一个 compile 方法，而最终还需要使用 createCompileToFunctionFn 方法对 compile 进一步增强
+   * 在 createCompileToFunctionFn 方法中，通过传入的 compile 进一步增加其编译功能，主要附加：缓存编译结果，生成渲染函数 render，打印编译错误
+   * 
+   * 简单来讲：平台具有不同的 baseOptions，传递给基础 baseCompile 编译器，用于实现不同的编译功能 -> createCompiler 方法给 baseCompile 编译器新增额外功能，生成一个新的 compile -> createCompileToFunctionFn 方法给 compile 编译器继续新增额外的功能，这就是最终的编译器
+   * 也就是通过一步步方法加强基础 baseCompile 编译器
+  */
 
-  var ref$1 = createCompiler(baseOptions);
+  var ref$1 = createCompiler(baseOptions); // 通过 baseOptions 生成编译器相关
   var compile = ref$1.compile;
-  var compileToFunctions = ref$1.compileToFunctions;
+  var compileToFunctions = ref$1.compileToFunctions; // 编译器 -- 将一个模板字符串编译成 render 函数。
 
   /*  */
 
-  // check whether current browser encodes a char inside attribute values
+  // check whether current browser encodes a char inside attribute values 检查当前浏览器是否在属性值中编码字符
   var div;
   function getShouldDecode(href) {
-    div = div || document.createElement('div');
-    div.innerHTML = href ? "<a href=\"\n\"/>" : "<div a=\"\n\"/>";
-    return div.innerHTML.indexOf('&#10;') > 0
+    div = div || document.createElement('div'); // 创建新元素
+    div.innerHTML = href ? "<a href=\"\n\"/>" : "<div a=\"\n\"/>"; // 测试属性
+    return div.innerHTML.indexOf('&#10;') > 0 // 判断测试属性是否编码字符(将传入的 \n 转化为 &#10;)
   }
 
-  // #3663: IE encodes newlines inside attribute values while other browsers don't
+  // #3663: IE encodes newlines inside attribute values while other browsers don't IE在属性值中编码换行，而其他浏览器不这样做
   var shouldDecodeNewlines = inBrowser ? getShouldDecode(false) : false;
-  // #6828: chrome encodes content in a[href]
+  // #6828: chrome encodes content in a[href] chrome 编码内容在一个 [href]
   var shouldDecodeNewlinesForHref = inBrowser ? getShouldDecode(true) : false;
 
   /*  */
@@ -12117,26 +12154,28 @@
     return el && el.innerHTML
   });
 
+  // 在这里先缓存一下 $mount 方法
   var mount = Vue.prototype.$mount;
-  Vue.prototype.$mount = function (
-    el,
+  Vue.prototype.$mount = function ( // 重新赋值 -- 依据平台来选择不同 渲染方法
+    el, // 挂载点
     hydrating
   ) {
-    el = el && query(el);
+    el = el && query(el); // 找到挂载元素
 
     /* istanbul ignore if */
-    if (el === document.body || el === document.documentElement) {
-      warn(
+    if (el === document.body || el === document.documentElement) { // 挂载点不能为 body 或 文档节点
+      warn( // 此时发出警告
         "Do not mount Vue to <html> or <body> - mount to normal elements instead."
       );
-      return this
+      return this // 直接退出渲染
     }
 
-    var options = this.$options;
-    // resolve template/el and convert to render function
-    if (!options.render) {
-      var template = options.template;
-      if (template) {
+    var options = this.$options; // 提取参数 options
+    // resolve template/el and convert to render function 解析 template/el 并转换为渲染函数
+    if (!options.render) { // 如果没有 render 配置项 -- 表示是通过模板形式的，需要编译器进行编译 -- 在用户通过 render 或者 通过 vue-loader 生成 render 时，此时是存在 render 选项的
+      // 在完整构建版本中的浏览器内编译时可用
+      var template = options.template; // 是否存在 template 模板
+      if (template) { // 如果存在，则通过下列方法生成 render 
         if (typeof template === 'string') {
           if (template.charAt(0) === '#') {
             template = idToTemplate(template);
@@ -12156,21 +12195,24 @@
           }
           return this
         }
-      } else if (el) {
+      } else if (el) { // 如果不存在，只是存在 el
         template = getOuterHTML(el);
       }
+      // 通过上述操作，应该获取到了 template 模板
       if (template) {
         /* istanbul ignore if */
+        // 性能监控
         if (config.performance && mark) {
           mark('compile');
         }
 
-        var ref = compileToFunctions(template, {
+        // 这下面就是另一个难点 -- 生成 render 方法
+        var ref = compileToFunctions(template, { // 模板字符串
           outputSourceRange: "development" !== 'production',
-          shouldDecodeNewlines: shouldDecodeNewlines,
-          shouldDecodeNewlinesForHref: shouldDecodeNewlinesForHref,
-          delimiters: options.delimiters,
-          comments: options.comments
+          shouldDecodeNewlines: shouldDecodeNewlines, // IE在属性值中编码换行，而其他浏览器不这样做
+          shouldDecodeNewlinesForHref: shouldDecodeNewlinesForHref, // chrome a[href] 中是否会编码换行
+          delimiters: options.delimiters, // 改变纯文本插入分隔符。修改指令的书写风格，比如默认是{{mgs}}  delimiters: ['${', '}']之后变成这样 ${mgs}
+          comments: options.comments // 当设为 true 时，将会保留且渲染模板中的 HTML 注释。默认行为是舍弃它们。
         }, this);
         var render = ref.render;
         var staticRenderFns = ref.staticRenderFns;
@@ -12188,16 +12230,17 @@
   };
 
   /**
-   * Get outerHTML of elements, taking care
-   * of SVG elements in IE as well.
+   * Get outerHTML of elements, taking care 小心获取元素的outerHTML
+   * of SVG elements in IE as well. 也可以在IE中使用SVG元素
+   * 作用：获取指定元素的全部子元素，用于做组件的模板
    */
   function getOuterHTML(el) {
-    if (el.outerHTML) {
+    if (el.outerHTML) { // 如果存在 outerHTML 方法，则直接取 outerHTML 模板
       return el.outerHTML
     } else {
       var container = document.createElement('div');
       container.appendChild(el.cloneNode(true));
-      return container.innerHTML
+      return container.innerHTML // 否则通过将 el 挂载到新创建的元素，并通过取 innerHTML，变相实现 outerHTML 功能
     }
   }
 
