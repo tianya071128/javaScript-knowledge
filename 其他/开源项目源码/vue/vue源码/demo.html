@@ -12,6 +12,8 @@
 <body>
   <div id="app">
     {{test}}{{ object.b.c }}{{ array[0] }}
+    <div v-once>这是只渲染一次的内容</div>
+    <div v-for="i in 5">{{i}}</div>
     <my-components test='5' :test2="object"></my-components>
   </div>
 </body>

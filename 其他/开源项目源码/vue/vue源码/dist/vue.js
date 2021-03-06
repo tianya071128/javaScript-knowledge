@@ -25,10 +25,12 @@
     return v !== undefined && v !== null
   }
 
+  // 指定值是否为 true
   function isTrue(v) {
     return v === true
   }
 
+  // 指定值是否为 false
   function isFalse(v) {
     return v === false
   }
@@ -387,9 +389,15 @@
 
   // 生命周期列表
   var LIFECYCLE_HOOKS = [
+    // beforeCreate：在这之前，已经初始化了组件的配置项 $options 以及相关属性定义，但是数据还没有准备好
     'beforeCreate', // 实例初始化之后，数据初始化前
+
+    // created：在这里，已经初始化了相关数据，data,props,methods 等数据，但是 render，VNode 还没有准备好
     'created', // 数据初始化完成
+
+    // beforeMount：在这一步， render 渲染函数已经准备好(template 模板已经解析)，但是还没有生成 VNode,更没有开始挂载 DOM
     'beforeMount', // 在挂在之前调用
+
     'mounted', // 实例被挂在之后调用，此时 DOM 可访问，但是不能保证所有的子组件也已经被挂载
     'beforeUpdate', // 更新之前，虚拟 DOM 打补丁之前
     'updated', // 已经重新渲染
@@ -397,7 +405,10 @@
     'destroyed', // 实例销毁后
     'activated', // 被 keep-alive 缓存的组件激活时调用
     'deactivated', // 被 keep-alive 缓存的组件停用时调用
-    'errorCaptured', // 铺货到子孙组件错误时调用
+
+    // errorCaptured：在组件的多个时期都可能执行，在组件的运行期间出现相关错误就会执行
+    'errorCaptured', // 捕获到子孙组件错误时调用
+
     'serverPrefetch' // 
   ];
 
@@ -658,10 +669,11 @@
 
   /*  */
 
-  var warn = noop;
+  var warn = noop; // 错误提示工具方法
   var tip = noop;
-  var generateComponentTrace = (noop); // work around flow check
-  var formatComponentName = (noop);
+  // 获取组件的继承关系 -- 总的来讲，就是将组件的树结构关系输出，方便用户定义问题所在
+  var generateComponentTrace = (noop); // work around flow check 绕流检查
+  var formatComponentName = (noop);  // 获取组件的名称或从 file 路径中获取组件名称，如果没有的话则返回 <Anonymous>
 
   {
     var hasConsole = typeof console !== 'undefined'; //  是否支持 console
@@ -674,42 +686,43 @@
     };
 
     warn = function (msg, vm) {
-      var trace = vm ? generateComponentTrace(vm) : '';
+      var trace = vm ? generateComponentTrace(vm) : ''; // 组件的继承关系追踪
 
-      if (config.warnHandler) {
-        config.warnHandler.call(null, msg, vm, trace);
+      if (config.warnHandler) { // 为 Vue 的运行时警告赋予一个自定义处理函数。
+        config.warnHandler.call(null, msg, vm, trace); // 如果用户自定义了，则交给用户处理
       } else if (hasConsole && (!config.silent)) {
-        console.error(("[Vue warn]: " + msg + trace));
+        console.error(("[Vue warn]: " + msg + trace)); // 否则直接打印至控制台
       }
     };
 
-    tip = function (msg, vm) {
-      if (hasConsole && (!config.silent)) {
-        console.warn("[Vue tip]: " + msg + (
+    tip = function (msg, vm) { // 打印提示信息
+      if (hasConsole && (!config.silent)) { // hasConsole:是否支持 console 对象 && config.silent：是否取消所有的日志和警告 
+        console.warn("[Vue tip]: " + msg + ( // 使用 warn 打印信息
           vm ? generateComponentTrace(vm) : ''
         ));
       }
     };
 
+    // 获取组件的名称或从 file 路径中获取组件名称，如果没有的话则返回 <Anonymous>
     formatComponentName = function (vm, includeFile) {
-      if (vm.$root === vm) {
-        return '<Root>'
+      if (vm.$root === vm) { // 是否是根组件
+        return '<Root>' // 如果是根组件，返回 <Root>
       }
-      var options = typeof vm === 'function' && vm.cid != null
-        ? vm.options
-        : vm._isVue
-          ? vm.$options || vm.constructor.options
-          : vm;
-      var name = options.name || options._componentTag;
-      var file = options.__file;
-      if (!name && file) {
+      var options = typeof vm === 'function' && vm.cid != null // vm 实例是一个函数(应该是函数式组件情况)
+        ? vm.options // 在 vm.options 中获取参数
+        : vm._isVue // 是否是组件
+          ? vm.$options || vm.constructor.options // 在这里获取参数
+          : vm; // 否则直接返回 vm 实例
+      var name = options.name || options._componentTag; // 获取 name
+      var file = options.__file; // 文件路径？
+      if (!name && file) { // 如果不存在 name && 存在 file
         var match = file.match(/([^/\\]+)\.vue$/);
-        name = match && match[1];
+        name = match && match[1]; // 从文件路径中获取 name
       }
 
       return (
-        (name ? ("<" + (classify(name)) + ">") : "<Anonymous>") +
-        (file && includeFile !== false ? (" at " + file) : '')
+        (name ? ("<" + (classify(name)) + ">") : "<Anonymous>") + // 存在组件名称 ? 将组件名称转化成驼峰命名 : 返回匿名组件 <Anonymous>
+        (file && includeFile !== false ? (" at " + file) : '') // 并且判断是否返回文件路径
       )
     };
 
@@ -723,13 +736,14 @@
       return res
     };
 
+    // 获取组件的继承关系 -- 总的来讲，就是将组件的树结构关系输出，方便用户定义问题所在
     generateComponentTrace = function (vm) {
-      if (vm._isVue && vm.$parent) {
-        var tree = [];
+      if (vm._isVue && vm.$parent) { // 是否为组件 && 是一个子组件
+        var tree = []; // 组件树集合
         var currentRecursiveSequence = 0;
-        while (vm) {
-          if (tree.length > 0) {
-            var last = tree[tree.length - 1];
+        while (vm) { // 递归查找
+          if (tree.length > 0) { // 如果集合中存在 vm 实例
+            var last = tree[tree.length - 1]; // 取出最后一个
             if (last.constructor === vm.constructor) {
               currentRecursiveSequence++;
               vm = vm.$parent;
@@ -739,8 +753,8 @@
               currentRecursiveSequence = 0;
             }
           }
-          tree.push(vm);
-          vm = vm.$parent;
+          tree.push(vm); // 直接往 tree 集合中推入 vm 
+          vm = vm.$parent; // 查找 vm 的父组件
         }
         return '\n\nfound in\n\n' + tree
           .map(function (vm, i) {
@@ -749,7 +763,7 @@
               : formatComponentName(vm)));
           })
           .join('\n')
-      } else {
+      } else { // 否则直接返回该组件的名称序列
         return ("\n\n(found in " + (formatComponentName(vm)) + ")")
       }
     };
@@ -819,38 +833,40 @@
   }
 
   /*  */
-
+  // VNode 构造器
   var VNode = function VNode(
-    tag,
-    data,
-    children,
-    text,
-    elm,
-    context,
-    componentOptions,
-    asyncFactory
+    tag, // 标签名，文本节点或注释节点为 undefinde
+    data, // 节点对应数据的对象，包含
+    children, // 子节点
+    text, // 文本
+    elm, // 当前 vnode 表示的 dom
+    context, // 编译作用域
+    componentOptions, // 如果是组件的 VNode，表示组件的 option 选项
+    asyncFactory // 异步工厂
   ) {
-    this.tag = tag;
-    this.data = data;
-    this.children = children;
-    this.text = text;
-    this.elm = elm;
-    this.ns = undefined;
-    this.context = context;
-    this.fnContext = undefined;
+    this.tag = tag; // 保存标签名
+    this.data = data; // 保存节点数据对象
+    this.children = children; // 保存子节点
+    this.text = text; // 保存文本
+    this.elm = elm; // 对应的 dom
+    this.ns = undefined; // 节点命名空间？
+    this.context = context; // 编译作用域
+
+    this.fnContext = undefined; // 
     this.fnOptions = undefined;
     this.fnScopeId = undefined;
-    this.key = data && data.key;
-    this.componentOptions = componentOptions;
-    this.componentInstance = undefined;
-    this.parent = undefined;
-    this.raw = false;
-    this.isStatic = false;
-    this.isRootInsert = true;
-    this.isComment = false;
-    this.isCloned = false;
-    this.isOnce = false;
-    this.asyncFactory = asyncFactory;
+
+    this.key = data && data.key; // 节点的 key 属性，用于节点的唯一标识，用于优化节点
+    this.componentOptions = componentOptions; // 组件 VNode 的 options
+    this.componentInstance = undefined; // 组件节点 VNode 对应的实例
+    this.parent = undefined; // 当前节点 VNode 对应的父 Vnode
+    this.raw = false; // 简而言之就是是否为原生 HTML 或只是普通文本，innerHTML 的时候为 true，textContent 的时候为 false
+    this.isStatic = false; // 静态节点标志
+    this.isRootInsert = true; // 是否作为跟节点插入
+    this.isComment = false; // 是否为注释节点
+    this.isCloned = false; // 是否为克隆节点
+    this.isOnce = false; // 是否有v-once指令
+    this.asyncFactory = asyncFactory; // 异步工厂
     this.asyncMeta = undefined;
     this.isAsyncPlaceholder = false;
   };
@@ -865,11 +881,12 @@
 
   Object.defineProperties(VNode.prototype, prototypeAccessors);
 
+  // 创建一个新的 VNode
   var createEmptyVNode = function (text) {
-    if (text === void 0) text = '';
+    if (text === void 0) text = ''; // text === undefined，则重置 test = ''
 
-    var node = new VNode();
-    node.text = text;
+    var node = new VNode(); // 生成 VNode
+    node.text = text; // 
     node.isComment = true;
     return node
   };
@@ -3666,14 +3683,14 @@
       return nextTick(fn, this)
     };
 
-    // 条件原型方法 _render
+    // 条件原型方法 _render -- 用于调用 vm.$options.render() 来生成 VNode
     Vue.prototype._render = function () {
-      var vm = this;
-      var ref = vm.$options;
-      var render = ref.render;
+      var vm = this; // 组件实例
+      var ref = vm.$options; // options 配置参数
+      var render = ref.render; // render 渲染函数
       var _parentVnode = ref._parentVnode;
 
-      if (_parentVnode) {
+      if (_parentVnode) { // 
         vm.$scopedSlots = normalizeScopedSlots(
           _parentVnode.data.scopedSlots,
           vm.$slots,
@@ -3681,23 +3698,23 @@
         );
       }
 
-      // set parent vnode. this allows render functions to have access
-      // to the data on the placeholder node.
-      vm.$vnode = _parentVnode;
-      // render self
+      // set parent vnode. this allows render functions to have access 设置父vnode。这允许渲染函数具有访问权限
+      // to the data on the placeholder node. 到占位符节点上的数据
+      vm.$vnode = _parentVnode; // $vnode 引用着父组件的 Vnode
+      // render self 渲染自己
       var vnode;
       try {
-        // There's no need to maintain a stack because all render fns are called
-        // separately from one another. Nested component's render fns are called
-        // when parent component is patched.
-        currentRenderingInstance = vm;
-        vnode = render.call(vm._renderProxy, vm.$createElement);
-      } catch (e) {
-        handleError(e, vm, "render");
-        // return error render result,
-        // or previous vnode to prevent render error causing blank component
+        // There's no need to maintain a stack because all render fns are called 没有必要维护堆栈，因为所有渲染fns都被调用
+        // separately from one another. Nested component's render fns are called 彼此分开。嵌套组件的渲染fns被调用
+        // when parent component is patched. 当父组件被修补时
+        currentRenderingInstance = vm; // 引用
+        vnode = render.call(vm._renderProxy, vm.$createElement); // 在 _renderProxy 上下文中，执行 render 渲染函数生成 VNode
+      } catch (e) { // 如果渲染 VNode 过程中出错
+        handleError(e, vm, "render"); // 暴露错误
+        // return error render result, 返回错误
+        // or previous vnode to prevent render error causing blank component 或之前的vnode，以防止渲染错误导致空白组件
         /* istanbul ignore else */
-        if (vm.$options.renderError) {
+        if (vm.$options.renderError) { // 查看是否定义了 handerEoor 方法，用于返回渲染错误的 VNode
           try {
             vnode = vm.$options.renderError.call(vm._renderProxy, vm.$createElement, e);
           } catch (e) {
@@ -3710,24 +3727,24 @@
       } finally {
         currentRenderingInstance = null;
       }
-      // if the returned array contains only a single node, allow it
-      if (Array.isArray(vnode) && vnode.length === 1) {
-        vnode = vnode[0];
+      // if the returned array contains only a single node, allow it 如果返回的数组只包含一个节点，那么允许它
+      if (Array.isArray(vnode) && vnode.length === 1) { // 如果是一个包含一个根节点的数组
+        vnode = vnode[0]; // 此时提取第一个根节点
       }
-      // return empty vnode in case the render function errored out
-      if (!(vnode instanceof VNode)) {
-        if (Array.isArray(vnode)) {
-          warn(
-            'Multiple root nodes returned from render function. Render function ' +
-            'should return a single root node.',
+      // return empty vnode in case the render function errored out 如果渲染函数出错，返回空的 vnode
+      if (!(vnode instanceof VNode)) { // 如果 vnode 不是 VNode 类型
+        if (Array.isArray(vnode)) { // 是一个数组, 此时说明定义了多个根节点
+          warn( // 发出警告
+            'Multiple root nodes returned from render function. Render function ' + // 从渲染函数返回的多个根节点。渲染函数
+            'should return a single root node.', // 应该返回单个根节点
             vm
           );
         }
-        vnode = createEmptyVNode();
+        vnode = createEmptyVNode(); // 定义一个空的 VNode
       }
-      // set parent
-      vnode.parent = _parentVnode;
-      return vnode
+      // set parent 设置父
+      vnode.parent = _parentVnode; // 在 vnode 上设置引用 _parentVnode
+      return vnode // 返回生成的 vnode
     };
   }
 
@@ -4075,24 +4092,27 @@
     vm._watcher = null; // 组件的 watcher 观察对象集合
     vm._inactive = null;
     vm._directInactive = false;
-    vm._isMounted = false;
-    vm._isDestroyed = false;
+    vm._isMounted = false; // 组件是否已经初始渲染
+    vm._isDestroyed = false; // 组件是否已经被渲染
     vm._isBeingDestroyed = false;
   }
 
   // 添加原型方法 _update, $forceUpdate, $destroy
   function lifecycleMixin(Vue) {
     // 添加原型方法 _update
+    /**
+     * 此方法
+     */
     Vue.prototype._update = function (vnode, hydrating) {
-      var vm = this;
-      var prevEl = vm.$el;
-      var prevVnode = vm._vnode;
+      var vm = this; // 实例
+      var prevEl = vm.$el; // 上一个挂载点(会将 $el 替换成组件 DOM)
+      var prevVnode = vm._vnode; // 上一次 Vnode
       var restoreActiveInstance = setActiveInstance(vm);
-      vm._vnode = vnode;
-      // Vue.prototype.__patch__ is injected in entry points
-      // based on the rendering backend used.
-      if (!prevVnode) {
-        // initial render
+      vm._vnode = vnode; // 将生成的 vnode 保存在 vm._vnode 中
+      // Vue.prototype.__patch__ is injected in entry points Vue.prototype。__patch__被注入到入口点
+      // based on the rendering backend used. 基于所使用的呈现后端
+      if (!prevVnode) { // 上一次的 vnode 是 null,表示是初次挂载
+        // initial render 最初的渲染
         vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
       } else {
         // updates
@@ -4167,38 +4187,42 @@
     };
   }
 
+  // 生成 vnode，挂载 DOM
   function mountComponent(
-    vm,
-    el,
+    vm, // 实例
+    el, // 挂载点 DOM
     hydrating
   ) {
-    vm.$el = el;
-    if (!vm.$options.render) {
-      vm.$options.render = createEmptyVNode;
+    vm.$el = el; // 将挂载点 el 添加到 $el 属性上
+    if (!vm.$options.render) { // 如果不存在 render 渲染函数
+      vm.$options.render = createEmptyVNode; // 一个空的 render 占位符
       {
         /* istanbul ignore if */
         if ((vm.$options.template && vm.$options.template.charAt(0) !== '#') ||
-          vm.$options.el || el) {
-          warn(
+          vm.$options.el || el) { // 如果定义了 template 或者 el 选项
+          warn( // 此时发出警告
             'You are using the runtime-only build of Vue where the template ' +
             'compiler is not available. Either pre-compile the templates into ' +
             'render functions, or use the compiler-included build.',
             vm
           );
         } else {
-          warn(
-            'Failed to mount component: template or render function not defined.',
+          warn( // 发出警告
+            'Failed to mount component: template or render function not defined.', // 安装组件失败:模板或未定义的渲染函数
             vm
           );
         }
       }
     }
+    // 执行 beforeMount 声明周期
     callHook(vm, 'beforeMount');
 
+    // 主要是调用 _render 方法生成 VNode，以及调用 _update 生成 VNode
     var updateComponent;
     /* istanbul ignore if */
+    // 性能监控
     if (config.performance && mark) {
-      updateComponent = function () {
+      updateComponent = function () { // 如果支持性能监控的话，需要对组件生成 VNode，以及挂载过程进行监控
         var name = vm._name;
         var id = vm._uid;
         var startTag = "vue-perf-start:" + id;
@@ -4220,21 +4244,24 @@
       };
     }
 
-    // we set this to vm._watcher inside the watcher's constructor
-    // since the watcher's initial patch may call $forceUpdate (e.g. inside child
-    // component's mounted hook), which relies on vm._watcher being already defined
+    // we set this to vm._watcher inside the watcher's constructor 我们将其设置为vm。_watcher在watcher的构造函数中
+    // since the watcher's initial patch may call $forceUpdate (e.g. inside child 因为观察者的初始补丁可能调用$forceUpdate(例如inside child)
+    // component's mounted hook), which relies on vm._watcher being already defined scomponent的挂载钩子)，它依赖于vm。已经定义了_watcher
+    // 通过对 updateComponent 进行观察，这样的话就会对渲染过程进行观察，收集渲染的依赖，并且一开始就执行一遍 updateComponent
+    // 执行 updateComponent 方法中，_render 负责调用 vm.$options.render 方法生成 VNode，
+    // 然后传递给 _update 方法进行挂载，
     new Watcher(vm, updateComponent, noop, {
-      before: function before() {
-        if (vm._isMounted && !vm._isDestroyed) {
-          callHook(vm, 'beforeUpdate');
+      before: function before() { // 数据更新前执行回调
+        if (vm._isMounted && !vm._isDestroyed) { // _isMounted：是否已经初次渲染 && _isDestroyed：组件是否已渲染
+          callHook(vm, 'beforeUpdate'); // 说明是更新操作，执行 beforeUpdate 生命周期
         }
       }
     }, true /* isRenderWatcher */);
     hydrating = false;
 
-    // manually mounted instance, call mounted on self
-    // mounted is called for render-created child components in its inserted hook
-    if (vm.$vnode == null) {
+    // manually mounted instance, call mounted on self 手动挂载实例，调用挂载在self上
+    // mounted is called for render-created child components in its inserted hook mount用于在其插入的钩子中调用渲染器创建的子组件
+    if (vm.$vnode == null) { // vm.$vnode：引用着父组件的 VNode， 根组件就不存在这个属性，所有子组件不会在这里调用 mounted 生命周期
       vm._isMounted = true;
       callHook(vm, 'mounted');
     }
@@ -5697,7 +5724,14 @@
   // during template compilation
   var isReservedAttr = makeMap('style,class');
 
-  // attributes that should be using props for binding
+  // attributes that should be using props for binding 应该使用道具进行绑定的属性
+  /* mustUseProp 校验属性
+  * 1. attr === 'value', tag 必须是 'input,textarea,option,select,progress' 其中一个 type !== 'button'
+  * 2. attr === 'selected' && tag === 'option'
+  * 3. attr === 'checked' && tag === 'input'
+  * 4. attr === 'muted' && tag === 'video'
+  * 的情况下为真
+  * */
   var acceptValue = makeMap('input,textarea,option,select,progress');
   var mustUseProp = function (tag, type, attr) {
     return (
@@ -5832,6 +5866,7 @@
     math: 'http://www.w3.org/1998/Math/MathML'
   };
 
+  // 判断标签是否为 html 标签
   var isHTMLTag = makeMap(
     'html,body,base,head,link,meta,style,title,' +
     'address,article,aside,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' +
@@ -5846,8 +5881,9 @@
     'content,element,shadow,template,blockquote,iframe,tfoot'
   );
 
-  // this map is intentionally selective, only covering SVG elements that may
-  // contain child elements.
+  // this map is intentionally selective, only covering SVG elements that may 这个映射是有意选择的，只覆盖可能的SVG元素
+  // contain child elements. 包含子元素
+  // 判断是否为 svg 相关元素
   var isSVG = makeMap(
     'svg,animate,circle,clippath,cursor,defs,desc,ellipse,filter,font-face,' +
     'foreignObject,g,glyph,image,line,marker,mask,missing-glyph,path,pattern,' +
@@ -5855,18 +5891,18 @@
     true
   );
 
-  var isPreTag = function (tag) { return tag === 'pre'; };
-
+  var isPreTag = function (tag) { return tag === 'pre'; }; // 判断标签是否是 pre
+  // 判断指定标签是否为 html 标签 或者 svg 标签
   var isReservedTag = function (tag) {
     return isHTMLTag(tag) || isSVG(tag)
   };
-
+  // 判断指定 tag 标签是否为 svg 或 math 
   function getTagNamespace(tag) {
     if (isSVG(tag)) {
       return 'svg'
     }
-    // basic support for MathML
-    // note it doesn't support other MathML elements being component roots
+    // basic support for MathML 对MathML的基本支持
+    // note it doesn't support other MathML elements being component roots 注意，它不支持其他MathML元素作为组件根
     if (tag === 'math') {
       return 'math'
     }
@@ -6105,6 +6141,7 @@
       }
     }
 
+    // 使用 elm DOM 创建一个 VNode
     function emptyNodeAt(elm) {
       return new VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm)
     }
@@ -6146,29 +6183,32 @@
     var creatingElmInVPre = 0;
 
     function createElm(
-      vnode,
-      insertedVnodeQueue,
-      parentElm,
-      refElm,
+      vnode, // 创建的 vnode
+      insertedVnodeQueue, // 创建子组件队列
+      parentElm, // 挂载节点的父节点
+      refElm, // 挂在节点的下一个节点，用于定位位置
       nested,
       ownerArray,
       index
     ) {
       if (isDef(vnode.elm) && isDef(ownerArray)) {
-        // This vnode was used in a previous render!
-        // now it's used as a new node, overwriting its elm would cause
-        // potential patch errors down the road when it's used as an insertion
-        // reference node. Instead, we clone the node on-demand before creating
-        // associated DOM element for it.
+        // This vnode was used in a previous render! 这个 vnode 在以前的渲染中使用过
+        // now it's used as a new node, overwriting its elm would cause 现在它被用作一个新节点，重写它的elm会导致
+        // potential patch errors down the road when it's used as an insertion 当它被用作插入时，潜在的补丁错误就会出现
+        // reference node. Instead, we clone the node on-demand before creating 参考节点。相反，我们在创建节点之前按需克隆节点
+        // associated DOM element for it. 关联的DOM元素
         vnode = ownerArray[index] = cloneVNode(vnode);
       }
 
-      vnode.isRootInsert = !nested; // for transition enter check
+      vnode.isRootInsert = !nested; // for transition enter check 过渡输入检查
+
+      // 这下面一个重点，在 createComponent 判断是否为子组件渲染
       if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
         return
       }
 
-      var data = vnode.data;
+      // 元素渲染应该走到这里
+      var data = vnode.data; // 获取 data 数据
       var children = vnode.children;
       var tag = vnode.tag;
       if (isDef(tag)) {
@@ -6212,17 +6252,23 @@
       }
     }
 
-    function createComponent(vnode, insertedVnodeQueue, parentElm, refElm) {
-      var i = vnode.data;
-      if (isDef(i)) {
-        var isReactivated = isDef(vnode.componentInstance) && i.keepAlive;
+
+    function createComponent(
+      vnode, // vnode
+      insertedVnodeQueue, // 子组件队列
+      parentElm, // 父节点
+      refElm // 下一个节点
+    ) {
+      var i = vnode.data; // 获取 data 数据
+      if (isDef(i)) { // 判断是否存在 data
+        var isReactivated = isDef(vnode.componentInstance) && i.keepAlive; // 组件已经创建 && 被 keepAlive 缓存
         if (isDef(i = i.hook) && isDef(i = i.init)) {
           i(vnode, false /* hydrating */);
         }
-        // after calling the init hook, if the vnode is a child component
-        // it should've created a child instance and mounted it. the child
-        // component also has set the placeholder vnode's elm.
-        // in that case we can just return the element and be done.
+        // after calling the init hook, if the vnode is a child component 调用init钩子后，如果vnode是子组件
+        // it should've created a child instance and mounted it. the child 它应该创建一个子实例并挂载它。这个孩子
+        // component also has set the placeholder vnode's elm. 组件还设置了占位符vnode的elm
+        // in that case we can just return the element and be done. 在这种情况下，我们只需要返回元素就可以了
         if (isDef(vnode.componentInstance)) {
           initComponent(vnode, insertedVnodeQueue);
           insert(parentElm, vnode.elm, refElm);
@@ -6349,16 +6395,17 @@
       }
     }
 
+    // 销毁 vnode 表示的 dom
     function invokeDestroyHook(vnode) {
       var i, j;
-      var data = vnode.data;
-      if (isDef(data)) {
-        if (isDef(i = data.hook) && isDef(i = i.destroy)) { i(vnode); }
-        for (i = 0; i < cbs.destroy.length; ++i) { cbs.destroy[i](vnode); }
+      var data = vnode.data; // vnode.data 表示 vnode 的一些数据，如 class, attrs等等
+      if (isDef(data)) { // 如果存在 data
+        if (isDef(i = data.hook) && isDef(i = i.destroy)) { i(vnode); } // 如果是组件 vnode 的话，就需要调用组件的销毁程序
+        for (i = 0; i < cbs.destroy.length; ++i) { cbs.destroy[i](vnode); } // 使用不同阶段的钩子进行 vnode 的销毁
       }
-      if (isDef(i = vnode.children)) {
-        for (j = 0; j < vnode.children.length; ++j) {
-          invokeDestroyHook(vnode.children[j]);
+      if (isDef(i = vnode.children)) { // 是否存在子节点
+        for (j = 0; j < vnode.children.length; ++j) { // 遍历子节点 
+          invokeDestroyHook(vnode.children[j]); // 销毁子节点
         }
       }
     }
@@ -6597,7 +6644,7 @@
     // deep updates (#7063).
     var isRenderedModule = makeMap('attrs,class,staticClass,staticStyle,key');
 
-    // Note: this is a browser-only function so we can assume elms are DOM nodes.
+    // Note: this is a browser-only function so we can assume elms are DOM nodes. 注意:这是一个仅在浏览器上使用的函数，因此我们可以假设elm是DOM节点
     function hydrate(elm, vnode, insertedVnodeQueue, inVPre) {
       var i;
       var tag = vnode.tag;
@@ -6702,34 +6749,41 @@
       }
     }
 
-    return function patch(oldVnode, vnode, hydrating, removeOnly) {
-      if (isUndef(vnode)) {
-        if (isDef(oldVnode)) { invokeDestroyHook(oldVnode); }
+    // 这里是最终的通过 vnode 生成 dom 的操作
+    return function patch(
+      oldVnode, // 旧的 vnode, 如果是 DOM，表示是初始渲染，不需要 diff 阶段
+      vnode, // 新的 vnode
+      hydrating, // 应该是表示 SSR 渲染标识
+      removeOnly // 是否要全部删除标志
+    ) {
+      if (isUndef(vnode)) { // 如果新的 vnode 不存在，此时表示销毁阶段
+        if (isDef(oldVnode)) { invokeDestroyHook(oldVnode); } // 此时如果旧的 vnode 存在，说明需要先销毁老节点，需要先处理好旧的 vnode
         return
       }
 
-      var isInitialPatch = false;
-      var insertedVnodeQueue = [];
+      var isInitialPatch = false; // 是否是初始渲染
+      var insertedVnodeQueue = []; // 子组件 vnode 队列，用于最后统一做一些渲染的处理
 
-      if (isUndef(oldVnode)) {
-        // empty mount (likely as component), create new root element
+      if (isUndef(oldVnode)) { // oldVnode 是否是 undefined 或 null
+        // empty mount (likely as component), create new root element 空挂载(可能作为组件)，创建新的根元素
         isInitialPatch = true;
         createElm(vnode, insertedVnodeQueue);
       } else {
-        var isRealElement = isDef(oldVnode.nodeType);
-        if (!isRealElement && sameVnode(oldVnode, vnode)) {
-          // patch existing root node
+        var isRealElement = isDef(oldVnode.nodeType); // oldVnode.nodeType：元素类型，如果有这个属性表示是一个 DOM 元素
+        if (!isRealElement && sameVnode(oldVnode, vnode)) { // 表示是 diff 阶段
+          // patch existing root node 修补现有根节点
           patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly);
-        } else {
-          if (isRealElement) {
-            // mounting to a real element
-            // check if this is server-rendered content and if we can perform
-            // a successful hydration.
-            if (oldVnode.nodeType === 1 && oldVnode.hasAttribute(SSR_ATTR)) {
-              oldVnode.removeAttribute(SSR_ATTR);
-              hydrating = true;
+        } else { // 表示是初始渲染或者新旧 vnode 不一致(此时需要删除 oldvnode, 渲染 vnode)
+          if (isRealElement) { // oldVnode 是一个 DOM 元素，表示初次渲染
+            // mounting to a real element 安装到一个真正的元素上
+            // check if this is server-rendered content and if we can perform 检查这是否是服务器渲染的内容，是否可以执行
+            // a successful hydration. 一个成功的水合作用
+            // 表示这个 SSR 渲染
+            if (oldVnode.nodeType === 1 && oldVnode.hasAttribute(SSR_ATTR)) { // 元素 DOM && oldVnode 具有 SSR_ATTR(data-server-rendered) 属性
+              oldVnode.removeAttribute(SSR_ATTR); // 删除 SSR_ATTR 属性
+              hydrating = true; // hydrating 标识置为 true
             }
-            if (isTrue(hydrating)) {
+            if (isTrue(hydrating)) { // hydrating 是否为 true
               if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
                 invokeInsertHook(vnode, insertedVnodeQueue, true);
                 return oldVnode
@@ -6743,24 +6797,24 @@
                 );
               }
             }
-            // either not server-rendered, or hydration failed.
-            // create an empty node and replace it
+            // either not server-rendered, or hydration failed. 要么不是服务器渲染，要么是水合作用失败
+            // create an empty node and replace it 创建一个空节点并替换它
             oldVnode = emptyNodeAt(oldVnode);
           }
 
-          // replacing existing element
-          var oldElm = oldVnode.elm;
-          var parentElm = nodeOps.parentNode(oldElm);
+          // replacing existing element 替换现有的元素
+          var oldElm = oldVnode.elm; // 获取 oldVnode 的元素
+          var parentElm = nodeOps.parentNode(oldElm); // 获取 oldVnode 元素的父元素 - 用于替换元素
 
-          // create new node
+          // create new node 创建新节点
           createElm(
-            vnode,
-            insertedVnodeQueue,
-            // extremely rare edge case: do not insert if old element is in a
-            // leaving transition. Only happens when combining transition +
-            // keep-alive + HOCs. (#4590)
+            vnode, // vnode 
+            insertedVnodeQueue, // 队列 - 用于收集渲染 vnode 的子组件，收集之后统一做一些操作
+            // extremely rare edge case: do not insert if old element is in a 极其罕见的边界情况:如果旧元素在a中，则不要插入
+            // leaving transition. Only happens when combining transition + 离开过渡。只有结合过渡+时才会发生
+            // keep-alive + HOCs. (#4590) keep-alive + HOCs
             oldElm._leaveCb ? null : parentElm,
-            nodeOps.nextSibling(oldElm)
+            nodeOps.nextSibling(oldElm) // 查找 oldElm 的一下节点 - 用于替换节点
           );
 
           // update parent placeholder node element, recursively
@@ -7172,8 +7226,9 @@
 
 
   /* eslint-disable no-unused-vars */
+  // 基础警告函数
   function baseWarn(msg, range) {
-    console.error(("[Vue compiler]: " + msg));
+    console.error(("[Vue compiler]: " + msg)); // 直接打印错误信息
   }
   /* eslint-enable no-unused-vars */
 
@@ -8693,6 +8748,7 @@
   // built-in modules have been applied.
   var modules = platformModules.concat(baseModules);
 
+  // 生成 patch(比较新旧 vnode，生成 dom) 工具方法
   var patch = createPatchFunction({ nodeOps: nodeOps, modules: modules });
 
   /**
@@ -9279,16 +9335,17 @@
   extend(Vue.options.directives, platformDirectives); // 添加全局指令， show 和 model
   extend(Vue.options.components, platformComponents); // 添加全局组件，transition 和 TransitionGroup
 
-  // install platform patch function
-  Vue.prototype.__patch__ = inBrowser ? patch : noop;
+  // install platform patch function 安装平台补丁功能
+  Vue.prototype.__patch__ = inBrowser ? patch : noop; // 比较新旧 vnode，完成 vnode 的渲染成 dom
 
   // public mount method 公共方法 -- 通用 $mount
+  // 平台共用方法 -- 将 render 函数渲染成 vnode，并将其挂载到 el 上
   Vue.prototype.$mount = function (
     el,
     hydrating
   ) {
-    el = el && inBrowser ? query(el) : undefined;
-    return mountComponent(this, el, hydrating)
+    el = el && inBrowser ? query(el) : undefined; // 找到挂载点
+    return mountComponent(this, el, hydrating) // 挂载方法
   };
 
   // devtools global hook
@@ -9835,18 +9892,29 @@
   }
 
   /**
-   * Convert HTML string to AST.
+   * Convert HTML string to AST. 将 HTML字符串转换为 AST
    */
   function parse(
-    template,
-    options
+    template, // 模板字符串
+    options // 选项
   ) {
+    // 警告日志函数
     warn$2 = options.warn || baseWarn;
-
+    // 判断标签是否是 pre 的工具函数
     platformIsPreTag = options.isPreTag || no;
+    /* mustUseProp 校验属性
+     * 1. attr === 'value', tag 必须是 'input,textarea,option,select,progress' 其中一个 type !== 'button'
+     * 2. attr === 'selected' && tag === 'option'
+     * 3. attr === 'checked' && tag === 'input'
+     * 4. attr === 'muted' && tag === 'video'
+     * 的情况下为真
+     * */
     platformMustUseProp = options.mustUseProp || no;
+    // 判断 tag 是否为 svg 或者 math 标签
     platformGetTagNamespace = options.getTagNamespace || no;
+    // 判断指定标签是否为 html 标签 或者 svg 标签
     var isReservedTag = options.isReservedTag || no;
+    // 判断是否为组件标签
     maybeComponent = function (el) { return !!el.component || !isReservedTag(el.tag); };
 
     transforms = pluckModuleFunction(options.modules, 'transformNode');
@@ -10830,17 +10898,17 @@
   };
 
   /*  */
-
+  // web 平台，compile 编译器相关的配置项
   var baseOptions = {
-    expectHTML: true,
-    modules: modules$1,
-    directives: directives$1,
-    isPreTag: isPreTag,
+    expectHTML: true, // 标志 是html -- 说明是 html 文档
+    modules: modules$1, // 为虚拟 dom 添加 staticClass，classBinding，staticStyle，styleBinding，for，alias，iterator1，iterator2，addRawAttr ，type ，key， ref，slotName 或者 slotScope 或者 slot，component 或者 inlineTemplate ，      plain，if ，else，elseif 属性
+    directives: directives$1, // 根据判断虚拟dom的标签类型是什么？给相应的标签绑定 相应的 v-model 双数据绑定代码函数，为虚拟dom添加textContent 属性，为虚拟dom添加innerHTML 属性
+    isPreTag: isPreTag, // 判断标签是否是 pre
     isUnaryTag: isUnaryTag,
-    mustUseProp: mustUseProp,
+    mustUseProp: mustUseProp, // 是否需要通过 attr 添加的属性？
     canBeLeftOpenTag: canBeLeftOpenTag,
-    isReservedTag: isReservedTag,
-    getTagNamespace: getTagNamespace,
+    isReservedTag: isReservedTag, // 判断指定标签是否为 html 标签 或者 svg 标签
+    getTagNamespace: getTagNamespace, // 判断指定 tag 标签是否为 svg 或 math
     staticKeys: genStaticKeys(modules$1)
   };
 
@@ -11728,9 +11796,9 @@
   // strip strings in expressions
   var stripStringRE = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\]|\\.)*`|`(?:[^`\\]|\\.)*`/g;
 
-  // detect problematic expressions in a template
+  // detect problematic expressions in a template 检测模板中有问题的表达式
   function detectErrors(ast, warn) {
-    if (ast) {
+    if (ast) { // ast，
       checkNode(ast, warn);
     }
   }
@@ -11892,12 +11960,12 @@
   /*  */
 
 
-
+  // 将 code 转化为函数形式 - 用于将 render 字符串函数转换为函数形式
   function createFunction(code, errors) {
     try {
       return new Function(code)
     } catch (err) {
-      errors.push({ err: err, code: code });
+      errors.push({ err: err, code: code }); // 如果转化出错，则将其推入 errors 集合中
       return noop
     }
   }
@@ -11909,24 +11977,33 @@
    *  4. 打印编译错误，包括：模板字符串 -> 渲染函数字符串 以及 渲染函数字符串 -> 渲染函数 这两个阶段的错误
    */
   function createCompileToFunctionFn(compile) {
-    var cache = Object.create(null);
+    var cache = Object.create(null); // 缓存
 
+    // 实现编译，将字符串 template 模板转化为 render 函数和 ast 分析
     return function compileToFunctions(
-      template,
-      options,
-      vm
+      template, // 模板字符串
+      options, // 配置参数
+      vm // 实例
     ) {
-      options = extend({}, options);
-      var warn$$1 = options.warn || warn;
-      delete options.warn;
+      options = extend({}, options); // 合并选项
+      var warn$$1 = options.warn || warn; // 发出警告方法
+      delete options.warn; // 删除 options 中的警告方法
 
       /* istanbul ignore if */
+      // 检测可能的CSP限制 -- 内容安全策略 (CSP)
       {
-        // detect possible CSP restriction
+        // detect possible CSP restriction 检测可能的CSP限制 -- 内容安全策略 (CSP)
         try {
-          new Function('return 1');
+          new Function('return 1'); // 检测是否能够使用 Function 创建函数
         } catch (e) {
           if (e.toString().match(/unsafe-eval|CSP/)) {
+            /**
+             * '看起来你是在' +中使用Vue.js的独立构建
+             * '带有禁止不安全eval的内容安全策略的环境。' +
+             * '模板编译器不能在这种环境下工作。考虑' +
+             * 放松政策，允许不安全eval或预编译你的' +
+             * “模板到渲染函数。”
+             */
             warn$$1(
               'It seems you are using the standalone build of Vue.js in an ' +
               'environment with Content Security Policy that prohibits unsafe-eval. ' +
@@ -11938,23 +12015,23 @@
         }
       }
 
-      // check cache
-      var key = options.delimiters
+      // check cache 检查缓存
+      var key = options.delimiters // 是否改变了纯文本插入分隔符。
         ? String(options.delimiters) + template
         : template;
-      if (cache[key]) {
-        return cache[key]
+      if (cache[key]) { // 是否已经换成过了
+        return cache[key] // 如果已有缓存，则直接将其返回
       }
 
-      // compile
+      // compile 使用 compile 进行编译 -- 使用 createCompilerCreator 方法返回的 createCompiler 方法内定义的 compile 编译器
       var compiled = compile(template, options);
 
-      // check compilation errors/tips
+      // check compilation errors/tips 检查编译 错误/提示
       {
-        if (compiled.errors && compiled.errors.length) {
-          if (options.outputSourceRange) {
+        if (compiled.errors && compiled.errors.length) { // 是否存在错误
+          if (options.outputSourceRange) { // 是否将错误位置报告出来
             compiled.errors.forEach(function (e) {
-              warn$$1(
+              warn$$1( // 
                 "Error compiling template:\n\n" + (e.msg) + "\n\n" +
                 generateCodeFrame(template, e.start, e.end),
                 vm
@@ -11968,7 +12045,7 @@
             );
           }
         }
-        if (compiled.tips && compiled.tips.length) {
+        if (compiled.tips && compiled.tips.length) { // 是否存在提示信息，并且将提示信息打印出来
           if (options.outputSourceRange) {
             compiled.tips.forEach(function (e) { return tip(e.msg, vm); });
           } else {
@@ -11977,20 +12054,20 @@
         }
       }
 
-      // turn code into functions
+      // turn code into functions 将代码转换为函数
       var res = {};
-      var fnGenErrors = [];
-      res.render = createFunction(compiled.render, fnGenErrors);
-      res.staticRenderFns = compiled.staticRenderFns.map(function (code) {
+      var fnGenErrors = []; // 转化函数出错队列
+      res.render = createFunction(compiled.render, fnGenErrors); // 转换成 render 函数形式
+      res.staticRenderFns = compiled.staticRenderFns.map(function (code) { // 将 staticRenderFns 转化
         return createFunction(code, fnGenErrors)
       });
 
-      // check function generation errors.
-      // this should only happen if there is a bug in the compiler itself.
-      // mostly for codegen development use
+      // check function generation errors. 检查函数生成错误
+      // this should only happen if there is a bug in the compiler itself. 只有在编译器本身存在错误时才应该这样做
+      // mostly for codegen development use 主要用于代码生成器开发
       /* istanbul ignore if */
       {
-        if ((!compiled.errors || !compiled.errors.length) && fnGenErrors.length) {
+        if ((!compiled.errors || !compiled.errors.length) && fnGenErrors.length) { // 检查是否存在函数生成错误
           warn$$1(
             "Failed to generate render function:\n\n" +
             fnGenErrors.map(function (ref) {
@@ -12004,7 +12081,7 @@
         }
       }
 
-      return (cache[key] = res)
+      return (cache[key] = res) // 将其缓存并返回其编译结果
     }
   }
 
@@ -12021,25 +12098,25 @@
        * 3. 调用 baseCompile 编译模板，生成 ast，errors，render，tips,staticRenderFns 信息
        */
       function compile(
-        template,
-        options
+        template, // 模板字符串
+        options // 配置项
       ) {
-        var finalOptions = Object.create(baseOptions);
-        var errors = [];
-        var tips = [];
+        var finalOptions = Object.create(baseOptions); // 生成一个继承 baseOptions 的对象，用于最终的配置项
+        var errors = []; // 错误队列
+        var tips = []; // 提示队列
 
-        var warn = function (msg, range, tip) {
-          (tip ? tips : errors).push(msg);
+        var warn = function (msg, range, tip) { // 添加错误 或 提示信息队列
+          (tip ? tips : errors).push(msg); // 判断 tip 是否存在，用于判断是错误信息还是提示信息
         };
 
         if (options) {
-          if (options.outputSourceRange) {
+          if (options.outputSourceRange) { // 这里是处理什么呢？ -- 应该是需要完善解析错误的位置信息
             // $flow-disable-line
             var leadingSpaceLength = template.match(/^\s*/)[0].length;
 
-            warn = function (msg, range, tip) {
+            warn = function (msg, range, tip) { // 添加错误位置记录
               var data = { msg: msg };
-              if (range) {
+              if (range) { // 记录模板解析的位置(start 开始位置、end 结束位置)
                 if (range.start != null) {
                   data.start = range.start + leadingSpaceLength;
                 }
@@ -12050,34 +12127,34 @@
               (tip ? tips : errors).push(data);
             };
           }
-          // merge custom modules
+          // merge custom modules 合并定制模块 -- 应该是依据不同平台合并不同编译选项
           if (options.modules) {
             finalOptions.modules =
               (baseOptions.modules || []).concat(options.modules);
           }
-          // merge custom directives
+          // merge custom directives 合并定制指令 -- 应该是依据不同平台合并不同编译选项
           if (options.directives) {
             finalOptions.directives = extend(
               Object.create(baseOptions.directives || null),
               options.directives
             );
           }
-          // copy other options
+          // copy other options 复制其他选项
           for (var key in options) {
             if (key !== 'modules' && key !== 'directives') {
-              finalOptions[key] = options[key];
+              finalOptions[key] = options[key]; // 将 options 其他选项复制到 finalOptions 中
             }
           }
         }
 
-        finalOptions.warn = warn;
+        finalOptions.warn = warn; // 添加 warn 工具函数
 
-        var compiled = baseCompile(template.trim(), finalOptions);
+        var compiled = baseCompile(template.trim(), finalOptions); // 通过 baseCompile 基础编译器来进行编译
         {
-          detectErrors(compiled.ast, warn);
+          detectErrors(compiled.ast, warn); // 检测 ast 中存在问题的表达式，并用 warn 推入 错误或提示 队列中
         }
-        compiled.errors = errors;
-        compiled.tips = tips;
+        compiled.errors = errors; // 错误队列
+        compiled.tips = tips; // 提示队列
         return compiled
       }
 
@@ -12099,21 +12176,21 @@
     // 返回一个对象：
     // { ast: ast // ast模板, 
     //   render: code.render // code 虚拟 DOM 需要渲染的参数函数,
-    //   staticRenderFns: code.staticRenderFns // 空数组
+    //   staticRenderFns: code.staticRenderFns // 空数组 - 表示 v-once 指令的，只渲染一次的 vdom
     // }
     function baseCompile(
       template, // 模板
       options // 解析参数
     ) {
-      var ast = parse(template.trim(), options); // 生成 ast 模板
+      var ast = parse(template.trim(), options); // 生成 ast 模板 -- 这里暂时跳过一下，内容有点多
       if (options.optimize !== false) { // optimize 的主要作用是标记 static 静态节点
         optimize(ast, options); // 优化器：循环递归虚拟node，标记是不是静态节点 - 根据node.static或者 node.once 标记staticRoot的状态
       }
-      var code = generate(ast, options);
+      var code = generate(ast, options); // 生成 render 函数字符串以及 staticRenderFns(表示 v-once 指令的，只渲染一次的 vdom)
       return {
-        ast: ast,
-        render: code.render,
-        staticRenderFns: code.staticRenderFns
+        ast: ast, // 解析的 sat
+        render: code.render, // 渲染函数字符串
+        staticRenderFns: code.staticRenderFns // 只渲染元素和组件一次。随后的重新渲染，元素/组件及其所有的子节点将被视为静态内容并跳过。这可以用于优化更新性能。
       }
     });
 
@@ -12206,7 +12283,11 @@
           mark('compile');
         }
 
-        // 这下面就是另一个难点 -- 生成 render 方法
+        // 这下面就是另一个难点 -- 生成 render 方法 --暂时跳过部分
+        // 总结一下：就是通过不同平台的配置项，利用 baseCompile 编译器将 template 进行编译成如下格式内容
+        // { render: f render, // render 函数
+        //   staticRenderFns: [ƒ anonymous( ),...] // 通过 v-once 只渲染元素和组件一次。
+        // }
         var ref = compileToFunctions(template, { // 模板字符串
           outputSourceRange: "development" !== 'production',
           shouldDecodeNewlines: shouldDecodeNewlines, // IE在属性值中编码换行，而其他浏览器不这样做
@@ -12214,19 +12295,20 @@
           delimiters: options.delimiters, // 改变纯文本插入分隔符。修改指令的书写风格，比如默认是{{mgs}}  delimiters: ['${', '}']之后变成这样 ${mgs}
           comments: options.comments // 当设为 true 时，将会保留且渲染模板中的 HTML 注释。默认行为是舍弃它们。
         }, this);
-        var render = ref.render;
-        var staticRenderFns = ref.staticRenderFns;
-        options.render = render;
-        options.staticRenderFns = staticRenderFns;
+        var render = ref.render; // render 渲染函数
+        var staticRenderFns = ref.staticRenderFns; // 只渲染一次的节点
+        options.render = render; // 添加到 options 上 -- 这样的话，同时也会添加到 vm.$options，因为在上面，options 引用的是 vm.$options
+        options.staticRenderFns = staticRenderFns; // 添加到 options 上 -- 这样的话，同时也会添加到 vm.$options，因为在上面，options 引用的是 vm.$options
 
         /* istanbul ignore if */
+        // 性能追踪结束
         if (config.performance && mark) {
           mark('compile end');
           measure(("vue " + (this._name) + " compile"), 'compile', 'compile end');
         }
       }
     }
-    return mount.call(this, el, hydrating)
+    return mount.call(this, el, hydrating) // 这里应该是生成真实 dom，并且将其挂载到 el 上
   };
 
   /**
