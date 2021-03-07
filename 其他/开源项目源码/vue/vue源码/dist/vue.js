@@ -36,7 +36,7 @@
   }
 
   /**
-   * Check if value is primitive.
+   * Check if value is primitive. 检查 value 是否为 基础类型(string, number, symbol, boolean)
    */
   function isPrimitive(value) {
     return (
@@ -76,6 +76,7 @@
     return _toString.call(obj) === '[object Object]'
   }
 
+  // 检查指定值是否为 正则
   function isRegExp(v) {
     return _toString.call(v) === '[object RegExp]'
   }
@@ -1987,6 +1988,7 @@
     }
   }
 
+  // 在指定上下文中执行函数，并且处理错误信息
   function invokeWithErrorHandling(
     handler, // 执行函数
     context, // 上下文
@@ -2305,77 +2307,80 @@
     }
   }
 
-  /*  */
-
+  // 从指定 name 中提取对应事件特性，应该是 vue 内部使用的，表示事件特性
+  // 例如 @onTest.passive.once="ceshi" 这样注册事件，vue 内部会将其名称转化为 &~ontest 表示其特性
   var normalizeEvent = cached(function (name) {
     var passive = name.charAt(0) === '&';
-    name = passive ? name.slice(1) : name;
-    var once$$1 = name.charAt(0) === '~'; // Prefixed last, checked first
-    name = once$$1 ? name.slice(1) : name;
+    name = passive ? name.slice(1) : name; // 如果 name 开头是 &，则去除 &
+    var once$$1 = name.charAt(0) === '~'; // Prefixed last, checked first 最后加前缀，先检查
+    name = once$$1 ? name.slice(1) : name; // 如果 name 开头是 ~，则去除 ~
     var capture = name.charAt(0) === '!';
-    name = capture ? name.slice(1) : name;
+    name = capture ? name.slice(1) : name; // 如果 name 开头是 !，则去除 !
     return {
-      name: name,
-      once: once$$1,
-      capture: capture,
-      passive: passive
+      name: name, // 提取原本的 name
+      once: once$$1, // 开头是 ~ 的表示 once 特性 -- 只触发一次回调
+      capture: capture,　// 开头是 ! 的表示 capture 特性 -- 添加事件侦听器时使用 capture 模式
+      passive: passive // 开头是 & 的表示 passive 特性 -- 以 { passive: true } 模式添加侦听器
     }
   });
 
+  // 对传入的 fns 进行额外处理 - 执行回调时的 this 绑定等等
   function createFnInvoker(fns, vm) {
-    function invoker() {
-      var arguments$1 = arguments;
+    function invoker() { // 这才是到时执行的方法
+      var arguments$1 = arguments; // 获取参数
 
-      var fns = invoker.fns;
-      if (Array.isArray(fns)) {
-        var cloned = fns.slice();
-        for (var i = 0; i < cloned.length; i++) {
-          invokeWithErrorHandling(cloned[i], null, arguments$1, vm, "v-on handler");
+      var fns = invoker.fns; // 提取回调
+      if (Array.isArray(fns)) { // 如果是数组
+        var cloned = fns.slice(); // 复制副本
+        for (var i = 0; i < cloned.length; i++) { // 遍历执行
+          invokeWithErrorHandling(cloned[i], null, arguments$1, vm, "v-on handler"); // 执行函数
         }
       } else {
         // return handler return value for single handlers
-        return invokeWithErrorHandling(fns, null, arguments, vm, "v-on handler")
+        return invokeWithErrorHandling(fns, null, arguments, vm, "v-on handler") // 直接执行单个回调
       }
     }
-    invoker.fns = fns;
-    return invoker
+    invoker.fns = fns; // 将回调传入 fns 中， fns 可以是数组 -- 这样可以在更新事件的时候直接替换这个属性即可，并且可以追加事件
+    return invoker // 返回封装了的函数
   }
 
+  // 添加事件的方法 -- 通过传入的 add 和 remove$$1 方法来进行增删事件
   function updateListeners(
-    on,
-    oldOn,
-    add,
-    remove$$1,
-    createOnceHandler,
-    vm
+    on, // 事件
+    oldOn, // 旧事件
+    add, // 添加事件方法
+    remove$$1, // 删除事件方法
+    createOnceHandler, // 添加执行一次事件
+    vm  // 实例
   ) {
     var name, def$$1, cur, old, event;
-    for (name in on) {
-      def$$1 = cur = on[name];
-      old = oldOn[name];
-      event = normalizeEvent(name);
-      if (isUndef(cur)) {
-        warn(
+    for (name in on) { // 遍历事件
+      def$$1 = cur = on[name]; // 提取事件
+      old = oldOn[name]; // 判断是否存在旧事件
+      // 例如 @onTest.passive.once="ceshi" 这样注册事件，vue 内部会将其名称转化为 &~ontest 表示其特性
+      event = normalizeEvent(name); // 提取出事件特性，以及事件名称
+      if (isUndef(cur)) { // 如果没有注册其具体事件
+        warn( // 发出警告
           "Invalid handler for event \"" + (event.name) + "\": got " + String(cur),
           vm
         );
-      } else if (isUndef(old)) {
-        if (isUndef(cur.fns)) {
-          cur = on[name] = createFnInvoker(cur, vm);
+      } else if (isUndef(old)) { // 如果不存在旧事件，说明是新增事件
+        if (isUndef(cur.fns)) { // 该事件没有进行内部转化，传入的方法名需要进行 this 绑定以及内部额外处理
+          cur = on[name] = createFnInvoker(cur, vm); // 对 cur 回调进行额外处理
         }
-        if (isTrue(event.once)) {
-          cur = on[name] = createOnceHandler(event.name, cur, event.capture);
+        if (isTrue(event.once)) { // 是否是添加一次性回调
+          cur = on[name] = createOnceHandler(event.name, cur, event.capture); // 通过 createOnceHandler 传入方法添加一次性回调
         }
-        add(event.name, cur, event.capture, event.passive, event.params);
-      } else if (cur !== old) {
-        old.fns = cur;
-        on[name] = old;
+        add(event.name, cur, event.capture, event.passive, event.params); // 添加事件
+      } else if (cur !== old) { // 如果存在新旧事件，说明是更新事件
+        old.fns = cur; // 此时说明 old 事件是经过 createFnInvoker 处理，只需要将 fns 替换即可
+        on[name] = old; // 添加进 on 对象中，因为在下面还要对新旧事件的比对，去除多余旧事件
       }
     }
-    for (name in oldOn) {
-      if (isUndef(on[name])) {
+    for (name in oldOn) { // 遍历旧事件
+      if (isUndef(on[name])) { // 此时说明事件已经失效
         event = normalizeEvent(name);
-        remove$$1(event.name, oldOn[name], event.capture);
+        remove$$1(event.name, oldOn[name], event.capture); // 删除事件
       }
     }
   }
@@ -3261,22 +3266,27 @@
 
   /*  */
 
-  // inline hooks to be invoked on component VNodes during patch
+  // inline hooks to be invoked on component VNodes during patch 补丁期间在组件 vnode 上调用的内联钩子
+  // 子组件的构建钩子
   var componentVNodeHooks = {
+    // 初始化组件钩子
     init: function init(vnode, hydrating) {
       if (
-        vnode.componentInstance &&
-        !vnode.componentInstance._isDestroyed &&
-        vnode.data.keepAlive
+        vnode.componentInstance && // 是否已经实例化过
+        !vnode.componentInstance._isDestroyed && // 没有被销毁过
+        vnode.data.keepAlive // 被 keepAlive 缓存的
       ) {
-        // kept-alive components, treat as a patch
-        var mountedNode = vnode; // work around flow
+        // kept-alive components, treat as a patch 将保持活力的组件视为补丁
+        var mountedNode = vnode; // work around flow 工作流程
         componentVNodeHooks.prepatch(mountedNode, mountedNode);
       } else {
+        // 创建子组件，并将其挂载到 componentInstance 属性上
         var child = vnode.componentInstance = createComponentInstanceForVnode(
           vnode,
-          activeInstance
+          activeInstance // 当前渲染的组件 - 在这里，子组件还没有开始渲染，这里引用的就是子组件的父组件
         );
+        // 在这里，已经创建好了子组件实例，但是没有挂载，需要手动挂载
+        // 手动调用 $mount，大致为通过 vm._render() 生成 vnode 和 vm._update() 将 vnode 生成 dom 的过程，并且通过 new Wathcer 观察这个过程，收集依赖
         child.$mount(hydrating ? vnode.elm : undefined, hydrating);
       }
     },
@@ -3428,20 +3438,21 @@
   }
 
   function createComponentInstanceForVnode(
-    vnode, // we know it's MountedComponentVNode but flow doesn't
-    parent // activeInstance in lifecycle state
+    vnode, // we know it's MountedComponentVNode but flow doesn't 我们知道它是MountedComponentVNode，但流不知道
+    parent // activeInstance in lifecycle state 处于生命周期状态的 activeInstance -- 当前渲染组件的父组件
   ) {
     var options = {
-      _isComponent: true,
-      _parentVnode: vnode,
-      parent: parent
+      _isComponent: true, // 表示是一个组件
+      _parentVnode: vnode, // 组件 vnode
+      parent: parent // 父组件
     };
-    // check inline-template render functions
+    // check inline-template render functions 检查内联模板渲染函数
     var inlineTemplate = vnode.data.inlineTemplate;
-    if (isDef(inlineTemplate)) {
+    if (isDef(inlineTemplate)) { // 是否是内联模板
       options.render = inlineTemplate.render;
       options.staticRenderFns = inlineTemplate.staticRenderFns;
     }
+    // vnode.componentOptions.Ctor 引用的是子组件的构造函数，在创建 VNode 的时候会通过 Vue.extend(options) 来创建
     return new vnode.componentOptions.Ctor(options)
   }
 
@@ -3642,7 +3653,9 @@
     vm._vnode = null; // the root of the child tree 子树的根
     vm._staticTrees = null; // v-once cached trees v-once 缓存的树
     var options = vm.$options; // 提取出 options 参数
+    // 子组件表示的组件 VNode
     var parentVnode = vm.$vnode = options._parentVnode; // the placeholder node in parent tree 父树中的占位符节点
+    // 子组件的组件 VNode 的渲染上下文(不是当前组件渲染的上下文)
     var renderContext = parentVnode && parentVnode.context;
     // 解决插槽问题
     vm.$slots = resolveSlots(options._renderChildren, renderContext);
@@ -3688,10 +3701,10 @@
       var vm = this; // 组件实例
       var ref = vm.$options; // options 配置参数
       var render = ref.render; // render 渲染函数
-      var _parentVnode = ref._parentVnode;
+      var _parentVnode = ref._parentVnode; // 如果是子组件，表示子组件的组件 VNode
 
-      if (_parentVnode) { // 
-        vm.$scopedSlots = normalizeScopedSlots(
+      if (_parentVnode) { // 是子组件的话
+        vm.$scopedSlots = normalizeScopedSlots( // 处理插槽
           _parentVnode.data.scopedSlots,
           vm.$slots,
           vm.$scopedSlots
@@ -3700,7 +3713,7 @@
 
       // set parent vnode. this allows render functions to have access 设置父vnode。这允许渲染函数具有访问权限
       // to the data on the placeholder node. 到占位符节点上的数据
-      vm.$vnode = _parentVnode; // $vnode 引用着父组件的 Vnode
+      vm.$vnode = _parentVnode; // $vnode 引用着子组件的 组件Vnode
       // render self 渲染自己
       var vnode;
       try {
@@ -3743,7 +3756,7 @@
         vnode = createEmptyVNode(); // 定义一个空的 VNode
       }
       // set parent 设置父
-      vnode.parent = _parentVnode; // 在 vnode 上设置引用 _parentVnode
+      vnode.parent = _parentVnode; // 在 vnode 上设置引用 _parentVnode(表示组件的 VNode)
       return vnode // 返回生成的 vnode
     };
   }
@@ -3925,40 +3938,45 @@
     vm._events = Object.create(null); // 为实例添加 _events 私有属性，保存着 event 事件
     vm._hasHookEvent = false; // 一个标识，用于标识是否通过类似 @hook:create 方式监听子组件的生命周期
     // init parent attached events 初始化父附加事件
-    var listeners = vm.$options._parentListeners;
-    if (listeners) {
-      updateComponentListeners(vm, listeners);
+    var listeners = vm.$options._parentListeners; // 父组件传入的事件
+    if (listeners) { // 父组件是否传入了事件
+      updateComponentListeners(vm, listeners); // 处理自定义事件
     }
   }
 
-  var target;
+  var target; // 当前添加对象
 
+  // 添加事件
   function add(event, fn) {
     target.$on(event, fn);
   }
 
+  // 删除事件
   function remove$1(event, fn) {
     target.$off(event, fn);
   }
 
+  // 给指定 target 添加一次性回调
   function createOnceHandler(event, fn) {
-    var _target = target;
+    var _target = target; // 缓存 target，应该需要这个来进行事件的解绑
     return function onceHandler() {
-      var res = fn.apply(null, arguments);
+      var res = fn.apply(null, arguments); // 执行回调
       if (res !== null) {
-        _target.$off(event, onceHandler);
+        _target.$off(event, onceHandler); // 利用 $off 解绑事件
       }
     }
   }
 
+  // 新增 或 更新自定义事件
   function updateComponentListeners(
-    vm,
-    listeners,
-    oldListeners
+    vm, // 组件实例
+    listeners, // 事件
+    oldListeners // 旧事件 -- 应该在 picth 阶段删除旧事件
   ) {
-    target = vm;
-    updateListeners(listeners, oldListeners || {}, add, remove$1, createOnceHandler, vm);
-    target = undefined;
+    target = vm; // 添加目标
+    // listeners：事件，oldListeners：旧事件，add：添加事件方法，remove$1：删除事件方法，createOnceHandler：添加执行一次事件，vm：实例
+    updateListeners(listeners, oldListeners || {}, add, remove$1, createOnceHandler, vm); // 添加事件
+    target = undefined; // 重置目标
   }
 
   // 添加原型方法 $on, $once, $off, $emit
@@ -4058,13 +4076,13 @@
 
   /*  */
 
-  var activeInstance = null;
+  var activeInstance = null; // 当前组件的引用
   var isUpdatingChildComponent = false;
-
+  // 设置当前渲染的组件实例
   function setActiveInstance(vm) {
-    var prevActiveInstance = activeInstance;
-    activeInstance = vm;
-    return function () {
+    var prevActiveInstance = activeInstance; // 保存当前组件渲染的实例
+    activeInstance = vm; // 重新设置当前渲染组件
+    return function () { // 返回一个函数，用于将渲染组件实例重置
       activeInstance = prevActiveInstance;
     }
   }
@@ -4118,20 +4136,20 @@
         // updates
         vm.$el = vm.__patch__(prevVnode, vnode);
       }
-      restoreActiveInstance();
-      // update __vue__ reference
+      restoreActiveInstance(); // 调用方法，将全局渲染组件的引用重置为上一个渲染组件，退出当前组件的渲染
+      // update __vue__ reference 更新__vue__参考
       if (prevEl) {
-        prevEl.__vue__ = null;
+        prevEl.__vue__ = null; // 如果存在上一个 dom 引用，将 __vue__ 属性置为 null
       }
-      if (vm.$el) {
-        vm.$el.__vue__ = vm;
+      if (vm.$el) { // 如果 vm.$el 存在
+        vm.$el.__vue__ = vm; // 则添加 vm.$el.__vue__ 引用 vm 实例
       }
-      // if parent is an HOC, update its $el as well
+      // if parent is an HOC, update its $el as well 如果parent是HOC，也更新它的$el
       if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
         vm.$parent.$el = vm.$el;
       }
-      // updated hook is called by the scheduler to ensure that children are
-      // updated in a parent's updated hook.
+      // updated hook is called by the scheduler to ensure that children are 更新的钩子被调度程序调用，以确保子钩子
+      // updated in a parent's updated hook. 在父节点的更新钩子中更新
     };
 
     // 添加原型方法 $forceUpdate
@@ -4187,7 +4205,7 @@
     };
   }
 
-  // 生成 vnode，挂载 DOM
+  // 生成 vnode，挂载 DOM -- 子组件一路走来也是在这里挂载 DOM
   function mountComponent(
     vm, // 实例
     el, // 挂载点 DOM
@@ -5214,10 +5232,13 @@
       // a flag to avoid this being observed 一个避免被观察到的标志
       vm._isVue = true;
       // merge options 合并选项
-      if (options && options._isComponent) { // _isComponent 应该是标识子组件的
-        // optimize internal component instantiation
-        // since dynamic options merging is pretty slow, and none of the
-        // internal component options needs special treatment.
+      if (options && options._isComponent) { // _isComponent 是标识子组件的
+        // optimize internal component instantiation 优化内部组件实例化
+        // since dynamic options merging is pretty slow, and none of the 因为动态选项合并是非常缓慢的，而且没有
+        // internal component options needs special treatment. 内部组件选项需要特殊处理
+        // 在子组件，组件定义的 options 在创建构造器时，就会存储在 vm.constructor.options 中进行处理，就不需要再次处理
+        // 而且在通过 Vue.extend(options) 创建构造器时，已经将结果进行缓存处理，这样多个相同组件引用的是同一个构造器
+        // 在这里通过 vm.$options.prototype 引用的是 vm.constructor.options 即组件定义数据
         initInternalComponent(vm, options);
       } else {
         // 合并选项至 $options, 最终这个组件的配置项 $options 中
@@ -5266,22 +5287,28 @@
     };
   }
 
+  // 初始化子组件的 options
   function initInternalComponent(vm, options) {
-    var opts = vm.$options = Object.create(vm.constructor.options);
-    // doing this because it's faster than dynamic enumeration.
-    var parentVnode = options._parentVnode;
-    opts.parent = options.parent;
-    opts._parentVnode = parentVnode;
+    var opts = vm.$options = Object.create(vm.constructor.options); //  创建一个继承 vm.constructor.options 的对象
+    // var options = {
+    //    _isComponent: true, //是否是组件
+    //    parent: parent, //组件的父节点
+    //    _parentVnode: vnode, //组件的 虚拟vonde 父节点
+    // }
+    // doing this because it's faster than dynamic enumeration. 这样做是因为它比动态枚举更快
+    var parentVnode = options._parentVnode; // 这个标识子组件的组件 VNode
+    opts.parent = options.parent; // 父组件引用
+    opts._parentVnode = parentVnode; // 子组件组件 VNode 引用
 
-    var vnodeComponentOptions = parentVnode.componentOptions;
-    opts.propsData = vnodeComponentOptions.propsData;
-    opts._parentListeners = vnodeComponentOptions.listeners;
-    opts._renderChildren = vnodeComponentOptions.children;
-    opts._componentTag = vnodeComponentOptions.tag;
+    var vnodeComponentOptions = parentVnode.componentOptions; // 子组件的 Vnode 中存着一部分的属性：parentVnode.componentOptions
+    opts.propsData = vnodeComponentOptions.propsData; // 提取出 propsData
+    opts._parentListeners = vnodeComponentOptions.listeners; // 提取出 listeners
+    opts._renderChildren = vnodeComponentOptions.children; // 组件子节点？
+    opts._componentTag = vnodeComponentOptions.tag; // 组件名称(tag)
 
-    if (options.render) {
-      opts.render = options.render;
-      opts.staticRenderFns = options.staticRenderFns;
+    if (options.render) { // 是否定义了 render 函数
+      opts.render = options.render; // 提取出 render 函数
+      opts.staticRenderFns = options.staticRenderFns; // 提取出 render 函数
     }
   }
 
@@ -5391,83 +5418,100 @@
     var cid = 1;
 
     /**
-     * Class inheritance
+     * Class inheritance 类继承
+     * 作用：创建组件的构造器
+     * 使用基础 Vue 构造器，创建一个“子类”。参数是一个包含组件选项的对象。合并继承new 实例化中的拓展参数或者是用户直接使用Vue.extend 的拓展参数。
+     * 把对象转义成组件构造函数。创建一个sub类 构造函数是VueComponent，合并options参数，
+     * 把props属性和计算属性添加到观察者中。//如果组件含有名称 则 把这个对象存到 组件名称中, 
+     * 在options拓展参数的原型中能获取到该数据Sub.options.components[name] = Sub 简称Ctor，
+     * 返回该构造函数
      */
     Vue.extend = function (extendOptions) {
-      extendOptions = extendOptions || {};
-      var Super = this;
-      var SuperId = Super.cid;
-      var cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {});
-      if (cachedCtors[SuperId]) {
+      extendOptions = extendOptions || {}; // 配置项
+      var Super = this; // 父类引用
+      var SuperId = Super.cid; // 父类 ID
+      // 如果通过 extendOptions 同一配置参数进行多次 extend 时，就可以进行缓存，返回同一个子类
+      var cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {}); // 在 _Ctor 中缓存
+      if (cachedCtors[SuperId]) { // 查找是否已经缓存过
         return cachedCtors[SuperId]
       }
 
-      var name = extendOptions.name || Super.options.name;
-      if (name) {
+      var name = extendOptions.name || Super.options.name; // 组件名称
+      if (name) { // 验证组件名称
         validateComponentName(name);
       }
-
+      // 创建子类
       var Sub = function VueComponent(options) {
+        // 子组件初始化操作
         this._init(options);
       };
-      Sub.prototype = Object.create(Super.prototype);
-      Sub.prototype.constructor = Sub;
-      Sub.cid = cid++;
-      Sub.options = mergeOptions(
+      Sub.prototype = Object.create(Super.prototype); // 子类继承父类
+      Sub.prototype.constructor = Sub; // 修正 constructor 指针
+      Sub.cid = cid++; // id 递增
+      Sub.options = mergeOptions( // 合并选项至 Sub.options 中
         Super.options,
         extendOptions
       );
-      Sub['super'] = Super;
+      Sub['super'] = Super; // 引用父类
 
-      // For props and computed properties, we define the proxy getters on
-      // the Vue instances at extension time, on the extended prototype. This
-      // avoids Object.defineProperty calls for each instance created.
+      // For props and computed properties, we define the proxy getters on 对于道具和计算属性，我们在上定义代理getter
+      // the Vue instances at extension time, on the extended prototype. This 扩展时，在扩展原型上的Vue实例。这
+      // avoids Object.defineroperty calls for each instance created. 避免对创建的每个实例调用Object.defineProperty
+      /**
+       * 下面两个的目的，不是在于直接初始化 props 和 computed，响应式的相关操作还是通过初始化组件时完成
+       * 在这里只是简单的将 props 和 computed 的 key 全部附加到 Sbu.prototype 上，这样这个构造器每个 new 出来的子组件都引用这一个 Sbu.prototype
+       * 避免对创建的每个实例都调用 Object.defineProperty 浪费性能
+       * 在初始化组件过程中，初始化这些选项时，最后有一个条件 if (!(key in vm)) { proxy(vm, "_props", key) }
+       * 这样就避免了对 Sub.options 上的选项重新赋值
+       */
       if (Sub.options.props) {
-        initProps$1(Sub);
+        initProps$1(Sub); // 在 Sub.prototype 上定义 props 的 key
       }
-      if (Sub.options.computed) {
-        initComputed$1(Sub);
+      if (Sub.options.computed) { // 处理 computed
+        initComputed$1(Sub); // 初始化子组件构造器上的 computed 选项 -- 只通过 defineComputed 在 Comp.prototype 上添加 computed 的 key
       }
 
-      // allow further extension/mixin/plugin usage
-      Sub.extend = Super.extend;
-      Sub.mixin = Super.mixin;
-      Sub.use = Super.use;
+      // allow further extension/mixin/plugin usage 允许进一步使用扩展/mixin/plugin
+      Sub.extend = Super.extend; // 继承 extend 方法
+      Sub.mixin = Super.mixin; // 继承 mixin 方法
+      Sub.use = Super.use; // 继承 use 方法
 
-      // create asset registers, so extended classes
-      // can have their private assets too.
+      // create asset registers, so extended classes 创建资产注册，即扩展类
+      // can have their private assets too. 也能拥有自己的私人资产吗
       ASSET_TYPES.forEach(function (type) {
-        Sub[type] = Super[type];
+        Sub[type] = Super[type]; // 资源 - 组件，指令，过滤器
       });
-      // enable recursive self-lookup
+      // enable recursive self-lookup 使递归 self-lookup
       if (name) {
-        Sub.options.components[name] = Sub;
+        Sub.options.components[name] = Sub; //保存引用
       }
 
-      // keep a reference to the super options at extension time.
-      // later at instantiation we can check if Super's options have
-      // been updated.
-      Sub.superOptions = Super.options;
-      Sub.extendOptions = extendOptions;
-      Sub.sealedOptions = extend({}, Sub.options);
+      // keep a reference to the super options at extension time. 在扩展时间保持对超级选项的引用
+      // later at instantiation we can check if Super's options have 稍后在实例化时，我们可以检查Super的选项是否有
+      // been updated. 被更新
+      Sub.superOptions = Super.options; // 保存 父类的 options -- 上面的注释可得知，是为了防止更新
+      Sub.extendOptions = extendOptions; // 都要保存
+      Sub.sealedOptions = extend({}, Sub.options); // 
 
-      // cache constructor
+      // cache constructor 缓存的构造函数
       cachedCtors[SuperId] = Sub;
       return Sub
     };
   }
 
+  // 初始化子组件构造器上的 props 选项
   function initProps$1(Comp) {
-    var props = Comp.options.props;
+    var props = Comp.options.props; // 获取 props
     for (var key in props) {
-      proxy(Comp.prototype, "_props", key);
+      proxy(Comp.prototype, "_props", key); // 在 Comp.prototype 上访问 props 的 key 实际上是访问 _props.key
     }
   }
 
+  // 初始化子组件构造器上的 computed 选项 
   function initComputed$1(Comp) {
     var computed = Comp.options.computed;
     for (var key in computed) {
-      defineComputed(Comp.prototype, key, computed[key]);
+      defineComputed(Comp.prototype, key, computed[key]); // 只通过 defineComputed 在 Comp.prototype 上添加 computed 的 key
     }
   }
 
@@ -5908,22 +5952,23 @@
     }
   }
 
+  // 检查指定标签是否为未知标签(也就是不合法标签) -- 未知标签返回 true
   var unknownElementCache = Object.create(null);
   function isUnknownElement(tag) {
     /* istanbul ignore if */
-    if (!inBrowser) {
-      return true
+    if (!inBrowser) { // 不是浏览器环境
+      return true // 未知标签
     }
-    if (isReservedTag(tag)) {
-      return false
+    if (isReservedTag(tag)) { //　检查是否是 html 或 svg 标签
+      return false // 是合法标签
     }
-    tag = tag.toLowerCase();
+    tag = tag.toLowerCase(); // 小写
     /* istanbul ignore if */
-    if (unknownElementCache[tag] != null) {
+    if (unknownElementCache[tag] != null) { // 检查缓存
       return unknownElementCache[tag]
     }
-    var el = document.createElement(tag);
-    if (tag.indexOf('-') > -1) {
+    var el = document.createElement(tag); // 使用 tag 尝试创建 html 标签
+    if (tag.indexOf('-') > -1) { // 下面进行检查
       // http://stackoverflow.com/a/28210364/1070244
       return (unknownElementCache[tag] = (
         el.constructor === window.HTMLUnknownElement ||
@@ -5958,31 +6003,35 @@
   }
 
   /*  */
-
+  // 创建元素节点
   function createElement$1(tagName, vnode) {
-    var elm = document.createElement(tagName);
-    if (tagName !== 'select') {
+    var elm = document.createElement(tagName); // 使用 tagName 创建节点
+    if (tagName !== 'select') { // 如果不是 select 节点，则直接返回
       return elm
     }
-    // false or null will remove the attribute but undefined will not
+    // false or null will remove the attribute but undefined will not false或null将删除该属性，但undefined不会
     if (vnode.data && vnode.data.attrs && vnode.data.attrs.multiple !== undefined) {
-      elm.setAttribute('multiple', 'multiple');
+      elm.setAttribute('multiple', 'multiple'); // 这里的 multiple 有什么问题吗？
     }
     return elm
   }
 
+  // 创建一个具有指定的命名空间URI和限定名称的元素。
   function createElementNS(namespace, tagName) {
     return document.createElementNS(namespaceMap[namespace], tagName)
   }
 
+  // 创建文本节点
   function createTextNode(text) {
     return document.createTextNode(text)
   }
 
+  // 创建一个注释节点
   function createComment(text) {
     return document.createComment(text)
   }
 
+  // 在指定节点之前插入节点
   function insertBefore(parentNode, newNode, referenceNode) {
     parentNode.insertBefore(newNode, referenceNode);
   }
@@ -5991,10 +6040,12 @@
     node.removeChild(child);
   }
 
+  // 在指定父节点最后追加指定节点
   function appendChild(node, child) {
     node.appendChild(child);
   }
 
+  // 查找指定节点的父节点
   function parentNode(node) {
     return node.parentNode
   }
@@ -6015,15 +6066,16 @@
     node.setAttribute(scopeId, '');
   }
 
+  // node 节点操作方法
   var nodeOps = /*#__PURE__*/Object.freeze({
-    createElement: createElement$1,
-    createElementNS: createElementNS,
-    createTextNode: createTextNode,
-    createComment: createComment,
-    insertBefore: insertBefore,
+    createElement: createElement$1, // 创建元素节点
+    createElementNS: createElementNS, // 创建一个具有指定的命名空间URI和限定名称的元素。
+    createTextNode: createTextNode, // 创建文本节点
+    createComment: createComment, // 创建注释节点
+    insertBefore: insertBefore, // 在指定节点之前插入节点
     removeChild: removeChild,
-    appendChild: appendChild,
-    parentNode: parentNode,
+    appendChild: appendChild, // 在指定父节点最后追加指定节点
+    parentNode: parentNode, // 查找指定节点的父节点
     nextSibling: nextSibling,
     tagName: tagName,
     setTextContent: setTextContent,
@@ -6164,19 +6216,20 @@
       }
     }
 
-    function isUnknownElement$$1(vnode, inVPre) {
+    // 检查 dom 元素是否为 合法标签
+    function isUnknownElement$$1(vnode, inVPre) { // inVPre：标记 标签是否还有 v-pre 指令，如果没有则是false
       return (
-        !inVPre &&
+        !inVPre && // 标记 标签是否还有 v-pre 指令，如果没有则是false
         !vnode.ns &&
-        !(
-          config.ignoredElements.length &&
-          config.ignoredElements.some(function (ignore) {
+        !( // config.ignoredElements：须使 Vue 忽略在 Vue 之外的自定义元素 (e.g. 使用了 Web Components APIs)。否则，它会假设你忘记注册全局组件或者拼错了组件名称，从而抛出一个关于 Unknown custom element 的警告。
+          config.ignoredElements.length && // 也就是这里查找一下这个标签是否是自定义的合法标签
+          config.ignoredElements.some(function (ignore) { //some() 方法测试是否至少有一个元素通过由提供的函数实现的测试。
             return isRegExp(ignore)
               ? ignore.test(vnode.tag)
               : ignore === vnode.tag
           })
         ) &&
-        config.isUnknownElement(vnode.tag)
+        config.isUnknownElement(vnode.tag) // 判断 tag 是否为合法标签
       )
     }
 
@@ -6209,15 +6262,15 @@
 
       // 元素渲染应该走到这里
       var data = vnode.data; // 获取 data 数据
-      var children = vnode.children;
-      var tag = vnode.tag;
-      if (isDef(tag)) {
+      var children = vnode.children; // 获取子元素
+      var tag = vnode.tag; // 获取节点标签
+      if (isDef(tag)) { // 如果 tag 不为空，在这里表示标签元素
         {
-          if (data && data.pre) {
+          if (data && data.pre) { // 标签是否是 pre？
             creatingElmInVPre++;
           }
-          if (isUnknownElement$$1(vnode, creatingElmInVPre)) {
-            warn(
+          if (isUnknownElement$$1(vnode, creatingElmInVPre)) { // 检查 tag 是否合法
+            warn( // 不合法，发出警告
               'Unknown custom element: <' + tag + '> - did you ' +
               'register the component correctly? For recursive components, ' +
               'make sure to provide the "name" option.',
@@ -6226,33 +6279,35 @@
           }
         }
 
-        vnode.elm = vnode.ns
-          ? nodeOps.createElementNS(vnode.ns, tag)
-          : nodeOps.createElement(tag, vnode);
+        vnode.elm = vnode.ns // 字符串值，可为此元素节点规定命名空间的名称。 可能是svg 或者 math 节点
+          ? nodeOps.createElementNS(vnode.ns, tag) // 创建一个具有指定的命名空间URI和限定名称的元素。
+          : nodeOps.createElement(tag, vnode); // 创建一个元素节点
         setScope(vnode);
 
         /* istanbul ignore if */
         {
-          createChildren(vnode, children, insertedVnodeQueue);
-          if (isDef(data)) {
-            invokeCreateHooks(vnode, insertedVnodeQueue);
+          createChildren(vnode, children, insertedVnodeQueue); // 创建子节点
+          if (isDef(data)) { // 判断是否存在 data 信息
+            invokeCreateHooks(vnode, insertedVnodeQueue); // 将 data 添加至 dom 节点上
           }
+          // 插入节点 - 如果是子组件的话，此时 parentElm, refElm 是 undefined，这个方法就什么也不做 -- 子节点不会走到这一步
+          // 子节点在 createComponent 方法内部完成 插入节点 操作
           insert(parentElm, vnode.elm, refElm);
         }
 
         if (data && data.pre) {
           creatingElmInVPre--;
         }
-      } else if (isTrue(vnode.isComment)) {
-        vnode.elm = nodeOps.createComment(vnode.text);
-        insert(parentElm, vnode.elm, refElm);
-      } else {
-        vnode.elm = nodeOps.createTextNode(vnode.text);
-        insert(parentElm, vnode.elm, refElm);
+      } else if (isTrue(vnode.isComment)) { // 如果是注释节点
+        vnode.elm = nodeOps.createComment(vnode.text); // 创建一个注释节点
+        insert(parentElm, vnode.elm, refElm); // 在 parentElm 下，在 refElm 之前插入这个注释节点
+      } else { // 否则就是一个文本节点
+        vnode.elm = nodeOps.createTextNode(vnode.text); // 创建一个文本节点
+        insert(parentElm, vnode.elm, refElm); // 插入 dom
       }
     }
 
-
+    // 子组件的创建
     function createComponent(
       vnode, // vnode
       insertedVnodeQueue, // 子组件队列
@@ -6262,17 +6317,21 @@
       var i = vnode.data; // 获取 data 数据
       if (isDef(i)) { // 判断是否存在 data
         var isReactivated = isDef(vnode.componentInstance) && i.keepAlive; // 组件已经创建 && 被 keepAlive 缓存
-        if (isDef(i = i.hook) && isDef(i = i.init)) {
+        if (isDef(i = i.hook) && isDef(i = i.init)) { // 判断是否存在 init 的 hook 钩子
           i(vnode, false /* hydrating */);
         }
         // after calling the init hook, if the vnode is a child component 调用init钩子后，如果vnode是子组件
         // it should've created a child instance and mounted it. the child 它应该创建一个子实例并挂载它。这个孩子
         // component also has set the placeholder vnode's elm. 组件还设置了占位符vnode的elm
         // in that case we can just return the element and be done. 在这种情况下，我们只需要返回元素就可以了
-        if (isDef(vnode.componentInstance)) {
-          initComponent(vnode, insertedVnodeQueue);
-          insert(parentElm, vnode.elm, refElm);
-          if (isTrue(isReactivated)) {
+        if (isDef(vnode.componentInstance)) { // 是否创建好了子组件
+          initComponent(vnode, insertedVnodeQueue); // 将组件推入到 insertedVnodeQueue 队列中以及为组件 dom 添加相关属性和 css 作用域
+          /**
+           * 原来在这里将组件 dom 插入到 dom 上的
+           * 在这里就存在着插入节点的位置信息
+           */
+          insert(parentElm, vnode.elm, refElm); // 插入节点
+          if (isTrue(isReactivated)) { // 是否是缓存节点
             reactivateComponent(vnode, insertedVnodeQueue, parentElm, refElm);
           }
           return true
@@ -6280,20 +6339,22 @@
       }
     }
 
+    // 将组件推入到 insertedVnodeQueue 队列中以及为组件 dom 添加相关属性和 css 作用域
     function initComponent(vnode, insertedVnodeQueue) {
-      if (isDef(vnode.data.pendingInsert)) {
-        insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert);
-        vnode.data.pendingInsert = null;
+      if (isDef(vnode.data.pendingInsert)) { // vnode 如果引用了 pendingInsert
+        // 在这里，如果是子组件的渲染过程，子组件中的子组件都会收集到 insertedVnodeQueue 中，这样一般而言都会在根组件的 insertedVnodeQueue 被收集，此后可以在一次性调用所有组件的钩子
+        insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert); // 将其推入到 insertedVnodeQueue 集合中
+        vnode.data.pendingInsert = null; // 重置为 null
       }
-      vnode.elm = vnode.componentInstance.$el;
-      if (isPatchable(vnode)) {
-        invokeCreateHooks(vnode, insertedVnodeQueue);
-        setScope(vnode);
+      vnode.elm = vnode.componentInstance.$el; // 将组件 dom 挂在 elm 上
+      if (isPatchable(vnode)) { // ？
+        invokeCreateHooks(vnode, insertedVnodeQueue); // 添加属性(class, styles, attrs, 事件等)至组件 dom 中
+        setScope(vnode); // 添加作用域变量
       } else {
-        // empty component root.
-        // skip all element-related modules except for ref (#3455)
+        // empty component root. 空的组件根
+        // skip all element-related modules except for ref (#3455) 跳过所有与元素相关的模块，除了ref
         registerRef(vnode);
-        // make sure to invoke the insert hook
+        // make sure to invoke the insert hook 确保调用了插入钩子
         insertedVnodeQueue.push(vnode);
       }
     }
@@ -6320,28 +6381,35 @@
       insert(parentElm, vnode.elm, refElm);
     }
 
+    // 插入节点
     function insert(parent, elm, ref$$1) {
-      if (isDef(parent)) {
-        if (isDef(ref$$1)) {
-          if (nodeOps.parentNode(ref$$1) === parent) {
-            nodeOps.insertBefore(parent, elm, ref$$1);
+      if (isDef(parent)) { // 如果存在父节点
+        if (isDef(ref$$1)) { // 并且存在坐标节点
+          if (nodeOps.parentNode(ref$$1) === parent) { // 并且坐标节点的父节点与目标节点的父节点相同
+            nodeOps.insertBefore(parent, elm, ref$$1); // 此时插入至坐标节点之前
           }
-        } else {
+        } else { // 否则的话，就直接在父节点追加该节点
           nodeOps.appendChild(parent, elm);
         }
       }
     }
 
-    function createChildren(vnode, children, insertedVnodeQueue) {
-      if (Array.isArray(children)) {
+    // 创建子节点
+    function createChildren(
+      vnode, // 节点 vnode
+      children, // 子节点
+      insertedVnodeQueue // 子组件队列
+    ) {
+      if (Array.isArray(children)) { // 如果存在子节点
         {
-          checkDuplicateKeys(children);
+          checkDuplicateKeys(children); // 检查子节点 children 中是否重复注册了 key
         }
-        for (var i = 0; i < children.length; ++i) {
-          createElm(children[i], insertedVnodeQueue, vnode.elm, null, true, children, i);
+        for (var i = 0; i < children.length; ++i) { // 遍历子节点
+          createElm(children[i], insertedVnodeQueue, vnode.elm, null, true, children, i); // 使用 createElm 创建子节点
         }
-      } else if (isPrimitive(vnode.text)) {
-        nodeOps.appendChild(vnode.elm, nodeOps.createTextNode(String(vnode.text)));
+      } else if (isPrimitive(vnode.text)) { // 检查 vnode.text 是否为基础类型(string, number, symbol, boolean)
+        // 此时如果没有子节点的话，可能存在 text 文本
+        nodeOps.appendChild(vnode.elm, nodeOps.createTextNode(String(vnode.text))); // 将其文本推入 vnode 表示的 dom 下
       }
     }
 
@@ -6352,20 +6420,21 @@
       return isDef(vnode.tag)
     }
 
+    // 为 dom 添加 class,style,attrs,domlisteners, props。。。 以及 如果是组件，则将组件钩子收集至 insertedVnodeQueue 队列中
     function invokeCreateHooks(vnode, insertedVnodeQueue) {
-      for (var i$1 = 0; i$1 < cbs.create.length; ++i$1) {
-        cbs.create[i$1](emptyNode, vnode);
+      for (var i$1 = 0; i$1 < cbs.create.length; ++i$1) { // 遍历模块方法 cbs
+        cbs.create[i$1](emptyNode, vnode); // 添加 dom 相关属性
       }
-      i = vnode.data.hook; // Reuse variable
-      if (isDef(i)) {
-        if (isDef(i.create)) { i.create(emptyNode, vnode); }
-        if (isDef(i.insert)) { insertedVnodeQueue.push(vnode); }
+      i = vnode.data.hook; // Reuse variable 重用变量 -- 提取组件钩子
+      if (isDef(i)) { // 如果存在组件钩子
+        if (isDef(i.create)) { i.create(emptyNode, vnode); } // 是否存在 create 钩子 -- 暂时没有发现使用场景
+        if (isDef(i.insert)) { insertedVnodeQueue.push(vnode); } // insert 插入钩子
       }
     }
 
-    // set scope id attribute for scoped CSS.
-    // this is implemented as a special case to avoid the overhead
-    // of going through the normal attribute patching process.
+    // set scope id attribute for scoped CSS. 为限定CSS设置范围id属性
+    // this is implemented as a special case to avoid the overhead 这是作为一种特殊情况来实现的，以避免开销
+    // of going through the normal attribute patching process. 通过正常的属性修补过程
     function setScope(vnode) {
       var i;
       if (isDef(i = vnode.fnScopeId)) {
@@ -6379,7 +6448,7 @@
           ancestor = ancestor.parent;
         }
       }
-      // for slot content they should also get the scopeId from the host instance.
+      // for slot content they should also get the scopeId from the host instance. 对于插槽内容，它们还应该从主机实例获得scopeId
       if (isDef(i = activeInstance) &&
         i !== vnode.context &&
         i !== vnode.fnContext &&
@@ -6525,14 +6594,15 @@
       }
     }
 
+    // 检查子节点 children 中是否重复注册了 key
     function checkDuplicateKeys(children) {
-      var seenKeys = {};
-      for (var i = 0; i < children.length; i++) {
+      var seenKeys = {}; // 对象
+      for (var i = 0; i < children.length; i++) { // 遍历子节点
         var vnode = children[i];
-        var key = vnode.key;
-        if (isDef(key)) {
-          if (seenKeys[key]) {
-            warn(
+        var key = vnode.key; // 提取每项 vnode 的 key
+        if (isDef(key)) { // 如果存在 key 的话
+          if (seenKeys[key]) { // 检查 key 是否已经被注册
+            warn( // 不能重复注册 key, 发出警告
               ("Duplicate keys detected: '" + key + "'. This may cause an update error."),
               vnode.context
             );
@@ -6625,12 +6695,17 @@
       }
     }
 
-    function invokeInsertHook(vnode, queue, initial) {
-      // delay insert hooks for component root nodes, invoke them after the
-      // element is really inserted
-      if (isTrue(initial) && isDef(vnode.parent)) {
+    function invokeInsertHook(
+      vnode, // vnode
+      queue, // 子组件队列
+      initial // 可能表示的是子组件的渲染
+    ) {
+      // delay insert hooks for component root nodes, invoke them after the 延迟组件根节点的插入钩子，然后调用它们
+      // element is really inserted 元素被真正插入
+      if (isTrue(initial) && isDef(vnode.parent)) { // 一般表示为子组件的渲染，因为此时还没有挂载 dom
+        // 在这里，因为组件还没有挂载到 dom 树上，所以需要将调用 mounted 钩子的函数引用到 vnode 中
         vnode.parent.data.pendingInsert = queue;
-      } else {
+      } else { // 其他情况，直接调用钩子
         for (var i = 0; i < queue.length; ++i) {
           queue[i].data.hook.insert(queue[i]);
         }
@@ -6761,10 +6836,11 @@
         return
       }
 
-      var isInitialPatch = false; // 是否是初始渲染
+      // 在这里表示暂时不挂载组件，只是生成 dom -- 可能是渲染子组件 
+      var isInitialPatch = false;
       var insertedVnodeQueue = []; // 子组件 vnode 队列，用于最后统一做一些渲染的处理
 
-      if (isUndef(oldVnode)) { // oldVnode 是否是 undefined 或 null
+      if (isUndef(oldVnode)) { // oldVnode 是否是 undefined 或 null -- 可能作为组件，此时 oldVnode 为 undefined
         // empty mount (likely as component), create new root element 空挂载(可能作为组件)，创建新的根元素
         isInitialPatch = true;
         createElm(vnode, insertedVnodeQueue);
@@ -6817,7 +6893,7 @@
             nodeOps.nextSibling(oldElm) // 查找 oldElm 的一下节点 - 用于替换节点
           );
 
-          // update parent placeholder node element, recursively
+          // update parent placeholder node element, recursively 递归地更新父占位符节点元素
           if (isDef(vnode.parent)) {
             var ancestor = vnode.parent;
             var patchable = isPatchable(vnode);
@@ -6856,6 +6932,7 @@
         }
       }
 
+      // 如果 isInitialPatch 是 true，此时表示暂不挂载，就需要将子组件的 insert 钩子保存在 vnode 中，到时在引用
       invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch);
       return vnode.elm
     }
@@ -9329,7 +9406,7 @@
   Vue.config.isReservedTag = isReservedTag;
   Vue.config.isReservedAttr = isReservedAttr;
   Vue.config.getTagNamespace = getTagNamespace;
-  Vue.config.isUnknownElement = isUnknownElement;
+  Vue.config.isUnknownElement = isUnknownElement; // 检查指定标签是否为未知标签(也就是不合法标签)
 
   // install platform runtime directives & components 安装平台运行时指令和组件
   extend(Vue.options.directives, platformDirectives); // 添加全局指令， show 和 model

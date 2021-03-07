@@ -14,14 +14,14 @@
     {{test}}{{ object.b.c }}{{ array[0] }}
     <div v-once>这是只渲染一次的内容</div>
     <div v-for="i in 5">{{i}}</div>
-    <my-components test='5' :test2="object"></my-components>
+    <my-components test='5' :test2="object" @onTest.passive.once="ceshi"></my-components>
   </div>
 </body>
 
 </html>
 <script>
   var vm = new Vue({
-    el: "#app",
+    // el: "#app",
     data: {
       test: 1,
       array: [1, 2, 3],
@@ -63,7 +63,12 @@
           }
         }
       }
-    }
+    },
+    methods: {
+      ceshi() {
+        console.log('测试事件');
+      }
+    },
   });
   console.log(vm);
 </script>
