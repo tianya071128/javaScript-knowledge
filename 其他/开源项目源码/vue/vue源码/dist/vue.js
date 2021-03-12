@@ -1553,7 +1553,7 @@
   };
 
   /**
-   * Validate component names 验证组件名称
+   * Validate component names 验证组件名称 - 验证组件 options 中的 components 中的选项
    */
   function checkComponents(options) {
     for (var key in options.components) { // 递归验证组件中的名称
@@ -1561,18 +1561,18 @@
     }
   }
 
-  // 验证组件名称 必须是大小写，并且是-横杆
+  // 验证组件名称 必须是大小写开头，可以存在 _ - 等字符
   function validateComponentName(name) {
-    if (!new RegExp(("^[a-zA-Z][\\-\\.0-9_" + (unicodeRegExp.source) + "]*$")).test(name)) {
-      warn(
-        'Invalid component name: "' + name + '". Component names ' +
-        'should conform to valid custom element name in html5 specification.'
+    if (!new RegExp(("^[a-zA-Z][\\-\\.0-9_" + (unicodeRegExp.source) + "]*$")).test(name)) { // 通过正则验证
+      warn( // 警告
+        'Invalid component name: "' + name + '". Component names ' + // 无效的组件名:“+ name +”。组件名称
+        'should conform to valid custom element name in html5 specification.' // 是否符合html5规范中有效的自定义元素名称
       );
     }
-    if (isBuiltInTag(name) || config.isReservedTag(name)) {
-      warn(
-        'Do not use built-in or reserved HTML elements as component ' +
-        'id: ' + name
+    if (isBuiltInTag(name) || config.isReservedTag(name)) { // 检查标签是否为内置标签(component, slot) && 判断指定标签是否为 html 标签 或者 svg 标签
+      warn( // 发出警告
+        'Do not use built-in or reserved HTML elements as component ' + // 不使用内置或保留HTML元素作为组件
+        'id: ' + name // id: name
       );
     }
   }
@@ -1712,11 +1712,11 @@
     // _base 当为 Vue 构造函数，或基于 Vue 构造函数的子类才会存在，且指向 Vue 构造函数
     if (!child._base) { // 应该是指当为合并组件 options 时，才需要进行这一步？
       if (child.extends) { // 当存在 extends 时，合并选项
-        parent = mergeOptions(parent, child.extends, vm);
+        parent = mergeOptions(parent, child.extends, vm); // 在这里，会通过 mergeOptions 合并选项后返回一个合并后的选项
       }
       if (child.mixins) { // 当存在 mixins 时
         for (var i = 0, l = child.mixins.length; i < l; i++) { // 遍历 mixins，合并选项
-          parent = mergeOptions(parent, child.mixins[i], vm);
+          parent = mergeOptions(parent, child.mixins[i], vm); // 在这里，会通过 mergeOptions 合并选项后返回一个合并后的选项
         }
       }
     }
@@ -2308,16 +2308,18 @@
       }
     };
 
-    // 初始化用户渲染的上下文环境 _renderProxy：用于渲染时的数据
+    // 初始化用户渲染的上下文环境 _renderProxy：用于渲染时的上下文
     initProxy = function initProxy(vm) {
       if (hasProxy) { // 是否原生支持 proxy
         // determine which proxy handler to use 确定要使用哪个代理处理程序
         var options = vm.$options; // 提取出 $options
         // render 渲染 如果是渲染 并且含有 _withStripped
         var handlers = options.render && options.render._withStripped // 这应该表示用户使用 render 渲染
-          ? getHandler
-          : hasHandler;
-        vm._renderProxy = new Proxy(vm, handlers);
+          ? getHandler // 判断是拦截 get 操作
+          : hasHandler; // 还是 has 操作
+        // 在 Proxy 实例中，对于没有定义的拦截操作，会执行原始操作
+        // 例如只定义了 has 拦截，对于 get 操作，相当于直接操作 target[key]
+        vm._renderProxy = new Proxy(vm, handlers); // 通过 proxy 代理，可以对属性访问进行拦截，这样可以对不允许访问的属性进行友好提示
       } else {
         vm._renderProxy = vm; // 不支持 proxy，直接代理 vm，就无法做到属性的检查
       }
@@ -3705,13 +3707,13 @@
   /*  */
   // 主要是初始化渲染相关的属性或方法
   function initRender(vm) {
-    // 一个属性，
-    vm._vnode = null; // the root of the child tree 子树的根
+    // _vnode 和 $vnode 都是引用的 vnode，但是 _vnode 表示的是组件渲染的 vnode，而 $vnode 表示的是组件的 vnode
+    vm._vnode = null; // the root of the child tree 子树的根 - 在这里引用的是组件生成 vnode
     vm._staticTrees = null; // v-once cached trees v-once 缓存的树
     var options = vm.$options; // 提取出 options 参数
     // 子组件表示的组件 VNode
-    var parentVnode = vm.$vnode = options._parentVnode; // the placeholder node in parent tree 父树中的占位符节点
-    // 子组件的组件 VNode 的渲染上下文(不是当前组件渲染的上下文)
+    var parentVnode = vm.$vnode = options._parentVnode; // the placeholder node in parent tree 父树中的占位符节点 - 相当于表示组件的 VNode
+    // 子组件的组件 VNode 的渲染上下文(不是当前组件渲染的上下文) - 因为在解析插槽时，渲染上下文应该是在组件 VNode 的上下文环境下生成
     var renderContext = parentVnode && parentVnode.context;
     // 解决插槽问题
     vm.$slots = resolveSlots(options._renderChildren, renderContext);
@@ -3725,15 +3727,26 @@
     // user-written render functions. 用户编写的显示功能
     vm.$createElement = function (a, b, c, d) { return createElement(vm, a, b, c, d, true); };
 
+    /**
+     * 当定义组件 <my-components arrsA='xx' arrsB='xx' @eventA='xx' @eventB='xx'></my-components>
+     * 这些 attr 和 event 都是会在生成这个组件 vnode 时，存储在组件 vnode 的 data 中
+     * 即是 options._parentVnode 属性上
+     */
     // $attrs & $listeners are exposed for easier HOC creation. $attrs和$listeners被公开，以便于更容易地创建
     // they need to be reactive so that HOCs using them are always updated 它们需要是反应性的，这样使用它们的hoc就会一直更新
     var parentData = parentVnode && parentVnode.data;
 
     /* istanbul ignore else */
     {
+      // 在 vm 实例上添加 $attrs 属性，值为 parentData && parentData.attrs，且这个属性是可以被观察到的,
+      // 这样的话，当存在观察者观察了 $attrs 属性，就会在 $attrs 属性改变时，触发这个观察者
       defineReactive$$1(vm, '$attrs', parentData && parentData.attrs || emptyObject, function () {
+        // isUpdatingChildComponent：表示是否渲染子组件中
+        // 只有在渲染子组件时，才会允许修改 $attrs 属性，其他情况都会报错
+        // 但是如果 warn 方法中没有设置抛出错误退出调用栈的情况下，还是会修改成功，只是会发出警告
         !isUpdatingChildComponent && warn("$attrs is readonly.", vm);
-      }, true);
+      }, true); // 这个参数设置为 true，表示不能进行深度监听，但是如果传入的本身就是一个可观察对象的话，还是会出发响应式的，始终应该记住，响应式系统是相对于组件系统独立的，是否响应式只是看这个对象是否进行了响应式转化，只要进行了响应式转化，就可以被观察到
+      // 与 $attrs 同理
       defineReactive$$1(vm, '$listeners', options._parentListeners || emptyObject, function () {
         !isUpdatingChildComponent && warn("$listeners is readonly.", vm);
       }, true);
@@ -4144,7 +4157,7 @@
     }
   }
 
-  // 初始化相关属性以及一些生命周期标识符
+  // 初始化相关属性($parent, $root, $children, $refs, _watcher)以及一些生命周期标识符(_inactive, _directInactive, _isMounted, _isDestroyed, _isBeingDestroyed)
   function initLifecycle(vm) {
     var options = vm.$options; // 提取 options 参数
 
@@ -4164,7 +4177,7 @@
     vm.$refs = {}; // 当前组件 ref 集合
 
     // 下面就是一些内部属性
-    vm._watcher = null; // 组件的 watcher 观察对象集合
+    vm._watcher = null; // 组件的渲染函数 watcher 观察对象
     vm._inactive = null;
     vm._directInactive = false;
     vm._isMounted = false; // 组件是否已经初始渲染
@@ -4484,7 +4497,11 @@
         invokeWithErrorHandling(handlers[i], vm, null, vm, info); // 执行 hooks
       }
     }
-    if (vm._hasHookEvent) { // 标识是否通过类似 @hook:create 方式监听子组件的生命周期
+    // 可能有两种情况：
+    // 1. 在组件内部中，通过 this.$on('hook:created', xxx) 方式监听生命周期方法
+    // 2. 在使用组件时(<my-components @hook:created='xx'></my-components>) 方式监听子组件的生命周期
+    // 这两种内部都会通过 $on 方式去添加订阅，此时就会将 _hasHookEvent 标识置为 true
+    if (vm._hasHookEvent) { // 标识是否自定义事件中存在监听了 hook: 格式的事件
       vm.$emit('hook:' + hook); // 发送事件
     }
     popTarget(); // 重新收集依赖
@@ -5304,9 +5321,24 @@
         mark(startTag);
       }
 
-      // a flag to avoid this being observed 一个避免被观察到的标志
+      // a flag to avoid this being observed 一个避免被观察到的标志 - 也是可以用来标识组件实例
       vm._isVue = true;
       // merge options 合并选项
+      /**
+       * 组件选项存储着组件的一些资源
+       * 合并选项有两种：
+       * 1. 合并子组件：
+       * 2. 组件选项(一般为用户 new 的组件，也可能是通过 new Vue.extend(options) 实例化一个子类)合并:
+       *    在组件选项中，一般为这样的形式：
+       *    {
+       *      beforeUpdate: [ƒ],
+       *      components: {},
+       *      data: {},
+       *      directives: {},
+       *      el: "#app", 
+       *      ...
+       *    }
+       */
       if (options && options._isComponent) { // _isComponent 是标识子组件的
         // optimize internal component instantiation 优化内部组件实例化
         // since dynamic options merging is pretty slow, and none of the 因为动态选项合并是非常缓慢的，而且没有
@@ -5318,19 +5350,19 @@
       } else {
         // 合并选项至 $options, 最终这个组件的配置项 $options 中
         vm.$options = mergeOptions(
-          resolveConstructorOptions(vm.constructor), // 提取出构造函数中的 options
+          resolveConstructorOptions(vm.constructor), // 提取出构造函数中的 options - 递归解析 构造器 上存储的 options
           options || {}, // options 参数
           vm
         );
       }
       /* istanbul ignore else */
       {
-        initProxy(vm); // 初始化 _renderProxy：用于生成 Vnode 使用
+        initProxy(vm); // 初始化 _renderProxy：用于生成 Vnode 时的上下文环境
       }
       // expose real self 暴露真实的 self
       vm._self = vm;
 
-      initLifecycle(vm); // 初始化相关属性以及一些生命周期标识符
+      initLifecycle(vm); // 初始化相关属性($parent, $root, $children, $refs, _watcher)以及一些生命周期标识符(_inactive, _directInactive, _isMounted, _isDestroyed, _isBeingDestroyed)
       initEvents(vm); // 初始化父组件传递的事件
       initRender(vm); // 主要是初始化渲染相关的属性或方法
 
@@ -5436,6 +5468,7 @@
 
   // 从这里入手，定义 Vue 构造函数
   function Vue(options) {
+    debugger;
     if (!(this instanceof Vue)
     ) {
       warn('Vue is a constructor and should be called with the `new` keyword');
@@ -9503,9 +9536,10 @@
 
   /*  */
 
-  // install platform specific utils
+  // install platform specific utils 安装特定于平台的utils
+  // 区分平台的
   Vue.config.mustUseProp = mustUseProp;
-  Vue.config.isReservedTag = isReservedTag;
+  Vue.config.isReservedTag = isReservedTag; // 判断指定标签是否为 html 标签 或者 svg 标签 - 在 web 平台上，就是区分 html 和 svg 标签，但是在 weex 平台上就是区分另外的
   Vue.config.isReservedAttr = isReservedAttr;
   Vue.config.getTagNamespace = getTagNamespace;
   Vue.config.isUnknownElement = isUnknownElement; // 检查指定标签是否为未知标签(也就是不合法标签)
