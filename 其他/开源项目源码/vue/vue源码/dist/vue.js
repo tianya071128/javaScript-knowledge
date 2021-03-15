@@ -399,6 +399,9 @@
    * 子组件 updated -> 父组件 updated
    * 父组件 beforeDestroy -> 子组件 beforeDestroy
    * 子组件 destroyed -> 父组件 destroyed
+   * 
+   * 子组件 activated -> 父组件 activated
+   * 父组件 deactivated -> 子组件 deactivated
    */
   var LIFECYCLE_HOOKS = [
     // beforeCreate：在这之前，已经初始化了组件的配置项 $options 以及相关属性定义，但是数据还没有准备好
@@ -439,7 +442,16 @@
      * 大致会将这些组件的内部引用销毁，这样垃圾收集机制会自动将这些内存回收
      */
     'destroyed', // 实例销毁后
+    /**
+     * 在这里，当执行 insert 插入钩子时，会分为两种情况，暂不理会
+     * 最终表现就是执行 insert 钩子时，表示缓存组件重用
+     * 此时会先递归子组件，让子组件先调用 activated 生命周期
+     */
     'activated', // 被 keep-alive 缓存的组件激活时调用
+    /**
+     * 停用好理解，当需要销毁组件时，如果发现组件是一个需要缓存组件，则此时不进行销毁操作
+     * 此时先调用父组件的 deactivated 钩子，在调用子组件的
+     */
     'deactivated', // 被 keep-alive 缓存的组件停用时调用
 
     // errorCaptured：在组件的多个时期都可能执行，在组件的运行期间出现相关错误就会执行
@@ -2643,20 +2655,20 @@
   }
 
   // 初始化 inject -- 提取出 inject 选项(先从祖先组件中的 _provided 属性中找，没有找到则取默认值)，
-  // 然后将其赋值到 vm 实例上，在这里不对 inject 值进行深度转化为响应式，而是通过 defineReactive$$1 方式添加到 vm 实例上，保证其为只读属性
+  // 然后将其赋值到 vm 实例上，在这里不对 inject 值进行深度转化为响应式，而是通过 defineReactive$$1 方式添加到 vm 实例上，保证其为只读属性(并不会完全保证，但是至少会出发警告)
   function initInjections(vm) {
     var result = resolveInject(vm.$options.inject, vm); // 加载出 inject 选项
     if (result) { // 如果注册了 inject
-      toggleObserving(false); // 标记禁止转化为响应式 -- 用于对 result[key] 的值进行深度转化为响应式
+      toggleObserving(false); // 标记禁止转化为响应式 -- 用于对 result[key] 的值不进行深度转化为响应式
       Object.keys(result).forEach(function (key) {
         /* istanbul ignore else */
         {
           // 在 vm 实例上添加 key，用于直接通过 this.xxx 来获取 inject 值
-          defineReactive$$1(vm, key, result[key], function () { // 当设置值为，发出警告
+          defineReactive$$1(vm, key, result[key], function () { // 当设置值为，发出警告 - 在这里可以看出，依赖注入只会在组件初始化的时候初始值，之后即使父组件的值变化了也不会相应变化
             warn(
-              "Avoid mutating an injected value directly since the changes will be " +
-              "overwritten whenever the provided component re-renders. " +
-              "injection being mutated: \"" + key + "\"",
+              "Avoid mutating an injected value directly since the changes will be " + // 避免直接改变一个注入的值，因为改变将会
+              "overwritten whenever the provided component re-renders. " + // 在重新呈现所提供的组件时覆盖
+              "injection being mutated: \"" + key + "\"", // 注入被突变 key
               vm
             );
           });
@@ -3323,9 +3335,15 @@
   /*  */
 
   // inline hooks to be invoked on component VNodes during patch 补丁期间在组件 vnode 上调用的内联钩子
-  // 子组件的构建钩子
+  // 子组件的构建钩子 - 会经历 init 初始化 - prepatch 更新 - insert 插入钩子 - destroy 销毁钩子
   var componentVNodeHooks = {
-    // 初始化组件钩子
+    // 初始化组件钩子 - 在这里初始化子组件
+    /**
+     * 子组件的初始化：
+     * 通过渲染器解析出子组件的 vnode，一般格式为:
+     * { componentOptions: 组件选项(Ctor: 构造器, listeners: 事件, propsData: props值等), componentInstance: 组件实例, data: { hook: 组件渲染过程钩子 } }
+     * 在父组件渲染过程中，会递归渲染子组件，此时就会通过判断 vnode.data.hook.init 钩子是否存在来判断是否为 组件vnode
+     */
     init: function init(vnode, hydrating) {
       if (
         vnode.componentInstance && // 是否已经实例化过
@@ -3334,7 +3352,7 @@
       ) {
         // kept-alive components, treat as a patch 将保持活力的组件视为补丁
         var mountedNode = vnode; // work around flow 工作流程
-        componentVNodeHooks.prepatch(mountedNode, mountedNode);
+        componentVNodeHooks.prepatch(mountedNode, mountedNode); // 如果是缓存组件，可将其视为更新操作
       } else {
         // 创建子组件，并将其挂载到 componentInstance 属性上
         var child = vnode.componentInstance = createComponentInstanceForVnode(
@@ -3347,6 +3365,7 @@
       }
     },
 
+    // 组件更新钩子
     prepatch: function prepatch(oldVnode, vnode) {
       var options = vnode.componentOptions;
       var child = vnode.componentInstance = oldVnode.componentInstance;
@@ -3368,12 +3387,12 @@
         callHook(componentInstance, 'mounted'); // 执行 mounted 生命周期
       }
       if (vnode.data.keepAlive) { // 缓存组件作用
-        if (context._isMounted) {
+        if (context._isMounted) { // 判断父组件是否已经初次渲染过，此时说明是更新阶段
           // vue-router#1212
-          // During updates, a kept-alive component's child components may
-          // change, so directly walking the tree here may call activated hooks
-          // on incorrect children. Instead we push them into a queue which will
-          // be processed after the whole patch process ended.
+          // During updates, a kept-alive component's child components may 在更新期间，保持活动的组件的子组件可能会
+          // change, so directly walking the tree here may call activated hooks 更改，因此直接遍历树可能会调用激活的钩子
+          // on incorrect children. Instead we push them into a queue which will 错误的孩子。相反，我们将它们放入一个队列中
+          // be processed after the whole patch process ended. 整个补丁进程结束后再进行处理
           queueActivatedComponent(componentInstance);
         } else {
           activateChildComponent(componentInstance, true /* direct */);
@@ -3499,7 +3518,7 @@
     vnode, // we know it's MountedComponentVNode but flow doesn't 我们知道它是MountedComponentVNode，但流不知道
     parent // activeInstance in lifecycle state 处于生命周期状态的 activeInstance -- 当前渲染组件的父组件
   ) {
-    var options = {
+    var options = { 
       _isComponent: true, // 表示是一个组件
       _parentVnode: vnode, // 组件 vnode
       parent: parent // 父组件
@@ -4203,7 +4222,8 @@
         // initial render 最初的渲染
         vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
       } else {
-        // updates
+        debugger;
+        // updates 更新阶段
         vm.$el = vm.__patch__(prevVnode, vnode);
       }
       restoreActiveInstance(); // 调用方法，将全局渲染组件的引用重置为上一个渲染组件，退出当前组件的渲染
@@ -5468,7 +5488,6 @@
 
   // 从这里入手，定义 Vue 构造函数
   function Vue(options) {
-    debugger;
     if (!(this instanceof Vue)
     ) {
       warn('Vue is a constructor and should be called with the `new` keyword');
@@ -5664,27 +5683,29 @@
     return opts && (opts.Ctor.options.name || opts.tag) // 返回组件 name || 组件 tag
   }
 
+  // 判断指定 name 是否符合 pattern 规则
   function matches(pattern, name) {
-    if (Array.isArray(pattern)) {
-      return pattern.indexOf(name) > -1
-    } else if (typeof pattern === 'string') {
-      return pattern.split(',').indexOf(name) > -1
-    } else if (isRegExp(pattern)) {
-      return pattern.test(name)
+    if (Array.isArray(pattern)) { // 如果是数组
+      return pattern.indexOf(name) > -1 // 则判断是否在集合中
+    } else if (typeof pattern === 'string') { // 如果是字符串
+      return pattern.split(',').indexOf(name) > -1 // 判断是否在字符串集合中
+    } else if (isRegExp(pattern)) { // 如果是正则
+      return pattern.test(name) // 判断是否在匹配正则
     }
     /* istanbul ignore next */
     return false
   }
 
+  // 通过 filter 判断缓存组件是否应该销毁
   function pruneCache(keepAliveInstance, filter) {
-    var cache = keepAliveInstance.cache;
-    var keys = keepAliveInstance.keys;
-    var _vnode = keepAliveInstance._vnode;
+    var cache = keepAliveInstance.cache; // 所有缓存组件 vnode
+    var keys = keepAliveInstance.keys; // keys
+    var _vnode = keepAliveInstance._vnode; // 当前渲染的 vnode
     for (var key in cache) {
       var cachedNode = cache[key];
       if (cachedNode) {
         var name = getComponentName(cachedNode.componentOptions);
-        if (name && !filter(name)) {
+        if (name && !filter(name)) { // 通过 filter 过滤方法来判断该 name 的组件是否应该销毁
           pruneCacheEntry(cache, key, keys, _vnode);
         }
       }
@@ -5727,13 +5748,14 @@
 
     destroyed: function destroyed() { // 销毁生命周期
       for (var key in this.cache) { // 遍历缓存集合
-        pruneCacheEntry(this.cache, key, this.keys);
+        pruneCacheEntry(this.cache, key, this.keys); // 销毁全部组件
       }
     },
 
     mounted: function mounted() { // 初次挂载生命周期
       var this$1 = this;
 
+      // 监听 include, exclude 数据变化，变化时，及时清理需要销毁的组件
       this.$watch('include', function (val) {
         pruneCache(this$1, function (name) { return matches(val, name); });
       });
@@ -5795,8 +5817,12 @@
           }
         }
 
-        vnode.data.keepAlive = true; // 给 vnode.data 一个标识
+        vnode.data.keepAlive = true; // 给 vnode.data 一个标识 - 这个标识很重要
       }
+      /**
+       * 如果返回的是一个 组件VNode，此时就会去渲染这个 VNode，也会生成一个 VNode 表示的 DOM
+       * 这样的话，也就相当于 keep-alive 的 DOM 挂载
+       */
       return vnode || (slot && slot[0]) // 返回这个 vnode
     }
   };
@@ -5910,19 +5936,24 @@
     )
   };
 
+  // 判断指定值是否为 contenteditable,draggable,spellcheck 属性
+  // contenteditable：规定元素内容是否可编辑。值为 true, false
+  // draggable：规定元素是否可拖动。值为 true, false, auto
+  // spellcheck：规定是否对元素内容进行拼写检查。值为 ture, false
   var isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck');
 
   var isValidContentEditableValue = makeMap('events,caret,typing,plaintext-only');
 
   var convertEnumeratedValue = function (key, value) {
-    return isFalsyAttrValue(value) || value === 'false'
-      ? 'false'
-      // allow arbitrary string value for contenteditable
+    return isFalsyAttrValue(value) || value === 'false' // 如果 value 是一个 null || undefined || false || 'false'
+      ? 'false' // 则直接返回 'false'
+      // allow arbitrary string value for contenteditable 允许contentteditable的任意字符串值
       : key === 'contenteditable' && isValidContentEditableValue(value)
         ? value
-        : 'true'
+        : 'true' // 否则返回 'true'
   };
 
+  // 判断指定值是否为需要设置为布尔值的属性
   var isBooleanAttr = makeMap(
     'allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' +
     'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' +
@@ -5949,13 +5980,13 @@
   /*  */
 
   function genClassForVnode(vnode) {
-    var data = vnode.data;
+    var data = vnode.data; // 提取出 data 属性
     var parentNode = vnode;
     var childNode = vnode;
-    while (isDef(childNode.componentInstance)) {
-      childNode = childNode.componentInstance._vnode;
+    while (isDef(childNode.componentInstance)) { // 如果 vnode 是一个 组件vnode
+      childNode = childNode.componentInstance._vnode; // 提取出 组件vnode 表示的 vnode
       if (childNode && childNode.data) {
-        data = mergeClassData(childNode.data, data);
+        data = mergeClassData(childNode.data, data); // 合并 组件vnode 的 class（此时为 <my-common class='xxx'></my-common>） 和 组件根元素的 class
       }
     }
     while (isDef(parentNode = parentNode.parent)) {
@@ -5966,12 +5997,13 @@
     return renderClass(data.staticClass, data.class)
   }
 
+  // 合并 parent 和 child 的 class 属性
   function mergeClassData(child, parent) {
     return {
-      staticClass: concat(child.staticClass, parent.staticClass),
-      class: isDef(child.class)
-        ? [child.class, parent.class]
-        : parent.class
+      staticClass: concat(child.staticClass, parent.staticClass), // 使用 concat 策略合并
+      class: isDef(child.class) // 如果 child.class 存在
+        ? [child.class, parent.class] // 则返回一个数组
+        : parent.class // 否则返回 parent.class
     }
   }
 
@@ -5986,40 +6018,47 @@
     return ''
   }
 
+  // 根据 a,b 情况返回不一样形式
   function concat(a, b) {
+    // a 存在，b 也存在 -- 返回 a + ' ' + b 格式
+    // a 存在，b 不存在 -- 返回 a
+    // a 不存在，b 也不存在 -- 返回 b || ''
     return a ? b ? (a + ' ' + b) : a : (b || '')
   }
 
+  // 将 value 序列化 -- 最终就是 'xx xx xx' 形式
   function stringifyClass(value) {
-    if (Array.isArray(value)) {
-      return stringifyArray(value)
+    if (Array.isArray(value)) { // 如果是数组
+      return stringifyArray(value) // 序列化数组形式 value -- 最终序列成 'xx xx xx'
     }
-    if (isObject(value)) {
-      return stringifyObject(value)
+    if (isObject(value)) { // 如果是对象
+      return stringifyObject(value) // 序列化对象形式 value -- 最终序列成 'xx xx xx'
     }
-    if (typeof value === 'string') {
-      return value
+    if (typeof value === 'string') { // 如果是 string 类型
+      return value // 则直接返回
     }
     /* istanbul ignore next */
-    return ''
+    return '' // 其他情况，返回 ''
   }
 
+  // 序列化数组形式 value -- 最终序列成 'xx xx xx'
   function stringifyArray(value) {
     var res = '';
     var stringified;
-    for (var i = 0, l = value.length; i < l; i++) {
-      if (isDef(stringified = stringifyClass(value[i])) && stringified !== '') {
-        if (res) { res += ' '; }
+    for (var i = 0, l = value.length; i < l; i++) { // 遍历数组
+      if (isDef(stringified = stringifyClass(value[i])) && stringified !== '') { // 深度递归序列化 value
+        if (res) { res += ' '; } // 使用 ' ' 空格拼接各项
         res += stringified;
       }
     }
     return res
   }
 
+  // 序列化对象形式 value -- 最终序列成 'xx xx xx'
   function stringifyObject(value) {
     var res = '';
-    for (var key in value) {
-      if (value[key]) {
+    for (var key in value) { // 遍历对象
+      if (value[key]) { // 这里应该是内部保证了对象的属性值不会存在是对象的问题
         if (res) { res += ' '; }
         res += key;
       }
@@ -6103,6 +6142,7 @@
     }
   }
 
+  // 判断 type 是否属于 text,number,password,search,email,tel,url 其中一种
   var isTextInputType = makeMap('text,number,password,search,email,tel,url');
 
   /*  */
@@ -6266,15 +6306,16 @@
 
   var hooks = ['create', 'activate', 'update', 'remove', 'destroy'];
 
+  // 判断 a 和 b 是否大致相等 - 如果大致相等的话，可以只做更新处理，否则就需要做初始化新的，销毁旧的处理
   function sameVnode(a, b) {
     return (
-      a.key === b.key && (
-        (
-          a.tag === b.tag &&
-          a.isComment === b.isComment &&
-          isDef(a.data) === isDef(b.data) &&
-          sameInputType(a, b)
-        ) || (
+      a.key === b.key && ( // 判断 a 和 b 的 key 属性需要相同
+        ( // 判断 a 和 b 的 tag，isComment，data 等数据基本一致
+          a.tag === b.tag && // tag 标签一致
+          a.isComment === b.isComment && // a 和 b 的 isComment 标记一样
+          isDef(a.data) === isDef(b.data) && // 
+          sameInputType(a, b) // 判断 a 和 b 如果是 input　标签并且 type 相同
+        ) || ( // 在这里判断一些特殊组件(暂时还不清楚，可能是异步组件，函数式组件)
           isTrue(a.isAsyncPlaceholder) &&
           a.asyncFactory === b.asyncFactory &&
           isUndef(b.asyncFactory.error)
@@ -6283,12 +6324,14 @@
     )
   }
 
+  // 判断 a 和 b 如果是 input　标签并且 type 相同
   function sameInputType(a, b) {
-    if (a.tag !== 'input') { return true }
+    if (a.tag !== 'input') { return true } // 如果不是 input 标签，则没有必要比较
     var i;
-    var typeA = isDef(i = a.data) && isDef(i = i.attrs) && i.type;
-    var typeB = isDef(i = b.data) && isDef(i = i.attrs) && i.type;
-    return typeA === typeB || isTextInputType(typeA) && isTextInputType(typeB)
+    var typeA = isDef(i = a.data) && isDef(i = i.attrs) && i.type; // 获取 a 的 input 类型
+    var typeB = isDef(i = b.data) && isDef(i = i.attrs) && i.type; // 获取 b 的 input 类型
+    // && 的优先级比 || 高
+    return typeA === typeB || isTextInputType(typeA) && isTextInputType(typeB) // a 和 b 的类型相同 || (// 判断 type 是否属于 text,number,password,search,email,tel,url 其中一种)
   }
 
   function createKeyToOldIdx(children, beginIdx, endIdx) {
@@ -6443,8 +6486,10 @@
     ) {
       var i = vnode.data; // 获取 data 数据
       if (isDef(i)) { // 判断是否存在 data
+        // 这里表示是否为缓存组件
         var isReactivated = isDef(vnode.componentInstance) && i.keepAlive; // 组件已经创建 && 被 keepAlive 缓存
         if (isDef(i = i.hook) && isDef(i = i.init)) { // 判断是否存在 init 的 hook 钩子
+          // 就算是缓存组件,也需要通过 init 钩子去执行相关操作
           i(vnode, false /* hydrating */);
         }
         // after calling the init hook, if the vnode is a child component 调用init钩子后，如果vnode是子组件
@@ -6474,7 +6519,7 @@
         vnode.data.pendingInsert = null; // 重置为 null
       }
       vnode.elm = vnode.componentInstance.$el; // 将组件 dom 挂在 elm 上
-      if (isPatchable(vnode)) { // ？
+      if (isPatchable(vnode)) { // 判断该 vnode 渲染出来的是一个 标签元素
         invokeCreateHooks(vnode, insertedVnodeQueue); // 添加属性(class, styles, attrs, 事件等)至组件 dom 中
         setScope(vnode); // 添加作用域变量
       } else {
@@ -6488,10 +6533,10 @@
 
     function reactivateComponent(vnode, insertedVnodeQueue, parentElm, refElm) {
       var i;
-      // hack for #4339: a reactivated component with inner transition
-      // does not trigger because the inner node's created hooks are not called
-      // again. It's not ideal to involve module-specific logic in here but
-      // there doesn't seem to be a better way to do it.
+      // hack for #4339: a reactivated component with inner transition 黑客#4339:一个重新激活的内部过渡组件
+      // does not trigger because the inner node's created hooks are not called 不触发是因为内部节点创建的钩子没有被调用
+      // again. It's not ideal to involve module-specific logic in here but 一次。在这里包含特定于模块的逻辑并不理想，但是
+      // there doesn't seem to be a better way to do it. 似乎没有更好的办法来做这件事
       var innerNode = vnode;
       while (innerNode.componentInstance) {
         innerNode = innerNode.componentInstance._vnode;
@@ -6540,9 +6585,12 @@
       }
     }
 
+    // 判断该 vnode 渲染出来的是一个 标签元素
     function isPatchable(vnode) {
-      while (vnode.componentInstance) {
-        vnode = vnode.componentInstance._vnode;
+      while (vnode.componentInstance) { // 如果 vnode 是一个组件 vnode，
+        // 这里如果 组件vnode 渲染出来的还是一个 组件vnode，则继续递归查找，直至找到一个不是表示 组件vnode 的
+        // 会有这种 组件vnode 渲染出来还是一个 组件vnode 的情况：暂时想到 keep-alive 中 render 函数返回的是一个 vnode，就是这样情况，那可以推论 router-view 应该也是返回一个 vnode
+        vnode = vnode.componentInstance._vnode; // 则递归的查找这个 组件Vnode 渲染出来的 vnode
       }
       return isDef(vnode.tag)
     }
@@ -6754,15 +6802,16 @@
       }
     }
 
+    // 更新 VNode 操作
     function patchVnode(
-      oldVnode,
-      vnode,
-      insertedVnodeQueue,
+      oldVnode, // 旧的 Vnode
+      vnode, // 新的 Vnode
+      insertedVnodeQueue, // 队列
       ownerArray,
       index,
-      removeOnly
+      removeOnly // 是否删除全部的标识
     ) {
-      if (oldVnode === vnode) {
+      if (oldVnode === vnode) { // 如果两个 Vnode 相同，则退出函数
         return
       }
 
@@ -6771,7 +6820,7 @@
         vnode = ownerArray[index] = cloneVNode(vnode);
       }
 
-      var elm = vnode.elm = oldVnode.elm;
+      var elm = vnode.elm = oldVnode.elm; // 提取出以前就渲染好的 DOM
 
       if (isTrue(oldVnode.isAsyncPlaceholder)) {
         if (isDef(vnode.asyncFactory.resolved)) {
@@ -6782,10 +6831,10 @@
         return
       }
 
-      // reuse element for static trees.
-      // note we only do this if the vnode is cloned -
-      // if the new node is not cloned it means the render functions have been
-      // reset by the hot-reload-api and we need to do a proper re-render.
+      // reuse element for static trees. 为静态树重用元素
+      // note we only do this if the vnode is cloned - 注意，我们只在vnode被克隆的情况下才这样做
+      // if the new node is not cloned it means the render functions have been 如果没有克隆新节点，则意味着已经克隆了渲染函数
+      // reset by the hot-reload-api and we need to do a proper re-render. 通过hot-reload-api重置，我们需要做一个适当的重新渲染
       if (isTrue(vnode.isStatic) &&
         isTrue(oldVnode.isStatic) &&
         vnode.key === oldVnode.key &&
@@ -6796,14 +6845,15 @@
       }
 
       var i;
-      var data = vnode.data;
-      if (isDef(data) && isDef(i = data.hook) && isDef(i = i.prepatch)) {
-        i(oldVnode, vnode);
+      var data = vnode.data; // data 数据
+      if (isDef(data) && isDef(i = data.hook) && isDef(i = i.prepatch)) { // 在这里，判断 vnode 是否为组件 vnode
+        i(oldVnode, vnode); // 如果是的话，就需要通过 prepatch 钩子来更新组件
       }
 
-      var oldCh = oldVnode.children;
-      var ch = vnode.children;
-      if (isDef(data) && isPatchable(vnode)) {
+      var oldCh = oldVnode.children; // oldVnode 的 子节点
+      var ch = vnode.children; // vnode 的 子节点
+      if (isDef(data) && isPatchable(vnode)) { // 存在 data && 该 vnode 渲染出来的是一个 标签元素
+        // 此时通过 cbs 模块的更新 模块队列 来更新该节点的 data 属性
         for (i = 0; i < cbs.update.length; ++i) { cbs.update[i](oldVnode, vnode); }
         if (isDef(i = data.hook) && isDef(i = i.update)) { i(oldVnode, vnode); }
       }
@@ -7196,39 +7246,39 @@
   ];
 
   /*  */
-
+  // 初始化或更新 vnode 中的 attrs 属性
   function updateAttrs(oldVnode, vnode) {
-    var opts = vnode.componentOptions;
-    if (isDef(opts) && opts.Ctor.options.inheritAttrs === false) {
-      return
+    var opts = vnode.componentOptions; // 提取出 组件vnode 的组件配置项
+    if (isDef(opts) && opts.Ctor.options.inheritAttrs === false) { // 通过设置 inheritAttrs 为 false，此时可取消将 attrs 绑定到组件的根元素上
+      return // 如果是组件 vnode，并且这个组件设置了不将 attrs 绑定到根组件上
     }
-    if (isUndef(oldVnode.data.attrs) && isUndef(vnode.data.attrs)) {
-      return
+    if (isUndef(oldVnode.data.attrs) && isUndef(vnode.data.attrs)) { // 如果新旧 vnode 中都不存在 attrs 属性时 
+      return // 此时直接返回
     }
     var key, cur, old;
-    var elm = vnode.elm;
-    var oldAttrs = oldVnode.data.attrs || {};
-    var attrs = vnode.data.attrs || {};
-    // clone observed objects, as the user probably wants to mutate it
+    var elm = vnode.elm; // DOM 元素
+    var oldAttrs = oldVnode.data.attrs || {}; // oldVnode 的 attrs 数据
+    var attrs = vnode.data.attrs || {}; // vnode 的 attrs 数据
+    // clone observed objects, as the user probably wants to mutate it 克隆观察到的对象，因为用户可能想要改变它
     if (isDef(attrs.__ob__)) {
       attrs = vnode.data.attrs = extend({}, attrs);
     }
 
-    for (key in attrs) {
+    for (key in attrs) { // 遍历新的 attrs 属性
       cur = attrs[key];
       old = oldAttrs[key];
-      if (old !== cur) {
-        setAttr(elm, key, cur);
+      if (old !== cur) { // 如果新旧值不相同，则修改 DOM 的 attrs
+        setAttr(elm, key, cur); // 设置属性
       }
     }
-    // #4391: in IE9, setting type can reset value for input[type=radio]
-    // #6666: IE/Edge forces progress value down to 1 before setting a max
+    // #4391: in IE9, setting type can reset value for input[type=radio] 在IE9中，设置type可以重置输入值[type=radio]
+    // #6666: IE/Edge forces progress value down to 1 before setting a max IE/Edge在设置最大值之前将进度值降低到1
     /* istanbul ignore if */
     if ((isIE || isEdge) && attrs.value !== oldAttrs.value) {
       setAttr(elm, 'value', attrs.value);
     }
-    for (key in oldAttrs) {
-      if (isUndef(attrs[key])) {
+    for (key in oldAttrs) { // 遍历旧的 attrs
+      if (isUndef(attrs[key])) { // 如果不存在新的 attrs 中，此时需要删除属性
         if (isXlink(key)) {
           elm.removeAttributeNS(xlinkNS, getXlinkProp(key));
         } else if (!isEnumeratedAttr(key)) {
@@ -7238,38 +7288,44 @@
     }
   }
 
-  function setAttr(el, key, value) {
-    if (el.tagName.indexOf('-') > -1) {
+  // 为指定 DOM 添加属性
+  function setAttr(
+    el, // DOM
+    key, // 添加属性key
+    value // 属性值
+  ) {
+    if (el.tagName.indexOf('-') > -1) { // 如果 el.tagName 带有 - 的话
       baseSetAttr(el, key, value);
-    } else if (isBooleanAttr(key)) {
-      // set attribute for blank value
+    } else if (isBooleanAttr(key)) { // 如果 key 是需要设置为 boolean 的属性
+      // set attribute for blank value 设置属性为空值
       // e.g. <option disabled>Select one</option>
-      if (isFalsyAttrValue(value)) {
-        el.removeAttribute(key);
+      if (isFalsyAttrValue(value)) { // 如果 value 为 null 或 false
+        el.removeAttribute(key); // 则需要删除属性
       } else {
-        // technically allowfullscreen is a boolean attribute for <iframe>,
-        // but Flash expects a value of "true" when used on <embed> tag
+        // technically allowfullscreen is a boolean attribute for <iframe>, 从技术上讲，allowfullscreen是一个布尔属性
+        // but Flash expects a value of "true" when used on <embed> tag 但是Flash要求在标签上使用的值为“true”
         value = key === 'allowfullscreen' && el.tagName === 'EMBED'
           ? 'true'
           : key;
-        el.setAttribute(key, value);
+        el.setAttribute(key, value); // 通过 setAttribute 方法设置属性
       }
-    } else if (isEnumeratedAttr(key)) {
-      el.setAttribute(key, convertEnumeratedValue(key, value));
-    } else if (isXlink(key)) {
+    } else if (isEnumeratedAttr(key)) { // 如果 key 是 contenteditable,draggable,spellcheck 属性
+      el.setAttribute(key, convertEnumeratedValue(key, value)); // 通过 setAttribute 方法设置
+    } else if (isXlink(key)) { // 如果是 xlink: 类型
       if (isFalsyAttrValue(value)) {
         el.removeAttributeNS(xlinkNS, getXlinkProp(key));
       } else {
         el.setAttributeNS(xlinkNS, key, value);
       }
-    } else {
+    } else { // 其他情况使用 baseSetAttr 设置属性
       baseSetAttr(el, key, value);
     }
   }
 
+  // 基础设置属性的方法
   function baseSetAttr(el, key, value) {
-    if (isFalsyAttrValue(value)) {
-      el.removeAttribute(key);
+    if (isFalsyAttrValue(value)) { // 如果是 null || undefined || false
+      el.removeAttribute(key); // 删除属性
     } else {
       // #7138: IE10 & 11 fires input event when setting placeholder on
       // <textarea>... block the first input event and remove the blocker
@@ -7292,18 +7348,20 @@
     }
   }
 
+  // attrs 模块方法
   var attrs = {
-    create: updateAttrs,
-    update: updateAttrs
+    create: updateAttrs, // 初始化方法
+    update: updateAttrs // 更新方法
   };
 
   /*  */
 
+  // 初始化后更新 DOM 的 class 属性
   function updateClass(oldVnode, vnode) {
-    var el = vnode.elm;
+    var el = vnode.elm; // 提取 DOM
     var data = vnode.data;
     var oldData = oldVnode.data;
-    if (
+    if ( // 简单来讲，就是没有新的 class 添加，也没有旧的 class 需要删除
       isUndef(data.staticClass) &&
       isUndef(data.class) && (
         isUndef(oldData) || (
@@ -7315,24 +7373,25 @@
       return
     }
 
-    var cls = genClassForVnode(vnode);
+    var cls = genClassForVnode(vnode); // 整合 class 出来 - 暂时策略不是很清楚
 
-    // handle transition classes
-    var transitionClass = el._transitionClasses;
+    // handle transition classes 处理过渡类
+    var transitionClass = el._transitionClasses; // 过渡的类
     if (isDef(transitionClass)) {
-      cls = concat(cls, stringifyClass(transitionClass));
+      cls = concat(cls, stringifyClass(transitionClass)); // stringifyClass: 将 value 序列化 -- 最终就是 'xx xx xx' 形式
     }
 
-    // set the class
-    if (cls !== el._prevClass) {
-      el.setAttribute('class', cls);
-      el._prevClass = cls;
+    // set the class 设置类
+    if (cls !== el._prevClass) { // 如果更新前后的类不相同
+      el.setAttribute('class', cls); // 此时直接设置 class 属性
+      el._prevClass = cls; // 这里保存了解析后的 class，用于后续更新使用
     }
   }
 
+  // class 模块钩子
   var klass = {
-    create: updateClass,
-    update: updateClass
+    create: updateClass, // 初始化
+    update: updateClass // 更新
   };
 
   /*  */
@@ -7815,8 +7874,8 @@
 
   var warn$1;
 
-  // in some cases, the event used has to be determined at runtime
-  // so we used some reserved tokens during compile.
+  // in some cases, the event used has to be determined at runtime 在某些情况下，所使用的事件必须在运行时确定
+  // so we used some reserved tokens during compile. 因此，我们在编译期间使用了一些保留令牌
   var RANGE_TOKEN = '__r';
   var CHECKBOX_RADIO_TOKEN = '__c';
 
@@ -7988,10 +8047,10 @@
 
   /*  */
 
-  // normalize v-model event tokens that can only be determined at runtime.
-  // it's important to place the event as the first in the array because
-  // the whole point is ensuring the v-model callback gets called before
-  // user-attached handlers.
+  // normalize v-model event tokens that can only be determined at runtime. 规范化只能在运行时确定的v-model事件令牌
+  // it's important to place the event as the first in the array because 将事件放置在数组的第一个位置非常重要，因为
+  // the whole point is ensuring the v-model callback gets called before 关键是要确保v-model回调在之前被调用
+  // user-attached handlers. user-attached 处理程序
   function normalizeEvents(on) {
     /* istanbul ignore if */
     if (isDef(on[RANGE_TOKEN])) {
@@ -8084,15 +8143,16 @@
     );
   }
 
+  // 更新 DOM 事件
   function updateDOMListeners(oldVnode, vnode) {
-    if (isUndef(oldVnode.data.on) && isUndef(vnode.data.on)) {
-      return
+    if (isUndef(oldVnode.data.on) && isUndef(vnode.data.on)) { // 如果新旧 vnode 上都不存在 on 事件
+      return // 则不做处理
     }
     var on = vnode.data.on || {};
     var oldOn = oldVnode.data.on || {};
-    target$1 = vnode.elm;
+    target$1 = vnode.elm; // DOM 元素
     normalizeEvents(on);
-    updateListeners(on, oldOn, add$1, remove$2, createOnceHandler$1, vnode.context);
+    updateListeners(on, oldOn, add$1, remove$2, createOnceHandler$1, vnode.context); // 通过 updateListeners 来更新事件
     target$1 = undefined;
   }
 
