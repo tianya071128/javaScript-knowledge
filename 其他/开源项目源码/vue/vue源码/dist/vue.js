@@ -1752,36 +1752,37 @@
   }
 
   /**
-   * Resolve an asset.
-   * This function is used because child instances need access
-   * to assets defined in its ancestor chain.
+   * Resolve an asset. 解决一个资产
+   * This function is used because child instances need access 之所以使用这个函数，是因为需要访问子实例
+   * to assets defined in its ancestor chain. 到其祖先链中定义的资产
+   * 查找资源(指令，组件，过滤器)
    */
   function resolveAsset(
-    options,
-    type,
-    id,
-    warnMissing
+    options, // 实例配置项
+    type, // 资源类型(指令，组件，过滤器)
+    id, // 唯一标识
+    warnMissing // 没有找到是否发出警告
   ) {
     /* istanbul ignore if */
-    if (typeof id !== 'string') {
+    if (typeof id !== 'string') { // 如果不为字符串，不合法
       return
     }
-    var assets = options[type];
+    var assets = options[type]; // 提取指令资源类型
     // check local registration variations first
-    if (hasOwn(assets, id)) { return assets[id] }
-    var camelizedId = camelize(id);
-    if (hasOwn(assets, camelizedId)) { return assets[camelizedId] }
-    var PascalCaseId = capitalize(camelizedId);
-    if (hasOwn(assets, PascalCaseId)) { return assets[PascalCaseId] }
-    // fallback to prototype chain
-    var res = assets[id] || assets[camelizedId] || assets[PascalCaseId];
+    if (hasOwn(assets, id)) { return assets[id] } // 首先直接尝试该 id 是否在资源集合中，找到直接返回
+    var camelizedId = camelize(id); // 将 id 转化为驼峰命名
+    if (hasOwn(assets, camelizedId)) { return assets[camelizedId] } // 然后验证转化为驼峰命名的 id 是否在集合中
+    var PascalCaseId = capitalize(camelizedId); // 将首字母转为大写
+    if (hasOwn(assets, PascalCaseId)) { return assets[PascalCaseId] } // 再次查找
+    // fallback to prototype chain 回退到原型链
+    var res = assets[id] || assets[camelizedId] || assets[PascalCaseId]; // 先在自身找，然后从原型链中查找
     if (warnMissing && !res) {
-      warn(
+      warn( //　警告
         'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
         options
       );
     }
-    return res
+    return res　// 返回
   }
 
   /*  */
@@ -2454,38 +2455,47 @@
   }
 
   /*  */
-
-  function mergeVNodeHook(def, hookKey, hook) {
-    if (def instanceof VNode) {
-      def = def.data.hook || (def.data.hook = {});
+  // 合并 vnode 的钩子
+  /**
+   * vue 内部存在需要深入组件渲染过程中的各个阶段，此时可通过 hook 机制来实现
+   * 先将不同的钩子添加到 hook 中，这样在组件的渲染过程的特定阶段就会执行这里的钩子
+   */
+  function mergeVNodeHook(
+    def, 
+    hookKey, // 钩子类型
+    hook // 钩子回调
+  ) {
+    if (def instanceof VNode) { // 如果 def 属于 VNode
+      def = def.data.hook || (def.data.hook = {}); // 提取出组件的 hook 集合
     }
     var invoker;
-    var oldHook = def[hookKey];
+    var oldHook = def[hookKey]; // 是否存在旧的 hook 回调
 
+    // 继续封装一层 hook，用于在执行 hook 后删除钩子，也就是这个钩子只会调用一次
     function wrappedHook() {
-      hook.apply(this, arguments);
-      // important: remove merged hook to ensure it's called only once
-      // and prevent memory leak
-      remove(invoker.fns, wrappedHook);
+      hook.apply(this, arguments); // 执行钩子
+      // important: remove merged hook to ensure it's called only once 重要提示:删除合并钩子以确保它只被调用一次
+      // and prevent memory leak 防止内存泄漏
+      remove(invoker.fns, wrappedHook); // 删除钩子
     }
 
-    if (isUndef(oldHook)) {
-      // no existing hook
-      invoker = createFnInvoker([wrappedHook]);
+    if (isUndef(oldHook)) { // 如果旧的 hook 不存在
+      // no existing hook 没有现有的钩子
+      invoker = createFnInvoker([wrappedHook]); // 封装钩子集合成一个新的函数
     } else {
       /* istanbul ignore if */
-      if (isDef(oldHook.fns) && isTrue(oldHook.merged)) {
-        // already a merged invoker
-        invoker = oldHook;
-        invoker.fns.push(wrappedHook);
+      if (isDef(oldHook.fns) && isTrue(oldHook.merged)) { // 如果旧的 hook 存在，并且 merged(表示是经过这个方法合并的) 标识为 true
+        // already a merged invoker 已经是合并的调用者
+        invoker = oldHook; 
+        invoker.fns.push(wrappedHook); // 这样只需要将需要添加的 hook 在经过函数封装后添加至 fns 集合中
       } else {
-        // existing plain hook
-        invoker = createFnInvoker([oldHook, wrappedHook]);
+        // existing plain hook 现有普通钩
+        invoker = createFnInvoker([oldHook, wrappedHook]); // 否则就需要通过 createFnInvoker 封装
       }
     }
 
-    invoker.merged = true;
-    def[hookKey] = invoker;
+    invoker.merged = true; // 将标识置为 true
+    def[hookKey] = invoker; // 存储组装后的钩子
   }
 
   /*  */
@@ -6222,6 +6232,7 @@
     return node.tagName
   }
 
+  // 设置文本节点的文本
   function setTextContent(node, text) {
     node.textContent = text;
   }
@@ -6242,7 +6253,7 @@
     parentNode: parentNode, // 查找指定节点的父节点
     nextSibling: nextSibling,
     tagName: tagName,
-    setTextContent: setTextContent,
+    setTextContent: setTextContent, // 设置文本节点的文本
     setStyleScope: setStyleScope
   });
 
@@ -6633,9 +6644,17 @@
       }
     }
 
-    function addVnodes(parentElm, refElm, vnodes, startIdx, endIdx, insertedVnodeQueue) {
-      for (; startIdx <= endIdx; ++startIdx) {
-        createElm(vnodes[startIdx], insertedVnodeQueue, parentElm, refElm, false, vnodes, startIdx);
+    // 新增子节点
+    function addVnodes(
+      parentElm, // 父节点
+      refElm, // 定位节点
+      vnodes, // 需要添加的集合
+      startIdx, // 开始索引
+      endIdx, // 结束索引
+      insertedVnodeQueue // 子组件集合 - 因为在 update 阶段，也是存在新增子组件集合的
+    ) {
+      for (; startIdx <= endIdx; ++startIdx) { // 遍历
+        createElm(vnodes[startIdx], insertedVnodeQueue, parentElm, refElm, false, vnodes, startIdx); // 通过 vnode 创建 DOM
       }
     }
 
@@ -6704,29 +6723,36 @@
       }
     }
 
-    function updateChildren(parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
-      var oldStartIdx = 0;
-      var newStartIdx = 0;
-      var oldEndIdx = oldCh.length - 1;
-      var oldStartVnode = oldCh[0];
-      var oldEndVnode = oldCh[oldEndIdx];
-      var newEndIdx = newCh.length - 1;
-      var newStartVnode = newCh[0];
-      var newEndVnode = newCh[newEndIdx];
+    // 更新子节点
+    function updateChildren(
+      parentElm, // 父节点
+      oldCh, // 旧子节点
+      newCh, // 新子节点
+      insertedVnodeQueue, // 新的子组件集合 
+      removeOnly
+    ) {
+      var oldStartIdx = 0; // 旧的子节点开始索引
+      var newStartIdx = 0; // 新的子节点开始索引
+      var oldEndIdx = oldCh.length - 1; // 旧的最后一个子节点索引
+      var oldStartVnode = oldCh[0]; // 旧的第一个子节点
+      var oldEndVnode = oldCh[oldEndIdx]; // 旧的最后一个子节点
+      var newEndIdx = newCh.length - 1; // 新的最后一个子节点索引
+      var newStartVnode = newCh[0]; // 新的第一个子节点
+      var newEndVnode = newCh[newEndIdx]; // 新的最后一个子节点
       var oldKeyToIdx, idxInOld, vnodeToMove, refElm;
 
-      // removeOnly is a special flag used only by <transition-group>
-      // to ensure removed elements stay in correct relative positions
-      // during leaving transitions
+      // removeOnly is a special flag used only by <transition-group> removeOnly 是使用的特殊标志
+      // to ensure removed elements stay in correct relative positions 以确保被移除的元素保持在正确的相对位置
+      // during leaving transitions 在离开转换
       var canMove = !removeOnly;
 
       {
-        checkDuplicateKeys(newCh);
+        checkDuplicateKeys(newCh); // 对新的子节点进行 key 检查，同一级子节点的 key 不能重复
       }
 
       while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
         if (isUndef(oldStartVnode)) {
-          oldStartVnode = oldCh[++oldStartIdx]; // Vnode has been moved left
+          oldStartVnode = oldCh[++oldStartIdx]; // Vnode has been moved left Vnode已向左移动
         } else if (isUndef(oldEndVnode)) {
           oldEndVnode = oldCh[--oldEndIdx];
         } else if (sameVnode(oldStartVnode, newStartVnode)) {
@@ -6806,7 +6832,7 @@
     function patchVnode(
       oldVnode, // 旧的 Vnode
       vnode, // 新的 Vnode
-      insertedVnodeQueue, // 队列
+      insertedVnodeQueue, // 新的子组件队列
       ownerArray,
       index,
       removeOnly // 是否删除全部的标识
@@ -6847,33 +6873,38 @@
       var i;
       var data = vnode.data; // data 数据
       if (isDef(data) && isDef(i = data.hook) && isDef(i = i.prepatch)) { // 在这里，判断 vnode 是否为组件 vnode
-        i(oldVnode, vnode); // 如果是的话，就需要通过 prepatch 钩子来更新组件
+        i(oldVnode, vnode); // 如果是的话，就需要通过 prepatch 钩子来更新组件 - 在这里处理组件的更新
       }
 
       var oldCh = oldVnode.children; // oldVnode 的 子节点
       var ch = vnode.children; // vnode 的 子节点
       if (isDef(data) && isPatchable(vnode)) { // 存在 data && 该 vnode 渲染出来的是一个 标签元素
         // 此时通过 cbs 模块的更新 模块队列 来更新该节点的 data 属性
-        for (i = 0; i < cbs.update.length; ++i) { cbs.update[i](oldVnode, vnode); }
-        if (isDef(i = data.hook) && isDef(i = i.update)) { i(oldVnode, vnode); }
+        for (i = 0; i < cbs.update.length; ++i) { cbs.update[i](oldVnode, vnode); } // 先更新 vnode 层面的模块更新
+        if (isDef(i = data.hook) && isDef(i = i.update)) { i(oldVnode, vnode); } // 在更新 update 操作
       }
-      if (isUndef(vnode.text)) {
-        if (isDef(oldCh) && isDef(ch)) {
+      if (isUndef(vnode.text)) { // 如果不是文本节点
+        if (isDef(oldCh) && isDef(ch)) { // 如果新旧 vnode 都存在子节点
+          // 此时就需要进行子节点的比对
           if (oldCh !== ch) { updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly); }
-        } else if (isDef(ch)) {
+        } else if (isDef(ch)) { // 如果旧 vnode 不存在子节点，新 vnode 存在子节点
+          // 此时将旧 vnode 节点清理，直接新增新 vnode 节点
           {
-            checkDuplicateKeys(ch);
+            checkDuplicateKeys(ch); // 检查新 vnode 的子节点的 key 是否重复
           }
-          if (isDef(oldVnode.text)) { nodeOps.setTextContent(elm, ''); }
-          addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue);
-        } else if (isDef(oldCh)) {
-          removeVnodes(oldCh, 0, oldCh.length - 1);
-        } else if (isDef(oldVnode.text)) {
+          if (isDef(oldVnode.text)) { nodeOps.setTextContent(elm, ''); } // 如果旧 vnode shiy
+          addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue); // 直接新增子节点
+        } else if (isDef(oldCh)) { // 如果旧 vnode 存在子节点，新 vnode 不存在子节点
+          // 在这里，新vnode 应该表示为一个空节点
+          removeVnodes(oldCh, 0, oldCh.length - 1); // 直接删除旧vnode 的子节点
+        } else if (isDef(oldVnode.text)) { // 如果旧 vnode 是一个文本节点
+          // 直接删除文本节点
           nodeOps.setTextContent(elm, '');
         }
-      } else if (oldVnode.text !== vnode.text) {
-        nodeOps.setTextContent(elm, vnode.text);
+      } else if (oldVnode.text !== vnode.text) { // 如果新 vnode是文本节点并且跟旧 vnode 的文本不一致(此时旧 vnode 可能不是文本节点，这种情况下也只需要直接设置新 vnode 的文本节点即可，旧节点 DOM 就会被剔除 DOM 树)
+        nodeOps.setTextContent(elm, vnode.text); // 设置文本节点的文本
       }
+      
       if (isDef(data)) {
         if (isDef(i = data.hook) && isDef(i = i.postpatch)) { i(oldVnode, vnode); }
       }
@@ -7125,76 +7156,86 @@
 
   /*  */
 
+  // 指令模块
   var directives = {
-    create: updateDirectives,
-    update: updateDirectives,
-    destroy: function unbindDirectives(vnode) {
+    create: updateDirectives, // 初始化
+    update: updateDirectives, // 更新
+    destroy: function unbindDirectives(vnode) { // 销毁
       updateDirectives(vnode, emptyNode);
     }
   };
 
+  // 初始化 || 更新 || 销毁 指令
   function updateDirectives(oldVnode, vnode) {
-    if (oldVnode.data.directives || vnode.data.directives) {
-      _update(oldVnode, vnode);
+    if (oldVnode.data.directives || vnode.data.directives) { // 只要新旧 vnode 中存在指令  
+      _update(oldVnode, vnode); // 就执行指令的操作
     }
   }
 
+  /**
+   * 指令的处理
+   * bind：只调用一次，指令第一次绑定到元素时调用。在这里可以进行一次性的初始化设置
+   * inserted：被绑定元素插入父节点时调用 (仅保证父节点存在，但不一定已被插入文档中)
+   * update：所在组件的 VNode 更新时调用，但是可能发生在其子 VNode 更新之前。
+   * componentUpdated：指令所在组件的 VNode 及其子 VNode 全部更新后调用
+   * unbind：只调用一次，指令与元素解绑时调用
+   */
   function _update(oldVnode, vnode) {
-    var isCreate = oldVnode === emptyNode;
-    var isDestroy = vnode === emptyNode;
-    var oldDirs = normalizeDirectives$1(oldVnode.data.directives, oldVnode.context);
-    var newDirs = normalizeDirectives$1(vnode.data.directives, vnode.context);
+    var isCreate = oldVnode === emptyNode; // 如果旧的 vnode 是一个空 Node，则为初始阶段
+    var isDestroy = vnode === emptyNode; // 如果新的 vnode 是一个空 Node，则为销毁阶段
+    var oldDirs = normalizeDirectives$1(oldVnode.data.directives, oldVnode.context); // 规范化旧指令
+    var newDirs = normalizeDirectives$1(vnode.data.directives, vnode.context); // 规范化新指令
 
-    var dirsWithInsert = [];
-    var dirsWithPostpatch = [];
+    var dirsWithInsert = []; // inserted 钩子集合
+    var dirsWithPostpatch = []; // componentUpdated 钩子集合
 
     var key, oldDir, dir;
-    for (key in newDirs) {
-      oldDir = oldDirs[key];
-      dir = newDirs[key];
-      if (!oldDir) {
-        // new directive, bind
-        callHook$1(dir, 'bind', vnode, oldVnode);
-        if (dir.def && dir.def.inserted) {
-          dirsWithInsert.push(dir);
+    for (key in newDirs) { // 遍历新的指令
+      oldDir = oldDirs[key]; // 对应旧指令
+      dir = newDirs[key]; // 对应新指令
+      if (!oldDir) { // 如果不存在旧指令 - 此时表示一个新指令刚绑定
+        // new directive, bind 新指令,绑定
+        callHook$1(dir, 'bind', vnode, oldVnode); // 执行 bind 绑定钩子
+        if (dir.def && dir.def.inserted) {  // 是否存在 inserted 插入钩子
+          dirsWithInsert.push(dir); // 此时暂时不执行，先推入集合中
         }
-      } else {
-        // existing directive, update
-        dir.oldValue = oldDir.value;
-        dir.oldArg = oldDir.arg;
-        callHook$1(dir, 'update', vnode, oldVnode);
-        if (dir.def && dir.def.componentUpdated) {
-          dirsWithPostpatch.push(dir);
+      } else { // 此时表示现有的指令，需要执行更新操作
+        // existing directive, update 现有的指令,更新
+        dir.oldValue = oldDir.value; // value：指令的绑定值
+        dir.oldArg = oldDir.arg; // arg：传给指令的参数
+        callHook$1(dir, 'update', vnode, oldVnode); // 执行 update 钩子
+        if (dir.def && dir.def.componentUpdated) { // 是否存在 componentUpdated 钩子
+          dirsWithPostpatch.push(dir); // 此时暂时不执行，推入集合中
         }
       }
     }
 
-    if (dirsWithInsert.length) {
+    if (dirsWithInsert.length) { // 是否存在 insert 钩子集合
       var callInsert = function () {
         for (var i = 0; i < dirsWithInsert.length; i++) {
           callHook$1(dirsWithInsert[i], 'inserted', vnode, oldVnode);
         }
       };
-      if (isCreate) {
-        mergeVNodeHook(vnode, 'insert', callInsert);
+      if (isCreate) { // 如果是初始阶段
+        mergeVNodeHook(vnode, 'insert', callInsert); // 则将其推入到组件的钩子中，会在特定时机执行
       } else {
-        callInsert();
+        callInsert(); // 如果不是在初始阶段，那么就立即执行
       }
     }
 
-    if (dirsWithPostpatch.length) {
-      mergeVNodeHook(vnode, 'postpatch', function () {
+    if (dirsWithPostpatch.length) { // 是否存在 componentUpdated 钩子
+      mergeVNodeHook(vnode, 'postpatch', function () { // 直接推入组件钩子中
         for (var i = 0; i < dirsWithPostpatch.length; i++) {
           callHook$1(dirsWithPostpatch[i], 'componentUpdated', vnode, oldVnode);
         }
       });
     }
 
-    if (!isCreate) {
-      for (key in oldDirs) {
+    if (!isCreate) { // 如果不是在初始阶段
+      for (key in oldDirs) { // 执行需要销毁的钩子
         if (!newDirs[key]) {
-          // no longer present, unbind
-          callHook$1(oldDirs[key], 'unbind', oldVnode, oldVnode, isDestroy);
+          // no longer present, unbind 不再存在，解除束缚
+          callHook$1(oldDirs[key], 'unbind', oldVnode, oldVnode, isDestroy); // 执行指令 unbind 钩子
         }
       }
     }
@@ -7202,40 +7243,50 @@
 
   var emptyModifiers = Object.create(null);
 
+  // 规范化指令参数
   function normalizeDirectives$1(
-    dirs,
+    dirs, // 指令对象
     vm
   ) {
-    var res = Object.create(null);
-    if (!dirs) {
+    var res = Object.create(null); // 空对象
+    if (!dirs) { // 不存在指令时
       // $flow-disable-line
-      return res
+      return res // 返回空对象
     }
     var i, dir;
-    for (i = 0; i < dirs.length; i++) {
+    for (i = 0; i < dirs.length; i++) { // 遍历指令集合
       dir = dirs[i];
-      if (!dir.modifiers) {
+      if (!dir.modifiers) { // modifiers：一个包含修饰符的对象 - 如果不存在修饰符对象的话
         // $flow-disable-line
-        dir.modifiers = emptyModifiers;
+        dir.modifiers = emptyModifiers; // 置为一个空对象
       }
-      res[getRawDirName(dir)] = dir;
-      dir.def = resolveAsset(vm.$options, 'directives', dir.name, true);
+      res[getRawDirName(dir)] = dir; // 重新命名 res
+      dir.def = resolveAsset(vm.$options, 'directives', dir.name, true); // 查找到注册的指令
     }
     // $flow-disable-line
     return res
   }
 
+  // 获取指令名称
   function getRawDirName(dir) {
+    // 返回 rawName || 通过 name 和 modifiers 组合而成
     return dir.rawName || ((dir.name) + "." + (Object.keys(dir.modifiers || {}).join('.')))
   }
 
-  function callHook$1(dir, hook, vnode, oldVnode, isDestroy) {
-    var fn = dir.def && dir.def[hook];
+  // 执行指令对应的钩子
+  function callHook$1(
+    dir, // 指令对象
+    hook,  // 对应钩子
+    vnode,  // 新的 vnode
+    oldVnode, // 旧的 vnode
+    isDestroy
+  ) {
+    var fn = dir.def && dir.def[hook]; // 提取对应钩子
     if (fn) {
       try {
-        fn(vnode.elm, dir, vnode, oldVnode, isDestroy);
+        fn(vnode.elm, dir, vnode, oldVnode, isDestroy); // 执行钩子
       } catch (e) {
-        handleError(e, vnode.context, ("directive " + (dir.name) + " " + hook + " hook"));
+        handleError(e, vnode.context, ("directive " + (dir.name) + " " + hook + " hook")); // 出错时处理错误
       }
     }
   }
@@ -8165,6 +8216,7 @@
 
   var svgContainer;
 
+  // 初始化或更新 DOMProps
   function updateDOMProps(oldVnode, vnode) {
     if (isUndef(oldVnode.data.domProps) && isUndef(vnode.data.domProps)) {
       return
