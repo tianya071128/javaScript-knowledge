@@ -3,7 +3,7 @@
  * @Author: 温祖彪
  * @Date: 2021-03-09 09:03:37
  * @LastEditors: sueRimn
- * @LastEditTime: 2021-03-09 11:14:09
+ * @LastEditTime: 2021-03-17 16:29:35
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -16,9 +16,9 @@
 
 <body>
   <script src="https://unpkg.com/vue/dist/vue.js"></script>
-  <script src="./dist/vue-router.js"></script>
+  <script src="./dist1/vue-router.js"></script>
 
-  <div id="app">
+  <div id="app"> 
     <h1>Hello App!</h1>
     <p>
       <!-- 使用 router-link 组件来导航. -->
@@ -51,7 +51,7 @@
   // 我们晚点再讨论嵌套路由。
   const routes = [
     { path: '/foo', component: Foo, alias: '/fooAlias', children: [{ path: 'bar', component: FooBar }] },
-    { path: '/bar', component: Bar }
+    { path: '/bar', component: Bar, name: 'Bar', children: [{ path: '', component: FooBar }] }
   ]
 
   // 3. 创建 router 实例，然后传 `routes` 配置
