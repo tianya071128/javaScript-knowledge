@@ -1,3 +1,55 @@
+/**
+ * 我们要明白 vue-router 的几个关键点, 在这里尝试使用文字来记录思路, 具体需要查看源码信息
+ * 1. 用户注册路由信息:
+ *    我们在初始化 new VueRouter 实例时, 我们在内部就会对路由注册的信息进行操作, 具体而言, 我们会将其注册信息解析成 
+ *    pathList(路由集合), pathMap(路径与路由信息集合), nameMap(name 与路由信息结合) 这样的数据结构, 路由信息会根据用户注册的信息来统一规范化格式
+ *    例如: 
+ *    { 
+ *      path: normalizedPath, // 路径
+ *      regex: compileRouteRegex(normalizedPath, pathToRegexpOptions),
+ *      components: route.components || { default: route.component }, // path 对应的组件, 最终会统一为 { xx: xx, xx: xx } -- 会兼容其命名视图
+ *      alias: route.alias // 是否存在别名
+ *        ? typeof route.alias === 'string' // 如果存在别名并且为 string 类型
+ *          ? [route.alias] // 组装成数组
+ *          : route.alias // 此时应该为数组, 所以直接使用
+ *        : [], // 不存在别名 - 返回 []
+ *      instances: {},
+ *      enteredCbs: {},
+ *      name: name, // 命名路由的 name
+ *      parent: parent, // 父路由
+ *      matchAs: matchAs, // 别名对应的原始路径 - 用于当为别名路径时查找到正确的路径
+ *      redirect: route.redirect, // 重定向路径
+ *      beforeEnter: route.beforeEnter, // 路由独享的守卫
+ *      meta: route.meta || {}, // 路由元信息
+ *      props: // 路由组件通过 props 形式传参
+ *        route.props == null // 没有注册 props
+ *          ? {} // 返回 {}
+ *          : route.components // 如果注册了命名视图的话
+ *            ? route.props // 直接使用, 需要跟命名视图注册的组件对应
+ *            : { default: route.props } // 封装一下 
+ *    }
+ *    在内部会通过闭包来引用这些数据, 返回一些公共 api 可以进行操作, 例如动态添加路由, 根据匹配信息来匹配对应路由信息
+ * 
+ * 2. 路由器初始化
+ *    在存在组件配置了这个路由器时, 我们才会去进行一些初始化, 例如渲染当前路由, 侦听路由变化等操作, 在这里初始化是因为, 如果还没有组件配置这个路由器的话, 那我们这个路由器就相当于停用状态
+ *    而在 install 注册插件的时候, 我们就去全局混入和全局注册一些组件等信息, 在全局混入中混入 beforeCreate 生命周期, 我们在这里会在根组件配置路由器 router(即 VueRouter 实例) 时候, 去调用 VueRouter.init 初始化
+ *    初始化时, 首先通过 transitionTo 方法来渲染当前 url 对应的路由, 因为在这里我们还没有渲染初始 url, 所以在这里渲染一下, 渲染完成后我们会去侦听 url 变化, 这样就可以响应 url 变化来渲染不同的路由组件
+ * 3. transitionTo: 这个方法非常关键, 主要进行两步: this.router.match 来匹配路由信息并创建路由对象, this.confirmTransition 来渲染组件, 执行守卫钩子等
+ *    3.1 this.router.match: 根据匹配信息来匹配用户注册的路由信息并且创建路由对象
+ *        我们通过操作 pathList, pathMap, nameMap 等数据, 来匹配传入的 location(路径信息), 找出对应的注册路由信息, 并根据这个路由信息来创建一个路由对象
+ *        路由对象结构为: 
+ *        var route = {
+ *          name: location.name || (record && record.name), // name 值
+ *          meta: (record && record.meta) || {}, // 元信息
+ *          path: location.path || '/', // 路径
+ *          hash: location.hash || '', // hash 值
+ *          query: query, // 查询参数
+ *          params: location.params || {}, // params 值
+ *          fullPath: getFullPath(location, stringifyQuery), // 根据 path, hash, query 来拼接成最终路径
+ *          matched: record ? formatMatch(record) : [] // 一个数组，包含当前路由的所有嵌套路径片段的路由记录 。
+ *        };
+ */
+
 /*!
   * vue-router v3.5.1
   * (c) 2021 Evan You
@@ -116,6 +168,7 @@
     return res // 返回
   }
 
+  // 默认序列化 query 方法
   function stringifyQuery (obj) {
     var res = obj
       ? Object.keys(obj)
@@ -157,46 +210,49 @@
 
   var trailingSlashRE = /\/?$/;
 
+  // 最终创建一个路由对象的地方
   function createRoute (
-    record,
-    location,
-    redirectedFrom,
-    router
+    record, // 路由信息
+    location, // 路径信息 
+    redirectedFrom, // 重定向信息
+    router // VueRouter 实例
   ) {
-    var stringifyQuery = router && router.options.stringifyQuery;
+    var stringifyQuery = router && router.options.stringifyQuery; // 自定义序列化参数方法 - 将对象转化为字符串
 
-    var query = location.query || {};
+    var query = location.query || {}; // 查询参数
     try {
-      query = clone(query);
+      query = clone(query); // 克隆 query - 应该是为了不影响原始值
     } catch (e) {}
 
+    // 路由对象
     var route = {
-      name: location.name || (record && record.name),
-      meta: (record && record.meta) || {},
-      path: location.path || '/',
-      hash: location.hash || '',
-      query: query,
-      params: location.params || {},
-      fullPath: getFullPath(location, stringifyQuery),
-      matched: record ? formatMatch(record) : []
+      name: location.name || (record && record.name), // name 值
+      meta: (record && record.meta) || {}, // 元信息
+      path: location.path || '/', // 路径
+      hash: location.hash || '', // hash 值
+      query: query, // 查询参数
+      params: location.params || {}, // params 值
+      fullPath: getFullPath(location, stringifyQuery), // 根据 path, hash, query 来拼接成最终路径
+      matched: record ? formatMatch(record) : [] // 一个数组，包含当前路由的所有嵌套路径片段的路由记录 。
     };
-    if (redirectedFrom) {
-      route.redirectedFrom = getFullPath(redirectedFrom, stringifyQuery);
+    if (redirectedFrom) { // 如果存在重定向信息
+      route.redirectedFrom = getFullPath(redirectedFrom, stringifyQuery); // 还需要额外添加一个 redirectedFrom 属性 -- 如果存在重定向，即为重定向来源的路由的名字
     }
-    return Object.freeze(route)
+    return Object.freeze(route) // 将其冻结并返回
   }
 
+  // 克隆一个值出来
   function clone (value) {
-    if (Array.isArray(value)) {
-      return value.map(clone)
-    } else if (value && typeof value === 'object') {
+    if (Array.isArray(value)) { // 是数组
+      return value.map(clone) // 递归数组
+    } else if (value && typeof value === 'object') { // 对象形式
       var res = {};
       for (var key in value) {
-        res[key] = clone(value[key]);
+        res[key] = clone(value[key]); // 递归对象
       }
       return res
-    } else {
-      return value
+    } else { // 其他值
+      return value // 返回原始值
     }
   }
 
@@ -205,37 +261,42 @@
     path: '/'
   });
 
+  // 包含当前路由的所有嵌套路径片段的路由记录 。
   function formatMatch (record) {
     var res = [];
-    while (record) {
-      res.unshift(record);
-      record = record.parent;
+    while (record) { // 递归
+      res.unshift(record); // 推入到 res 集合中
+      record = record.parent; // 查找父路由
     }
     return res
   }
 
+  // 根据 path, hash, query 来拼接成最终路径
   function getFullPath (
-    ref,
-    _stringifyQuery
+    ref, // 路径信息
+    _stringifyQuery // 序列化方法
   ) {
-    var path = ref.path;
-    var query = ref.query; if ( query === void 0 ) query = {};
-    var hash = ref.hash; if ( hash === void 0 ) hash = '';
+    var path = ref.path; // 提取出 path 信息
+    var query = ref.query; if ( query === void 0 ) query = {}; // query 信息
+    var hash = ref.hash; if ( hash === void 0 ) hash = ''; // hash 信息
 
-    var stringify = _stringifyQuery || stringifyQuery;
-    return (path || '/') + stringify(query) + hash
+    var stringify = _stringifyQuery || stringifyQuery; // 如果没有自定义序列化 query 方法, 则使用默认方法
+    return (path || '/') + stringify(query) + hash // 拼接路径
   }
 
+  // 比较 a 和 b 是否相同
   function isSameRoute (a, b, onlyPath) {
-    if (b === START) {
-      return a === b
-    } else if (!b) {
-      return false
-    } else if (a.path && b.path) {
+    if (b === START) { // 如果 b 为空路由对象
+      return a === b // 那么两个直接比较
+    } else if (!b) { // 如果 b 不存在
+      return false // 直接返回 false
+    } else if (a.path && b.path) { // 如果 a 和 b 的 path 都存在
+      // a 和 b 的 path 相同 && hash 相同 && query 相同
       return a.path.replace(trailingSlashRE, '') === b.path.replace(trailingSlashRE, '') && (onlyPath ||
         a.hash === b.hash &&
         isObjectEqual(a.query, b.query))
-    } else if (a.name && b.name) {
+    } else if (a.name && b.name) { // 如果 a 和 b 的 name 都存在
+      // a 和 b 的 name 相同 && hash 相同 && query 相同 && params 相同
       return (
         a.name === b.name &&
         (onlyPath || (
@@ -249,29 +310,30 @@
     }
   }
 
+  // 比较 a 和 b 是否相同
   function isObjectEqual (a, b) {
-    if ( a === void 0 ) a = {};
-    if ( b === void 0 ) b = {};
+    if ( a === void 0 ) a = {}; // 重置 a
+    if ( b === void 0 ) b = {}; // 重置 b
 
-    // handle null value #1566
-    if (!a || !b) { return a === b }
-    var aKeys = Object.keys(a).sort();
-    var bKeys = Object.keys(b).sort();
-    if (aKeys.length !== bKeys.length) {
-      return false
+    // handle null value #1566 处理空值
+    if (!a || !b) { return a === b } // 如果  a 和 b 存在空值, 直接相比
+    var aKeys = Object.keys(a).sort(); // 属性进行升序
+    var bKeys = Object.keys(b).sort(); // 属性进行升序
+    if (aKeys.length !== bKeys.length) { // 如果属性数量不一致
+      return false // 那么表示不相等
     }
-    return aKeys.every(function (key, i) {
+    return aKeys.every(function (key, i) { // 判断 a 和 b 的是否相等 - 遍历比较 a 和 b 的属性值
       var aVal = a[key];
       var bKey = bKeys[i];
-      if (bKey !== key) { return false }
+      if (bKey !== key) { return false } // 如果 bKey 不跟 aKey 相同 - 那么直接表示不相同, 返回 false, 退出循环
       var bVal = b[key];
-      // query values can be null and undefined
-      if (aVal == null || bVal == null) { return aVal === bVal }
-      // check nested equality
-      if (typeof aVal === 'object' && typeof bVal === 'object') {
+      // query values can be null and undefined 查询值可以为null和未定义
+      if (aVal == null || bVal == null) { return aVal === bVal } // 如果 aVal 或 bVal 存在空值, 那么直接比较及可靠, 无需递归比较
+      // check nested equality 检查嵌套平等
+      if (typeof aVal === 'object' && typeof bVal === 'object') { // 如果都为 object, 那么就需要递归比较
         return isObjectEqual(aVal, bVal)
       }
-      return String(aVal) === String(bVal)
+      return String(aVal) === String(bVal) // 其他情况, 统一进行 String 转化后比较
     })
   }
 
@@ -979,28 +1041,29 @@
   // $flow-disable-line
   var regexpCompileCache = Object.create(null);
 
+  // 通过 path 来拼接 params最终路径 - 例如: 用户定义路由: /a/:b -- 传递了 { b: 5 } -- 此时解析成 /a/5 
   function fillParams (
-    path,
-    params,
-    routeMsg
+    path, // 路径
+    params, // 路由参数
+    routeMsg // 提示信息
   ) {
-    params = params || {};
+    params = params || {}; // 路由参数
     try {
       var filler =
         regexpCompileCache[path] ||
-        (regexpCompileCache[path] = pathToRegexp_1.compile(path));
+        (regexpCompileCache[path] = pathToRegexp_1.compile(path)); // 通过 path-to-regexp 插件来完成匹配的
 
-      // Fix #2505 resolving asterisk routes { name: 'not-found', params: { pathMatch: '/not-found' }}
-      // and fix #3106 so that you can work with location descriptor object having params.pathMatch equal to empty string
+      // Fix #2505 resolving asterisk routes { name: 'not-found', params: { pathMatch: '/not-found' }} 修复#2505解析星号路由{name: 'not-found'， params: {pathMatch: '/not-found'}}
+      // and fix #3106 so that you can work with location descriptor object having params.pathMatch equal to empty string 并修复#3106，以便您可以使用带有参数的位置描述符对象。pathMatch等于空字符串
       if (typeof params.pathMatch === 'string') { params[0] = params.pathMatch; }
 
       return filler(params, { pretty: true })
-    } catch (e) {
+    } catch (e) { // 如果解析出错了的话
       {
-        // Fix #3072 no warn if `pathMatch` is string
+        // Fix #3072 no warn if `pathMatch` is string 修复#3072如果' pathMatch '是字符串不会发出警告的问题
         warn(typeof params.pathMatch === 'string', ("missing param for " + routeMsg + ": " + (e.message)));
       }
-      return ''
+      return '' // 返回 ''
     } finally {
       // delete the 0 if it was added
       delete params[0];
@@ -1320,7 +1383,6 @@
     Vue.mixin({
       // beforeCreate: 在数据准备前执行
       beforeCreate: function beforeCreate () {
-        debugger;
         if (isDef(this.$options.router)) { // 是否是配置了 router 的 Vue 根实例 -- 这里表示的就是一个路由树对应的根
           /**
            * 在这里, 初始化配置了 router 的根组件, 因为当存在组件配置了 router 的时候, 我们这时候就需要去处理路由问题
@@ -1693,7 +1755,7 @@
     function match (
       raw, // 匹配路径
       currentRoute, // 当前路由对象
-      redirectedFrom
+      redirectedFrom // 重定向信息 - 我们需要传递这个, 来判断是否为重定向过来的, 因为在创建路由对象时, 需要 redirectedFrom 属性添加 - 如果存在重定向，即为重定向来源的路由的名字
     ) {
       // 通过匹配信息和当前路由对象来解析出 path, hash, query... 路由信息
       var location = normalizeLocation(raw, currentRoute, false, router);
@@ -1709,20 +1771,25 @@
           .filter(function (key) { return !key.optional; })
           .map(function (key) { return key.name; });
 
+        // 如果是通过 name 跳转路由的话, 那么 params 一定是通过 { params: {} } 方式传递的, 所以无需在 path 中解析出来
         if (typeof location.params !== 'object') { // 如果 params 不是一个对象
           location.params = {}; // 那么封装成一个对象
         }
 
-        if (currentRoute && typeof currentRoute.params === 'object') {
-          for (var key in currentRoute.params) {
+        if (currentRoute && typeof currentRoute.params === 'object') { // 如果当前路由存在 params 的话
+          for (var key in currentRoute.params) { // 遍历以前的 params 
+            // !(key in location.params) 不存在 location 匹配信息中
+            // paramNames.indexOf(key) > -1 当前 params 存在与匹配的路由信息中的params
+            // 在这里, 猜测可能是如果匹配路由定义的 params 没有传递, 但是在当前路由中存在的话, 那么就复用一下 params
             if (!(key in location.params) && paramNames.indexOf(key) > -1) {
               location.params[key] = currentRoute.params[key];
             }
           }
         }
 
+        // 解析出最终路由
         location.path = fillParams(record.path, location.params, ("named route \"" + name + "\""));
-        return _createRoute(record, location, redirectedFrom)
+        return _createRoute(record, location, redirectedFrom) // 创建路由对象
       } else if (location.path) { // 在这里就说明不是通过命名路由跳转, 那么 params 的定义信息也就无用了
         location.params = {}; // 路由参数
         for (var i = 0; i < pathList.length; i++) { // 遍历 pathList 注册路径集合
@@ -1730,52 +1797,66 @@
           var record$1 = pathMap[path]; // 提取出路由信息
           // matchRoute 方法来匹配注册到的路由, 若是匹配到了, 在方法内部, 就会解析好 params 参数
           if (matchRoute(record$1.regex, location.path, location.params)) {
-            return _createRoute(record$1, location, redirectedFrom) // 此时创建
+            return _createRoute(record$1, location, redirectedFrom) // 匹配到了的话就创建一个路由对象返回
           }
         }
       }
-      // no match
-      return _createRoute(null, location)
+      // no match 不匹配
+      return _createRoute(null, location) // 创建一个空的路由对象
     }
 
+    // 解析重定向路由
+    /**
+     * 重定向策略: 就是根据重定向规则来找到最终的路由信息, 并且内部通过 match 去匹配是否存在这个重定向路径
+     */
     function redirect (
-      record,
-      location
+      record, // 重定向路由信息
+      location // 路径信息
     ) {
-      var originalRedirect = record.redirect;
-      var redirect = typeof originalRedirect === 'function'
+      var originalRedirect = record.redirect; // 重定向路径
+      var redirect = typeof originalRedirect === 'function' // 如果是一个函数的话, 那么是动态返回重定向目标
+      /**
+       * createRoute(record, location, null, router): 创建传入函数中的路由对象
+       * redirect: to => {
+       *   // 方法接收 目标路由 作为参数
+       *   // return 重定向的 字符串路径/路径对象
+       * }}
+       */
         ? originalRedirect(createRoute(record, location, null, router))
         : originalRedirect;
 
-      if (typeof redirect === 'string') {
-        redirect = { path: redirect };
+      // 因为有可能是一个对象形式的: { name: 'foo' }
+      if (typeof redirect === 'string') { // 如果是 字符串 类型, 说明是一个最终 path 路径
+        redirect = { path: redirect }; // 组装成对象形式
       }
 
-      if (!redirect || typeof redirect !== 'object') {
+      // 如果不存在(可能只是定义了 redirect 为函数但是没有返回值), 或者 redirect 不是对象(可能定义为其他数据类型)
+      if (!redirect || typeof redirect !== 'object') { 
         {
-          warn(
+          warn( // 发出警告
             false, ("invalid redirect option: " + (JSON.stringify(redirect)))
           );
         }
-        return _createRoute(null, location)
+        return _createRoute(null, location) // 创建一个空路由对象
       }
 
-      var re = redirect;
-      var name = re.name;
-      var path = re.path;
-      var query = location.query;
-      var hash = location.hash;
-      var params = location.params;
-      query = re.hasOwnProperty('query') ? re.query : query;
-      hash = re.hasOwnProperty('hash') ? re.hash : hash;
-      params = re.hasOwnProperty('params') ? re.params : params;
+      var re = redirect; // 重定向信息
+      var name = re.name; // 命名路由
+      var path = re.path; // 路径
+      var query = location.query; // 查询参数
+      var hash = location.hash; // hash
+      var params = location.params; // 路由参数
+      query = re.hasOwnProperty('query') ? re.query : query; // 如果重定向信息已经包含了 query, 优先使用
+      hash = re.hasOwnProperty('hash') ? re.hash : hash; // 如果重定向信息已经包含了 hash, 优先使用
+      params = re.hasOwnProperty('params') ? re.params : params; // 如果重定向信息已经包含了 params, 优先使用
 
-      if (name) {
-        // resolved named direct
-        var targetRecord = nameMap[name];
-        {
+      if (name) { // 如果是通过 name 跳转的话
+        // resolved named direct 解决命名直接
+        var targetRecord = nameMap[name]; // 找到目标路由信息
+        { // 如果没有找到的话, 那么就直接报错处理, 因为会用户定义的, 所以这时候需要退出调用栈, 通知用户
           assert(targetRecord, ("redirect failed: named route \"" + name + "\" not found."));
         }
+        // 通过 match 重新来生成一个路由对象
         return match({
           _normalized: true,
           name: name,
@@ -1783,19 +1864,23 @@
           hash: hash,
           params: params
         }, undefined, location)
-      } else if (path) {
-        // 1. resolve relative redirect
+      } else if (path) { // 如果是通过 path 跳转的话
+        // 1. resolve relative redirect 解决相对重定向
+        /**
+         * 例如: 定义路由为: { path: '/a', children: [{ path: 'c', redirect: '../c' }] }
+         * 此时我们需要结合 ../c 和 /a 路径来解析, 因为 ../c 是一个相对路径
+         */
         var rawPath = resolveRecordPath(path, record);
-        // 2. resolve params
+        // 2. resolve params 解析路由参数 - 根据 params 来确定最终路径
         var resolvedPath = fillParams(rawPath, params, ("redirect route with path \"" + rawPath + "\""));
-        // 3. rematch with existing query and hash
+        // 3. rematch with existing query and hash 与现有查询和散列重新匹配
         return match({
-          _normalized: true,
+          _normalized: true, // 表示不需要在重新解析 location
           path: resolvedPath,
           query: query,
           hash: hash
         }, undefined, location)
-      } else {
+      } else { // 其他情况, 发出警告, 返回一个空路由对象
         {
           warn(false, ("invalid redirect option: " + (JSON.stringify(redirect))));
         }
@@ -1803,42 +1888,56 @@
       }
     }
 
+    /**
+     * 解析别名策略:
+     * 也就是找到别名对应的实际路由, 实际渲染的就是这个对应的路由信息, 但是会改变 path 路径, 用于在 url 还是展示 别名路由
+     */
     function alias (
-      record,
-      location,
-      matchAs
+      record, // 路由信息
+      location, // 路径信息
+      matchAs // 别名路径
     ) {
+      // 解析最终实际应该渲染的路由 - 但是在 url 表现上, 还是会展示这个 url
       var aliasedPath = fillParams(matchAs, location.params, ("aliased route with path \"" + matchAs + "\""));
-      var aliasedMatch = match({
+      var aliasedMatch = match({ // 通过这个 path 路径来创建路由对象 - 这个一般而言是可以找到的
         _normalized: true,
         path: aliasedPath
       });
-      if (aliasedMatch) {
-        var matched = aliasedMatch.matched;
-        var aliasedRecord = matched[matched.length - 1];
-        location.params = aliasedMatch.params;
-        return _createRoute(aliasedRecord, location)
+      if (aliasedMatch) { // 匹配别名的路由信息
+        var matched = aliasedMatch.matched; // 一个数组，包含当前路由的所有嵌套路径片段的路由记录
+        var aliasedRecord = matched[matched.length - 1]; // 这个数组的最后一个, 就是我们最终渲染的路由对象
+        location.params = aliasedMatch.params; // 路由参数
+        return _createRoute(aliasedRecord, location) // 创建最终的路由对象 - 在这里基本上都会采用实际渲染的路由信息, 但是会改变 path 路径
       }
-      return _createRoute(null, location)
+      return _createRoute(null, location) // 否则就返回一个空的路由对象
     }
 
+    // 创建路由对象
     function _createRoute (
-      record, // 路由信息
+      record, // 用户路由信息
       location, // 路径信息
-      redirectedFrom
+      redirectedFrom // 重定向信息
     ) {
-      if (record && record.redirect) {
+      if (record && record.redirect) { // 如果是重定向路由
+        /**
+         * 重定向策略: 就是根据重定向规则来找到最终的路由信息, 并且内部通过 match 去匹配是否存在这个重定向路径
+         */
         return redirect(record, redirectedFrom || location)
       }
-      if (record && record.matchAs) {
+      if (record && record.matchAs) { // 如果是别名路由
+        /**
+         * 解析别名策略:
+         * 也就是找到别名对应的实际路由, 实际渲染的就是这个对应的路由信息, 但是会改变 path 路径, 用于在 url 还是展示 别名路由
+         */
         return alias(record, location, record.matchAs)
       }
+      // 创建一个路由对象
       return createRoute(record, location, redirectedFrom, router)
     }
 
     // 返回一个 api 对象, 用于操作解析好的数据
     return {
-      match: match, // 最主要的方法, 用于指定信息来匹配相应路由
+      match: match, // 最主要的方法, 用于指定信息来匹配相应路由, 并根据这些信息来创建一个最终的路由对象
       /**
        * 根据参数不同, 有两种用法:
        * 添加一条新路由规则。 -- addRoute(route: RouteConfig): () => void
@@ -1876,7 +1975,14 @@
     return true
   }
 
+  // 解决相对路径问题
+  /**
+   * 例如: 定义路由为: { path: '/a', children: [{ path: 'c', redirect: '../c' }] }
+   * 此时我们需要结合 ../c 和 /a 路径来解析, 因为 ../c 是一个相对路径
+   */
   function resolveRecordPath (path, record) {
+    // 在这里就需要根据 record.parent 父路由来确定最终路径
+    // 如果 path 是以 / 开头的话,这样表示一个绝对路径, 那么就会直接返回 path
     return resolvePath(path, record.parent ? record.parent.path : '/', true)
   }
 
@@ -2171,9 +2277,9 @@
       from,
       to,
       NavigationFailureType.duplicated,
-      ("Avoided redundant navigation to current location: \"" + (from.fullPath) + "\".")
+      ("Avoided redundant navigation to current location: \"" + (from.fullPath) + "\".") // 避免到当前位置的冗余导航
     );
-    // backwards compatible with the first introduction of Errors
+    // backwards compatible with the first introduction of Errors 向后兼容第一次引入错误
     error.name = 'NavigationDuplicated';
     return error
   }
@@ -2384,25 +2490,30 @@
     this.errorCbs.push(errorCb);
   };
 
+  // 跳转到指定路由, 渲染组件, 执行钩子 - 最终底层方法
   History.prototype.transitionTo = function transitionTo (
     location, // 需要匹配的路由路径
-    onComplete,
-    onAbort
+    onComplete, // 成功回调
+    onAbort // 失败回调
   ) {
-      var this$1 = this; // 实例引用
+    var this$1 = this; // 实例引用
 
     var route;
     // catch redirect option https://github.com/vuejs/vue-router/issues/3201 抓重定向选择
     try {
-      route = this.router.match(location, this.current);
+      // this.current: 当前路由对象
+      route = this.router.match(location, this.current); // 匹配路由 - 根据匹配的信息来创建一个路由对象
     } catch (e) {
+      // 发现错误, 那么执行 errorCbs 错误回调集合 - 这个是用户注册的错误处理回调
       this.errorCbs.forEach(function (cb) {
         cb(e);
       });
-      // Exception should still be thrown
+      // Exception should still be thrown 仍然应该抛出异常
       throw e
     }
-    var prev = this.current;
+    var prev = this.current; // 上一下路由
+
+    // 在上面, 我们已经根据匹配信息来创建了路由对象了, 那么还需要根据这个路由对象来执行组件守卫, 组件渲染, url 更新等操作
     this.confirmTransition(
       route,
       function () {
@@ -2441,11 +2552,17 @@
     );
   };
 
-  History.prototype.confirmTransition = function confirmTransition (route, onComplete, onAbort) {
-      var this$1 = this;
+  // 根据这个路由对象来执行组件守卫, 组件渲染, url 更新等操作
+  History.prototype.confirmTransition = function confirmTransition (
+    route, // 需要处理的路由对象
+    onComplete,  // 成功回调
+    onAbort // 失败回调
+  ) {
+    debugger;
+    var this$1 = this; // VueRouter 路由器实例
 
-    var current = this.current;
-    this.pending = route;
+    var current = this.current; // 当前路由 - 也就是上一个路由
+    this.pending = route; // 等待渲染的路由对象
     var abort = function (err) {
       // changed after adding errors with
       // https://github.com/vuejs/vue-router/pull/3047 before that change,
@@ -2462,36 +2579,45 @@
       }
       onAbort && onAbort(err);
     };
-    var lastRouteIndex = route.matched.length - 1;
-    var lastCurrentIndex = current.matched.length - 1;
+    var lastRouteIndex = route.matched.length - 1; // 等待渲染路由的所有嵌套路由 - 最后一个索引
+    var lastCurrentIndex = current.matched.length - 1; // 上一个路由的所有嵌套路由集合的最后一个索引
+    // 在这一段, 可以猜测为应该是路由完全相同的情况下, 不进行操作
+    /**
+     * 例如从 /bar/foo 跳转到 /bar/foo, 这时候我们是不需要处理的
+     */
     if (
-      isSameRoute(route, current) &&
-      // in the case the route map has been dynamically appended to
-      lastRouteIndex === lastCurrentIndex &&
-      route.matched[lastRouteIndex] === current.matched[lastCurrentIndex]
+      isSameRoute(route, current) && // 比较两个路由是否相同
+      // in the case the route map has been dynamically appended to 在这种情况下，路线图被动态地附加到
+      lastRouteIndex === lastCurrentIndex && // 还需要比较两个是否存在相同的嵌套路由长度
+      route.matched[lastRouteIndex] === current.matched[lastCurrentIndex] // 表示这个路由对应的用户注册路由信息是否相同, 在这里是直接通过 === 比较, 因为这里的对象都是 VueRouter 实例初始化的时候初始化的
     ) {
-      this.ensureURL();
+      this.ensureURL(); // 校正 url
       return abort(createNavigationDuplicatedError(current, route))
     }
 
+    // 解析我们需要更新的路由信息 - 因为有一些路由是复用的, 并不是所有的路由都需要处理
+    /**
+     * 例如: /foo/bar 到 /foo/xxx 的时候, 我们不需要去处理 /foo 对应的路由信息
+     */
     var ref = resolveQueue(
       this.current.matched,
       route.matched
     );
-      var updated = ref.updated;
-      var deactivated = ref.deactivated;
-      var activated = ref.activated;
+      var updated = ref.updated; // 需要更新的路由信息 - 此时可能由于路由复用产生了 query 和 params 变动
+      var deactivated = ref.deactivated; // 失活的路由信息
+      var activated = ref.activated; // 激活的路由信息
 
+    // 解析守卫的队列 - 我们需要根据上述解析出的各种路由信息来收集需要执行的队列
     var queue = [].concat(
-      // in-component leave guards
+      // in-component leave guards 在组件离开守卫
       extractLeaveGuards(deactivated),
-      // global before hooks
+      // global before hooks 全局钩子之前
       this.router.beforeHooks,
-      // in-component update hooks
+      // in-component update hooks 在组件更新钩子
       extractUpdateHooks(updated),
-      // in-config enter guards
+      // in-config enter guards 进行守卫
       activated.map(function (m) { return m.beforeEnter; }),
-      // async components
+      // async components 异步组件
       resolveAsyncComponents(activated)
     );
 
@@ -2594,21 +2720,29 @@
     return base.replace(/\/$/, '')
   }
 
+  // 解析我们需要更新的路由信息 - 因为有一些路由是复用的, 并不是所有的路由都需要处理
+  /**
+   * 例如: /foo/bar 到 /foo/xxx 的时候, 我们不需要去处理 /foo 对应的路由信息
+   */
   function resolveQueue (
-    current,
-    next
+    current, // 上一个路由
+    next // 渲染路由 - 下一个路由
   ) {
     var i;
-    var max = Math.max(current.length, next.length);
-    for (i = 0; i < max; i++) {
-      if (current[i] !== next[i]) {
+    var max = Math.max(current.length, next.length); // 找出长度最大值
+    /**
+     * 假设 /foo/bar 跳转到 /foo/xxx/xxx 的时候, 我们 current 为 [/foo, /foo/bar], 而 next 为 [/foo, /foo/xxx, /foo/xxx/xxx]
+     * 我们观察这样的数据结构, 我们就知道最顶端是不需要更新的, 此时我们需要找出两个数组开始不同的地方
+     */
+    for (i = 0; i < max; i++) { // 从前往后遍历
+      if (current[i] !== next[i]) { // 当存在两者不一致的时候, 此时我们就找出了需要更新的路由信息
         break
       }
     }
     return {
-      updated: next.slice(0, i),
-      activated: next.slice(i),
-      deactivated: current.slice(i)
+      updated: next.slice(0, i), // 需要更新的路由信息集合
+      activated: next.slice(i), // 激活的路由信息集合
+      deactivated: current.slice(i) // 失活的路由信息集合
     }
   }
 
@@ -2894,10 +3028,11 @@
       window.history.go(n);
     };
 
+    // 校正 url - 使 url 表现与路有对象表示一致
     HashHistory.prototype.ensureURL = function ensureURL (push) {
-      var current = this.current.fullPath;
-      if (getHash() !== current) {
-        push ? pushHash(current) : replaceHash(current);
+      var current = this.current.fullPath; // 当前路由的完整路径
+      if (getHash() !== current) { // 当前 url 是否与路由对象的完整路径相同
+        push ? pushHash(current) : replaceHash(current); // 校正 url
       }
     };
 
