@@ -3,7 +3,7 @@
  * @Author: 温祖彪
  * @Date: 2021-03-09 09:03:37
  * @LastEditors: sueRimn
- * @LastEditTime: 2021-03-17 16:29:35
+ * @LastEditTime: 2021-03-22 17:20:53
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -40,9 +40,9 @@
 
   // 1. 定义 (路由) 组件。
   // 可以从其他文件 import 进来
-  const Foo = { template: '<div>Foo<router-view></router-view></div>' }
-  const Bar = { template: '<div>bar</div>' }
-  const FooBar = { template: '<div>FooBar</div>' }
+  const Foo = () => new Promise(resolve => resolve({ template: '<div>Foo<router-view></router-view></div>', beforeRouteLeave(to, from, next) { next()}, beforeRouteEnter(to, from, next) {next()} }))
+  const Bar = { template: '<div>bar</div>', beforeRouteLeave(to, from, next) { next()}, beforeRouteEnter(to, from, next) {next()} }
+  const FooBar = { template: '<div>FooBar</div>', beforeRouteLeave(to, from, next) { next()}, beforeRouteEnter(to, from, next) {next()} }
 
   // 2. 定义路由
   // 每个路由应该映射一个组件。 其中"component" 可以是

@@ -13,8 +13,8 @@
  *          ? [route.alias] // 组装成数组
  *          : route.alias // 此时应该为数组, 所以直接使用
  *        : [], // 不存在别名 - 返回 []
- *      instances: {},
- *      enteredCbs: {},
+ *      instances: {}, // 这个很重要, 是存储着路由对应的组件实例
+ *      enteredCbs: {}, // 这个是组件内的进入守卫 beforeRouteEnter 中通过 next(vm => vm.xx) 访问实例时, 我们需要先存储着这个回调, 在渲染组件完成后在执行
  *      name: name, // 命名路由的 name
  *      parent: parent, // 父路由
  *      matchAs: matchAs, // 别名对应的原始路径 - 用于当为别名路径时查找到正确的路径
@@ -34,6 +34,7 @@
  *    在存在组件配置了这个路由器时, 我们才会去进行一些初始化, 例如渲染当前路由, 侦听路由变化等操作, 在这里初始化是因为, 如果还没有组件配置这个路由器的话, 那我们这个路由器就相当于停用状态
  *    而在 install 注册插件的时候, 我们就去全局混入和全局注册一些组件等信息, 在全局混入中混入 beforeCreate 生命周期, 我们在这里会在根组件配置路由器 router(即 VueRouter 实例) 时候, 去调用 VueRouter.init 初始化
  *    初始化时, 首先通过 transitionTo 方法来渲染当前 url 对应的路由, 因为在这里我们还没有渲染初始 url, 所以在这里渲染一下, 渲染完成后我们会去侦听 url 变化, 这样就可以响应 url 变化来渲染不同的路由组件
+ * 
  * 3. transitionTo: 这个方法非常关键, 主要进行两步: this.router.match 来匹配路由信息并创建路由对象, this.confirmTransition 来渲染组件, 执行守卫钩子等
  *    3.1 this.router.match: 根据匹配信息来匹配用户注册的路由信息并且创建路由对象
  *        我们通过操作 pathList, pathMap, nameMap 等数据, 来匹配传入的 location(路径信息), 找出对应的注册路由信息, 并根据这个路由信息来创建一个路由对象
@@ -48,6 +49,21 @@
  *          fullPath: getFullPath(location, stringifyQuery), // 根据 path, hash, query 来拼接成最终路径
  *          matched: record ? formatMatch(record) : [] // 一个数组，包含当前路由的所有嵌套路径片段的路由记录 。
  *        };
+ *    3.2 confirmTransition 方法: 在这个方法中, 我们通过 this.router.match 匹配到的路由对象, 来导航路由
+ *        我们在这个方法内部, 会进行导航守卫的执行, 具体策略可见方法内部注释, 主要进行这样的工作: 
+ *        1. 导航被触发。
+ *        2. 在失活的组件里调用 beforeRouteLeave 守卫。
+ *        3. 调用全局的 beforeEach 守卫。
+ *        4. 在重用的组件里调用 beforeRouteUpdate 守卫 (2.2+)。
+ *        5. 在路由配置里调用 beforeEnter。
+ *        6. 解析异步路由组件。
+ *        7.在被激活的组件里调用 beforeRouteEnter。
+ *        8.调用全局的 beforeResolve 守卫 (2.5+)。
+ *        9. 导航被确认。
+ *        10.调用全局的 afterEach 钩子。
+ *        11. 触发 DOM 更新。
+ *        12. 调用 beforeRouteEnter 守卫中传给 next 的回调函数，创建好的组件实例会作为回调函数的参数传入。
+ * 4. 在完成导航操作后, 我们
  */
 
 /*!
@@ -356,16 +372,17 @@
     return true
   }
 
+  // 执行 beforeRouteEnter 守卫中 next 的回调, 将组件实例传入其中
   function handleRouteEntered (route) {
-    for (var i = 0; i < route.matched.length; i++) {
+    for (var i = 0; i < route.matched.length; i++) { // 遍历这个路由对象中的嵌套路由
       var record = route.matched[i];
-      for (var name in record.instances) {
+      for (var name in record.instances) { // record.instances: 对应的组件实例
         var instance = record.instances[name];
         var cbs = record.enteredCbs[name];
-        if (!instance || !cbs) { continue }
-        delete record.enteredCbs[name];
+        if (!instance || !cbs) { continue } // 如果不存在组件实例 || 不存在beforeRouteEnter 守卫中 next 的回调, 那么跳出当前循环
+        delete record.enteredCbs[name]; // 我们需要删除这个回调
         for (var i$1 = 0; i$1 < cbs.length; i$1++) {
-          if (!instance._isBeingDestroyed) { cbs[i$1](instance); }
+          if (!instance._isBeingDestroyed) { cbs[i$1](instance); } // 如果当前组件组件不是被在销毁阶段的话, 那么就执行这个回调
         }
       }
     }
@@ -1535,8 +1552,8 @@
           ? [route.alias] // 组装成数组
           : route.alias // 此时应该为数组, 所以直接使用
         : [], // 不存在别名 - 返回 []
-      instances: {},
-      enteredCbs: {},
+      instances: {}, // 这个很重要, 是存储着路由对应的组件实例
+      enteredCbs: {}, // 这个是组件内的进入守卫 beforeRouteEnter 中通过 next(vm => vm.xx) 访问实例时, 我们需要先存储着这个回调, 在渲染组件完成后在执行
       name: name, // 命名路由的 name
       parent: parent, // 父路由
       matchAs: matchAs, // 别名对应的原始路径 - 用于当为别名路径时查找到正确的路径
@@ -1678,8 +1695,8 @@
    *       ? [route.alias] // 组装成数组
    *       : route.alias // 此时应该为数组, 所以直接使用
    *     : [], // 不存在别名 - 返回 []
-   *   instances: {},
-   *   enteredCbs: {},
+   *   instances: {}, // 这个很重要, 是存储着路由对应的组件实例
+   *   enteredCbs: {}, // 这个是组件内的进入守卫 beforeRouteEnter 中通过 next(vm => vm.xx) 访问实例时, 我们需要先存储着这个回调, 在渲染组件完成后在执行
    *   name: name, // 命名路由的 name
    *   parent: parent, // 父路由
    *   matchAs: matchAs, // 别名对应的原始路径 - 用于当为别名路径时查找到正确的路径
@@ -2007,6 +2024,7 @@
     return _key
   }
 
+  // 设置全局唯一 key
   function setStateKey (key) {
     return (_key = key)
   }
@@ -2016,24 +2034,28 @@
   // 保存着不同页面对应的 key
   var positionStore = Object.create(null);
 
+  // 设置滚动相关信息, 主要是通过监听 popstate 事件, 每次页面变动时, 保存旧页面的滚动位置, 设置新页面的 key, 具体滚动行为应该在页面渲染 OK 后我们再处理的
   function setupScroll () {
-    // Prevent browser scroll behavior on History popstate
+    // Prevent browser scroll behavior on History popstate 防止浏览器滚动历史 popstate 行为
+    // window.history.scrollRestoration: 允许web应用程序在历史导航上显式地设置默认滚动恢复行为, auto: 将恢复用户已滚动到的页面上的位置。 | manual: 未还原页上的位置。用户必须手动滚动到该位置。
     if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
+      window.history.scrollRestoration = 'manual'; // 不需要浏览器滚动默认行为
     }
-    // Fix for #1585 for Firefox
-    // Fix for #2195 Add optional third attribute to workaround a bug in safari https://bugs.webkit.org/show_bug.cgi?id=182678
-    // Fix for #2774 Support for apps loaded from Windows file shares not mapped to network drives: replaced location.origin with
+    // Fix for #1585 for Firefox 修复了 #1585 的 Firefox 浏览器
+    // Fix for #2195 Add optional third attribute to workaround a bug in safari https://bugs.webkit.org/show_bug.cgi?id=182678 添加第三个可选属性来解决safari https://bugs.webkit.org/show_bug.cgi?id=182678中的一个bug
+    // Fix for #2774 Support for apps loaded from Windows file shares not mapped to network drives: replaced location.origin with 修复了 #2774 对从 Windows 文件共享加载的应用程序没有映射到网络驱动器的支持:替换位置。起源与
     // window.location.protocol + '//' + window.location.host
-    // location.host contains the port and location.hostname doesn't
+    // location.host contains the port and location.hostname doesn't 位置。host包含端口和位置。主机名不
     var protocolAndPath = window.location.protocol + '//' + window.location.host;
     var absolutePath = window.location.href.replace(protocolAndPath, '');
-    // preserve existing history state as it could be overriden by the user
-    var stateCopy = extend({}, window.history.state);
+    // preserve existing history state as it could be overriden by the user 保留现有的历史状态，因为它可能会被用户覆盖
+    var stateCopy = extend({}, window.history.state); // 复制一个 window.history.state 副本
     stateCopy.key = getStateKey();
     window.history.replaceState(stateCopy, '', absolutePath);
+    // 设置侦听 popstate 事件侦听器
+    // handlePopState 方法: 处理 popstate 事件, 保存旧页面的滚动位置, 设置新页面的 key
     window.addEventListener('popstate', handlePopState);
-    return function () {
+    return function () { // 返回一个取消这个历史侦听器的方法
       window.removeEventListener('popstate', handlePopState);
     }
   }
@@ -2098,10 +2120,11 @@
     }
   }
 
+  // 处理 popstate 事件, 保存旧页面的滚动位置, 设置新页面的 key
   function handlePopState (e) {
-    saveScrollPosition();
-    if (e.state && e.state.key) {
-      setStateKey(e.state.key);
+    saveScrollPosition(); // 每次 url 响应的时候都需要保存当前页面的滚动位置 - 在这时候, 页面还没有重新渲染, 所以我们保存的是旧页面信息
+    if (e.state && e.state.key) { // 但是 e.state 信息是对应的新页面
+      setStateKey(e.state.key); // 此时我们就需要设置新页面 key
     }
   }
 
@@ -2236,42 +2259,55 @@
 
   /*  */
 
-  function runQueue (queue, fn, cb) {
+  // 运行队列 queue
+  /** 策略
+   * 我们通过 step 方法执行每一项队列, 在每一项队列中将其处理流程转移到 fn 中, 在 fn 中通过回调来确定执行下一个队列的时机
+   * 也就是说控制流程是这样的: step -> fn -> step
+   */
+  function runQueue (
+    queue, // 队列
+    fn, // 解析每个队列的回调
+    cb // 运行完成队列 queue 后的回调
+  ) {
     var step = function (index) {
-      if (index >= queue.length) {
+      if (index >= queue.length) { // 如果已经运行完队列时, 那么我们此时就执行 cb 回调即可
         cb();
-      } else {
-        if (queue[index]) {
+      } else { // 否则, 接着运行
+        if (queue[index]) { // 如果队列中存在值的话, 那么我们就通过 fn 去处理这个值, 并且将执行下一个队列交给 fn 做为回调
+          // 接下来控制流程转移到 fn 回调中
           fn(queue[index], function () {
-            step(index + 1);
+            step(index + 1); // 我们在执行完每项队列值时, 通过回调形式我们就会执行下一个队列
           });
-        } else {
-          step(index + 1);
+        } else { // 如果该队列项中为空(因为在之前的提取队列的过程, 我们并没有去除空项)
+          step(index + 1); // 此时我们直接执行下一个队列
         }
       }
     };
-    step(0);
+    step(0); // 开始运行 - 从 0 开始
   }
 
-  // When changing thing, also edit router.d.ts
+  // When changing thing, also edit router.d.ts 当修改内容时，也要编辑 router.d.ts
   var NavigationFailureType = {
-    redirected: 2,
-    aborted: 4,
-    cancelled: 8,
-    duplicated: 16
+    redirected: 2, // next('/xx') || next({ path: '/xx' }) 重定向导航
+    aborted: 4, // next(false) 终止导航
+    cancelled: 8, // 有了新的导航
+    duplicated: 16 // 冗余导航
   };
 
+  // 创建错误对象, 代表路由导航时, 通过在守卫中 next('/xx') 重定向的错误信息
   function createNavigationRedirectedError (from, to) {
     return createRouterError(
       from,
       to,
-      NavigationFailureType.redirected,
-      ("Redirected when going from \"" + (from.fullPath) + "\" to \"" + (stringifyRoute(
+      NavigationFailureType.redirected, // 错误编码
+      // 重新定向时从 from.fullPath 到 to 通过导航守卫
+      ("Redirected when going from \"" + (from.fullPath) + "\" to \"" + (stringifyRoute( // 提示信息
         to
       )) + "\" via a navigation guard.")
     )
   }
 
+  // 创建错误对象, 代表是冗余导航, 例如 this.$router.push(this.route) 时导航到当前路由
   function createNavigationDuplicatedError (from, to) {
     var error = createRouterError(
       from,
@@ -2284,27 +2320,32 @@
     return error
   }
 
+  // 创建错误对象, 代表路由导航, 突然有了新的导航
   function createNavigationCancelledError (from, to) {
     return createRouterError(
       from,
       to,
       NavigationFailureType.cancelled,
+      // 导航取消从 from.fullPath 到 to.fullPath 有了新的导航
       ("Navigation cancelled from \"" + (from.fullPath) + "\" to \"" + (to.fullPath) + "\" with a new navigation.")
     )
   }
 
+  // 创建错误对象, 代表路由导航时, 通过在守卫中 next(false) 终止导航
   function createNavigationAbortedError (from, to) {
     return createRouterError(
       from,
       to,
       NavigationFailureType.aborted,
+      // 导航流产从 from.fullPath 到 to.fullPath 通过导航守卫
       ("Navigation aborted from \"" + (from.fullPath) + "\" to \"" + (to.fullPath) + "\" via a navigation guard.")
     )
   }
 
+  // 创建一个错误对象
   function createRouterError (from, to, type, message) {
     var error = new Error(message);
-    error._isRouter = true;
+    error._isRouter = true; // 标识这个错误对象是这个库生成的
     error.from = from;
     error.to = to;
     error.type = type;
@@ -2324,116 +2365,150 @@
     return JSON.stringify(location, null, 2)
   }
 
+  // 判断 err 是否为 Error 实例
   function isError (err) {
     return Object.prototype.toString.call(err).indexOf('Error') > -1
   }
 
+  // 判断是否为内部构造的错误
+  // 如果传入了 errorType, 还需要比较 err 错误类型是否为 errorType 类型
   function isNavigationFailure (err, errorType) {
     return (
-      isError(err) &&
-      err._isRouter &&
+      isError(err) && // 是 Error 实例
+      err._isRouter && // 是内部构造的错误
       (errorType == null || err.type === errorType)
     )
   }
 
   /*  */
 
+  // 解析异步组件
+  /**
+   * 策略: 我们通过遍历 matched 路由信息集合, 来遍历执行需要解析的异步组件, 我们通过 pending 变量来判断需要解析的异步组件个数, 当最终为 0 时, next 执行下一步
+   *       我们通过解析 promise, 还可能是回调形式, 但是最终会执行 resolve/reject 方法解析, 在这个方法获取到我们需要的组件配置
+   *       并且我们将解析后的组件配置覆盖原来的路由注册组件 match.components[key] = resolvedDef; 这样我们就只需要解析一次
+   *       如果在发生错误的时候, 那么在 reject 内部, 就会去调用 next(error) 来通知外部, 那么就会造成导航失败
+   */
   function resolveAsyncComponents (matched) {
+    // 返回一个函数 - 我们先需要执行各个离开守卫, 然后我们再来进行解析异步组件的步骤
     return function (to, from, next) {
-      var hasAsync = false;
-      var pending = 0;
+      var hasAsync = false; // 是否为异步组件
+      var pending = 0; // 异步组件的个数
       var error = null;
 
-      flatMapComponents(matched, function (def, _, match, key) {
-        // if it's a function and doesn't have cid attached,
-        // assume it's an async component resolve function.
-        // we are not using Vue's default async resolving mechanism because
-        // we want to halt the navigation until the incoming component has been
-        // resolved.
-        if (typeof def === 'function' && def.cid === undefined) {
-          hasAsync = true;
-          pending++;
+      // 我们借助 flatMapComponents 方法来执行每个路由信息表示的组件
+      flatMapComponents(matched, 
+        function (
+          def, // 组件配置项
+          _, // 组件实例 - 如果存在的话
+          match, // 路由信息
+          key // 命名视图的 key
+        ) {
+          // if it's a function and doesn't have cid attached, 如果它是一个函数，没有 cid 连接
+          // assume it's an async component resolve function. 假设它是一个异步组件解析函数
+          // we are not using Vue's default async resolving mechanism because 我们没有使用 Vue 默认的异步解析机制，因为
+          // we want to halt the navigation until the incoming component has been 我们想要停止导航，直到传入的组件已经完成
+          // resolved. 解决
+          // 从注释可以看出, 我们并没有使用 vue 的异步组件机制, 而自己实现
+          if (typeof def === 'function' && def.cid === undefined) { // def.cid: 如果存在, 表示是 Vue 构造器或子类
+            hasAsync = true; // 此时存在异步组件
+            pending++; // 异步组件的个数 + 1
 
-          var resolve = once(function (resolvedDef) {
-            if (isESModule(resolvedDef)) {
-              resolvedDef = resolvedDef.default;
-            }
-            // save resolved on async factory in case it's used elsewhere
-            def.resolved = typeof resolvedDef === 'function'
-              ? resolvedDef
-              : _Vue.extend(resolvedDef);
-            match.components[key] = resolvedDef;
-            pending--;
-            if (pending <= 0) {
-              next();
-            }
-          });
+            // 通过 once 保证我们只执行这个 fn 回调一次, 因为 resolve/reject 可能多次执行
+            // 成功回调
+            var resolve = once(function (resolvedDef) {
+              if (isESModule(resolvedDef)) {
+                resolvedDef = resolvedDef.default; // 如果是模块机制, 那么我们就取 default
+              }
+              // save resolved on async factory in case it's used elsewhere 保存在异步工厂上的解析，以防它在其他地方使用
+              def.resolved = typeof resolvedDef === 'function' // 如果是一个函数
+                ? resolvedDef // 那么直接返回
+                : _Vue.extend(resolvedDef); // 创建 Vue 子类
+              match.components[key] = resolvedDef; // 将异步组件解析后的结果附加在 components 上, 因为只需要解析一次异步组件, 解析完成后覆盖掉
+              pending--; // 将异步组件的次数 -1
+              if (pending <= 0) { // 如果没有需要解析的异步组件后
+                next(); // 那么我们直接执行下一步
+              }
+            });
 
-          var reject = once(function (reason) {
-            var msg = "Failed to resolve async component " + key + ": " + reason;
-             warn(false, msg);
-            if (!error) {
-              error = isError(reason)
-                ? reason
-                : new Error(msg);
-              next(error);
-            }
-          });
+            var reject = once(function (reason) {
+              var msg = "Failed to resolve async component " + key + ": " + reason; // 解析异步组件失败
+              warn(false, msg); // 发出警告
+              // 我们需要保证只会发射一次错误, 因为重复调用 next(error) 是会出现问题的
+              if (!error) { // 如果不存在错误
+                error = isError(reason)
+                  ? reason
+                  : new Error(msg);
+                next(error);
+              }
+            });
 
-          var res;
-          try {
-            res = def(resolve, reject);
-          } catch (e) {
-            reject(e);
-          }
-          if (res) {
-            if (typeof res.then === 'function') {
-              res.then(resolve, reject);
-            } else {
-              // new syntax in Vue 2.3
-              var comp = res.component;
-              if (comp && typeof comp.then === 'function') {
-                comp.then(resolve, reject);
+            /**
+             * 异步路由的方式: 
+             * (resolve, reject) => { resolve({组件配置}) } -- 通过回调形式
+             * () => new Promise(resolve({组件配置})) -- promise 形式
+             */
+            var res;
+            try { // 
+              res = def(resolve, reject); // 解决 回调形式 异步组件
+            } catch (e) {
+              reject(e); // 如果出错的话, 通过 reject 处理
+            }
+            if (res) { // 存在返回值
+              if (typeof res.then === 'function') { // 返回一个 promise 的话
+                res.then(resolve, reject);
+              } else {
+                // new syntax in Vue 2.3 Vue 2.3中的新语法
+                // 如果返回的是一个异步组件形式, 还需要解析这个异步组件, 总而言之, 我们需要的是一个最终的路由配置对象
+                var comp = res.component; 
+                if (comp && typeof comp.then === 'function') {
+                  comp.then(resolve, reject);
+                }
               }
             }
           }
-        }
-      });
+        });
 
-      if (!hasAsync) { next(); }
+      if (!hasAsync) { next(); } // 如果不存在异步组件的话, 那我们直接执行下一步
     }
   }
 
+  // 封装处理 路由信息集合, 通过 fn 回调决定返回我们需要的组件内信息
   function flatMapComponents (
-    matched,
-    fn
+    matched, // 路由信息集合
+    fn // 回调
   ) {
-    return flatten(matched.map(function (m) {
-      return Object.keys(m.components).map(function (key) { return fn(
-        m.components[key],
-        m.instances[key],
-        m, key
+    return flatten(matched.map(function (m) { // 遍历 mathched 数组, 并返回特定格式
+      // 遍历路由信息的 components 数组
+      return Object.keys(m.components).map(function (key) { return fn( // 我们抽取出一些数据, 传递给 fn 回调, 让 fn 回调决定我们需要哪些内容
+        m.components[key], // 组件 value
+        m.instances[key], // 这个很重要, 是存储着路由对应的组件实例
+        m, // 路由信息
+        key // 命名视图的 key, 默认为 default
       ); })
     }))
   }
 
+  // 拍平数组, 但是只能将二维数组拍平为一维数组 -- 例如: [1, [2, 3, [4, 5]]] -- [1, 2, 3, [4, 5]]
   function flatten (arr) {
-    return Array.prototype.concat.apply([], arr)
+    return Array.prototype.concat.apply([], arr) // 借用 concat 方法
   }
 
   var hasSymbol =
     typeof Symbol === 'function' &&
     typeof Symbol.toStringTag === 'symbol';
 
+  // 判断是模块形式
   function isESModule (obj) {
     return obj.__esModule || (hasSymbol && obj[Symbol.toStringTag] === 'Module')
   }
 
-  // in Webpack 2, require.ensure now also returns a Promise
-  // so the resolve/reject functions may get called an extra time
-  // if the user uses an arrow function shorthand that happens to
-  // return that Promise.
+  // in Webpack 2, require.ensure now also returns a Promise 在 Webpack 2中，require。确保现在也返回一个承诺
+  // so the resolve/reject functions may get called an extra time 因此，resolve/reject函数可能会被多调用一段时间
+  // if the user uses an arrow function shorthand that happens to 如果用户使用箭头函数，就会发生
+  // return that Promise. 返回这一承诺
   function once (fn) {
+    // 通过 called 变量保证我们只会执行这个函数一次
     var called = false;
     return function () {
       var args = [], len = arguments.length;
@@ -2463,29 +2538,33 @@
      */
     this.current = START; // 初始化为一个初始路由
     // 添加一些属性, 暂时不知有何作用
-    this.pending = null;
-    this.ready = false;
-    this.readyCbs = [];
-    this.readyErrorCbs = [];
-    this.errorCbs = [];
-    this.listeners = [];
+    this.pending = null; // 正在导航的路由
+    this.ready = false; // 是否初始化导航结束
+    this.readyCbs = []; // 监听初始化导航成功回调
+    this.readyErrorCbs = []; // 监听初始化导航失败回调
+    this.errorCbs = []; // 错误回调
+    this.listeners = []; // 取消历史侦听器集合
   };
 
+  // 监听路由导航成功
   History.prototype.listen = function listen (cb) {
-    this.cb = cb;
+    this.cb = cb; // 添加回调, 我们只需要一个监听器, 没有暴露给外部
   };
 
+  // 该方法把一个回调排队，在路由完成初始导航时调用，这意味着它可以解析所有的异步进入钩子和路由初始化相关联的异步组件。
+  // 也就是只会在初始化导航的时候有效
   History.prototype.onReady = function onReady (cb, errorCb) {
-    if (this.ready) {
-      cb();
+    if (this.ready) { // 如果已经初始化导航过
+      cb(); // 那么就直接执行这个回调
     } else {
-      this.readyCbs.push(cb);
-      if (errorCb) {
-        this.readyErrorCbs.push(errorCb);
+      this.readyCbs.push(cb); // 否则的话, 我们就将其推入到集合中
+      if (errorCb) { // 如果还注册了错误回调的话
+        this.readyErrorCbs.push(errorCb); // 也需要将其推入集合中
       }
     }
   };
 
+  // 注册一个回调，该回调会在路由导航过程中出错时被调用。
   History.prototype.onError = function onError (errorCb) {
     this.errorCbs.push(errorCb);
   };
@@ -2515,35 +2594,38 @@
 
     // 在上面, 我们已经根据匹配信息来创建了路由对象了, 那么还需要根据这个路由对象来执行组件守卫, 组件渲染, url 更新等操作
     this.confirmTransition(
-      route,
-      function () {
-        this$1.updateRoute(route);
-        onComplete && onComplete(route);
-        this$1.ensureURL();
+      route, // 渲染路由
+      function () { // 成功回调
+        this$1.updateRoute(route); // 更新 this.current 当前路由的引用
+        onComplete && onComplete(route); // 导航成功回调
+        this$1.ensureURL(); // 通过 this.current 当前路由来修正 url
+
+        // 我们在这里执行 afterEach 全局后置守卫
         this$1.router.afterHooks.forEach(function (hook) {
-          hook && hook(route, prev);
+          hook && hook(route, prev); // 直接执行这个守卫即可
         });
 
-        // fire ready cbs once
-        if (!this$1.ready) {
-          this$1.ready = true;
-          this$1.readyCbs.forEach(function (cb) {
+        // fire ready cbs once 可点火cbs一次
+        // 如果存在监听初始化导航的回调, 那么只需要执行一次
+        if (!this$1.ready) { // 是否初始化标识
+          this$1.ready = true; // 置为 true, 只会执行一次
+          this$1.readyCbs.forEach(function (cb) { // 执行 readyCbs 集合
             cb(route);
           });
         }
       },
-      function (err) {
+      function (err) { // 失败回调
         if (onAbort) {
-          onAbort(err);
+          onAbort(err); // 导航失败回调
         }
-        if (err && !this$1.ready) {
-          // Initial redirection should not mark the history as ready yet
-          // because it's triggered by the redirection instead
+        if (err && !this$1.ready) { // 存在错误 && 是初始化导航过程失败
+          // Initial redirection should not mark the history as ready yet 初始重定向不应该将历史记录标记为已经准备好
+          // because it's triggered by the redirection instead 因为它是由重定向触发的
           // https://github.com/vuejs/vue-router/issues/3225
           // https://github.com/vuejs/vue-router/issues/3331
-          if (!isNavigationFailure(err, NavigationFailureType.redirected) || prev !== START) {
-            this$1.ready = true;
-            this$1.readyErrorCbs.forEach(function (cb) {
+          if (!isNavigationFailure(err, NavigationFailureType.redirected) || prev !== START) { // 如果不是重导航错误 || 上一个路由不是初始路由 -- 我们在这样情况下才判断是需要处理的错误
+            this$1.ready = true; // 置为 true
+            this$1.readyErrorCbs.forEach(function (cb) { // 执行初始化导航失败回调
               cb(err);
             });
           }
@@ -2558,27 +2640,30 @@
     onComplete,  // 成功回调
     onAbort // 失败回调
   ) {
-    debugger;
     var this$1 = this; // VueRouter 路由器实例
 
     var current = this.current; // 当前路由 - 也就是上一个路由
     this.pending = route; // 等待渲染的路由对象
+
+    // 处理导航错误的情况
     var abort = function (err) {
-      // changed after adding errors with
-      // https://github.com/vuejs/vue-router/pull/3047 before that change,
-      // redirect and aborted navigation would produce an err == null
-      if (!isNavigationFailure(err) && isError(err)) {
-        if (this$1.errorCbs.length) {
-          this$1.errorCbs.forEach(function (cb) {
+      // changed after adding errors with 在添加错误后更改
+      // https://github.com/vuejs/vue-router/pull/3047 before that change, https://github.com/vuejs/vue-router/pull/3047 在此之前
+      // redirect and aborted navigation would produce an err == null 重定向和中止导航将产生 err == null
+      if (!isNavigationFailure(err) && isError(err)) { // 如果不是内部构造的 err && 是错误 error 实例
+        if (this$1.errorCbs.length) { // 如果用户注册了错误回调
+          this$1.errorCbs.forEach(function (cb) { // 那么就将错误抛给用户处理
             cb(err);
           });
-        } else {
-          warn(false, 'uncaught error during route navigation:');
+        } else { // 如果没有注册错误回调, 那么就通过 console.error 直接抛出
+          warn(false, 'uncaught error during route navigation:'); // uncaught error during route navigation: 导航时的未捕获错误
           console.error(err);
         }
       }
-      onAbort && onAbort(err);
+      onAbort && onAbort(err); // 将其交给 onAbort 导航失败回调
     };
+
+
     var lastRouteIndex = route.matched.length - 1; // 等待渲染路由的所有嵌套路由 - 最后一个索引
     var lastCurrentIndex = current.matched.length - 1; // 上一个路由的所有嵌套路由集合的最后一个索引
     // 在这一段, 可以猜测为应该是路由完全相同的情况下, 不进行操作
@@ -2608,6 +2693,33 @@
       var activated = ref.activated; // 激活的路由信息
 
     // 解析守卫的队列 - 我们需要根据上述解析出的各种路由信息来收集需要执行的队列
+    /** 完整的导航解析流程
+     * 导航被触发。
+     * 在失活的组件里调用 beforeRouteLeave 守卫。
+     * 调用全局的 beforeEach 守卫。
+     * 在重用的组件里调用 beforeRouteUpdate 守卫 (2.2+)。
+     * 在路由配置里调用 beforeEnter。
+     * 解析异步路由组件。
+     * 在被激活的组件里调用 beforeRouteEnter。
+     * 调用全局的 beforeResolve 守卫 (2.5+)。
+     * 导航被确认。
+     * 调用全局的 afterEach 钩子。
+     * 触发 DOM 更新。
+     * 调用 beforeRouteEnter 守卫中传给 next 的回调函数，创建好的组件实例会作为回调函数的参数传入。
+     */
+    /**
+     * 1. 在失活的组件里调用 beforeRouteLeave 守卫 --- extractLeaveGuards(deactivated): 解析 beforeRouteLeave 离开守卫
+     *       - 在这里的逻辑是, 直接从 deactivated 失活路由信息中提取出我们需要的执行的守卫信息, 在 deactivated 中都是已经渲染过的路由组件, 我们直接从组件中就可以提取出来的
+     *         并且离开守卫是先执行 子路由 -> 父路由
+     * 2. 调用全局的 beforeEach 守卫 --- this.router.beforeHooks: 全局的前置守卫
+     * 3. 在重用的组件里调用 beforeRouteUpdate 守卫 --- extractUpdateHooks(updated): 重用的组件里调用 beforeRouteUpdate 守卫
+     *       - 逻辑: 从 updated 更新路由信息集合中提取出 beforeRouteUpdate 守卫, 与离开守卫类似, 但是不同的是我们执行的时机是 父路由 -> 子路由
+     * 4. 在路由配置里调用 beforeEnter --- activated.map(function (m) { return m.beforeEnter; }): 提取出路由独享的 beforeEnter 进入守卫
+     *       - 我们只需要从 路由信息 中提取出 beforeEnter 选项即可
+     * 5. 解析异步路由组件 --- resolveAsyncComponents(activated): 如果是刚激活的路由, 那么组件配置有可能是异步组件, 那么我们需要解析异步组件
+     *       - 我们将内部解析异步组件, 而不是借助 vue 的异步组件机制
+     * 接下来的导航过程在下面, 这里的队列到此为止, 因为异步路由的解析过程又是异步的, 所以我们需要重新建立一个队列机制
+     */
     var queue = [].concat(
       // in-component leave guards 在组件离开守卫
       extractLeaveGuards(deactivated),
@@ -2621,53 +2733,115 @@
       resolveAsyncComponents(activated)
     );
 
-    var iterator = function (hook, next) {
-      if (this$1.pending !== route) {
-        return abort(createNavigationCancelledError(current, route))
+    /** 这是我们执行每一项的方法 - 也就是执行守卫的方法
+     * 在方法内部我们可以看到, 我们会将 route(对应 to 参数, 即将进入的路由), current(对应 from 参数, 即将离开的路由), fn(对应 next 参数, 决定导航行为)
+     * 我们执行用户定义的守卫, 将控制权转移给用户的守卫中, 在守卫通过调用 next 方法, 又将控制权移交给我们,
+     * 我们查看第三个参数 next, fn 回调的时候可以看到, 我们接收用户传入的 to 参数, 用来决定导航行为, 通过 to 参数的不同, 策略就不同
+     * 1. 如果是 next(false) 的时候 -- 导航失败, 交给 abort 处理, 并通过 ensureURL 方法修正 url, 此时退出队列执行
+     * 2. 如果是 next(new Error()) 的时候 -- 导航失败, 类似 next(false)
+     * 3. 如果是 next('/xx') || next({ path: '/xx', name: '/xx' }) 的时候 -- 导航重定向, 我们也需要通过 abort 方法通知导航重定向, 
+     *    并且直接通过 this.replace 或 this.push 方法来重新触发导航操作, 此时守卫队列也不会在执行
+     * 4. 其他情况, 一般为 next() 情况, 此时继续执行下一个守卫队列
+     */
+    var iterator = function (
+      hook, // 队列值
+      next // 执行下一个队列的方法
+    ) {
+      // 在上面一点点地方, 会 this.pending = route 赋值
+      // 此时有可能是有的新的导航, 那么我们此时就需要终止这个旧导航
+      if (this$1.pending !== route) { // 如果当前处理的 route 路由不是正在导航的路由 pending
+        return abort(createNavigationCancelledError(current, route)) // 那么就报错
       }
-      try {
-        hook(route, current, function (to) {
-          if (to === false) {
-            // next(false) -> abort navigation, ensure current URL
-            this$1.ensureURL(true);
-            abort(createNavigationAbortedError(current, route));
-          } else if (isError(to)) {
-            this$1.ensureURL(true);
-            abort(to);
-          } else if (
-            typeof to === 'string' ||
-            (typeof to === 'object' &&
-              (typeof to.path === 'string' || typeof to.name === 'string'))
-          ) {
-            // next('/') or next({ path: '/' }) -> redirect
-            abort(createNavigationRedirectedError(current, route));
-            if (typeof to === 'object' && to.replace) {
-              this$1.replace(to);
-            } else {
-              this$1.push(to);
+      try { // 将守卫中的错误捕获
+        // 我们开始执行每一个钩子
+        hook(
+          route, // 下一个路由, 即是守卫中的 to 参数
+          current,  // 正要离开的路由, 即是守卫中的 from 参数
+          function (to) { // 调用该方法来 resolve 这个钩子
+            if (to === false) { // 如果是 next(false) 的时候
+              // next(false) -> abort navigation, ensure current URL 中止导航，确保当前URL
+              /**
+               * 例如我们手动修改 url, 从 /bar -> /foo, 此时 url 表现为 /foo, 假设在 /bar 的路由守卫中我们 next(false)
+               * 此时我们应该终止路由导航, 就需要将 url 重置为 /bar, 此时通过 this.current 路由对象即可重置
+               * 此时虽然会被 popstate(hashchange) 事件监听到, 但是在 popstate(hashchange) 事件处理器中, 我们会判断 this.current 如果是当前 url 的路由对象, 那么我们就不会处理这个 url 变动
+               * 上面这个判断是错误的, 我们通过 ensureURL 重置 url 的时候, 因为如果是在 popstate(hashchange) 事件中重置的 url, 此时是不会重复触发 popstate(hashchange) 事件
+               */
+              this$1.ensureURL(true); // 通过 this.current 路由对象来修正 url
+              abort(createNavigationAbortedError(current, route)); // 发出错误信息
+            } else if (isError(to)) { // 如果是 next(new Error()) 的时候
+              this$1.ensureURL(true); // 通过 this.current 路由对象来修正 url
+              abort(to); // 直接使用用户定义的错误信息 to 来处理
+            } else if ( // 如果是 next('/xx') || next({ path: '/xx', name: '/xx' })
+              typeof to === 'string' ||
+              (typeof to === 'object' &&
+                (typeof to.path === 'string' || typeof to.name === 'string'))
+            ) {
+              // next('/') or next({ path: '/' }) -> redirect next('/')或next({path: '/'}) ->重定向
+              abort(createNavigationRedirectedError(current, route));
+              // 如果是重导航的情况的话, 那么我们就直接丢弃了这个钩子队列, 让其自行回收内存
+              // 通过 this.replace 或 this.push 方法来重新触发导航操作
+              // 那么为什么不通过 this$1.ensureURL(true) 修正路由呢? 因为我们还需要再次导航到 to 对应的路由
+              if (typeof to === 'object' && to.replace) { // 如果是 replace 替换路由情况
+                this$1.replace(to);
+              } else {
+                this$1.push(to);
+              }
+            } else { // 其他情况, 一般表示为正常导航
+              // confirm transition and pass on the value 确认转换并传递值
+              next(to); // 执行下一个队列
             }
-          } else {
-            // confirm transition and pass on the value
-            next(to);
-          }
-        });
-      } catch (e) {
-        abort(e);
+          });
+      } catch (e) { // 如果在守卫中出现错误了
+        abort(e); // 那么就通过 abort 处理
       }
     };
 
+    // 运行队列 queue
+    /** 策略
+     * 我们通过 step 方法执行每一项队列, 在每一项队列中将其处理流程转移到 fn 中, 在 fn 中通过回调来确定执行下一个队列的时机
+     * 也就是说控制流程是这样的: step -> fn -> step
+     */
     runQueue(queue, iterator, function () {
-      // wait until async components are resolved before
-      // extracting in-component enter guards
-      var enterGuards = extractEnterGuards(activated);
-      var queue = enterGuards.concat(this$1.router.resolveHooks);
+      // wait until async components are resolved before 等待异步组件之前被解析
+      // extracting in-component enter guards 提取组件内的输入守卫
+      /** 完整的导航解析流程
+       * 导航被触发。
+       * 在失活的组件里调用 beforeRouteLeave 守卫。
+       * 调用全局的 beforeEach 守卫。
+       * 在重用的组件里调用 beforeRouteUpdate 守卫 (2.2+)。
+       * 在路由配置里调用 beforeEnter。
+       * 解析异步路由组件。
+       * 在被激活的组件里调用 beforeRouteEnter。
+       * 调用全局的 beforeResolve 守卫 (2.5+)。
+       * 导航被确认。
+       * 调用全局的 afterEach 钩子。
+       * 触发 DOM 更新。
+       * 调用 beforeRouteEnter 守卫中传给 next 的回调函数，创建好的组件实例会作为回调函数的参数传入。
+       */
+      /**
+       * 在上面的 queue 队列中, 我们已经处理到解析异步组件完成, 那么接下来就是处理进入相关的守卫
+       * 
+       * 6. 在被激活的组件里调用 beforeRouteEnter --- extractEnterGuards(activated): 提取出 beforeRouteEnter 进入守卫
+       *    -- 与其他组件守卫类似, 直接提取出来, 但是有一点特殊的, 就是这个守卫无法直接访问实例, 需要通过 next(vm => { // vm 组件实例 }) 访问
+       *    -- 但是在这里, 我们的组件还没有初始化, 那么我们就先收集这个回调, 在组件初始化后在执行即可
+       * 7. 调用全局的 beforeResolve 守卫 --- this$1.router.resolveHooks: 提取全局解析守卫 beforeResolve, 和 router.beforeEach 类似, 只是调用时机不同
+       * 8. 调用全局的 afterEach 钩子 --- this$1.router.afterHooks: 我们在上面导航成功 onComplete 回调中执行这个守卫, 直接执行即可, 这个守卫已经无法更改导航结果
+       * 9. 触发 DOM 更新 --- 
+       * 10. 调用 beforeRouteEnter 守卫中传给 next 的回调函数，创建好的组件实例会作为回调函数的参数传入 --- handleRouteEntered(route) 这个方法完成
+       *      --- 在 handleRouteEntered(route) 方法中, 我们通过判断 route.matched 嵌套路由记录判断每个路由信息的 enteredCbs 属性中是否存在 next 回调, 因为我们会将 next 的回调收集到 enteredCbs 属性中
+       *      --- 而组件实例则存在于 instances 属性中, 这样我们 next 回调和 vm 组件实例的元素就存在了, 只需要执行这个 next 回调并传入 vm 实例即可
+       */
+      var enterGuards = extractEnterGuards(activated); // 提取 beforeRouteEnter 进入守卫
+      var queue = enterGuards.concat(this$1.router.resolveHooks); // 提取全局解析守卫 beforeResolve
       runQueue(queue, iterator, function () {
-        if (this$1.pending !== route) {
-          return abort(createNavigationCancelledError(current, route))
+        // 走到这一步, 已经执行了全局的解析守卫, 导航已经被确定, 不同在通过 next(false) 形式取消导航了
+        if (this$1.pending !== route) { // 如果当前处理的 route 路由不是正在导航的路由 pending, 可能是存在新的导航
+          return abort(createNavigationCancelledError(current, route)) // 导航失败回调
         }
-        this$1.pending = null;
-        onComplete(route);
+        this$1.pending = null; // 将正在渲染的导航引用置为 null, 我们此时说明已经确定导航
+        onComplete(route); // 执行导航成功回调
         if (this$1.router.app) {
+          // 我们通过 $nextTick 来等待组件渲染好后, 执行 beforeRouteEnter 守卫中 next 回调
           this$1.router.app.$nextTick(function () {
             handleRouteEntered(route);
           });
@@ -2676,9 +2850,10 @@
     });
   };
 
+  // 更新当前路由引用
   History.prototype.updateRoute = function updateRoute (route) {
-    this.current = route;
-    this.cb && this.cb(route);
+    this.current = route; // 更新引用
+    this.cb && this.cb(route); // 如果存在监听导航成功引用的话, 那么我们就执行这个监听器
   };
 
   History.prototype.setupListeners = function setupListeners () {
@@ -2746,76 +2921,107 @@
     }
   }
 
+  // 在路由信息集合中提取出指定 name 的值
   function extractGuards (
-    records,
-    name,
-    bind,
-    reverse
+    records, // 组件信息集合
+    name, // 提取信息 name
+    bind, // 绑定守卫上下文指向对应的组件实例 - 如果存在实例的话
+    reverse // 颠倒数组中元素的顺序
   ) {
-    var guards = flatMapComponents(records, function (def, instance, match, key) {
-      var guard = extractGuard(def, name);
-      if (guard) {
-        return Array.isArray(guard)
-          ? guard.map(function (guard) { return bind(guard, instance, match, key); })
+    // flatMapComponents: 封装处理 路由信息集合, 通过 fn 回调决定返回我们需要的组件内信息
+    var guards = flatMapComponents(records, function (def /** 组件选项 */, instance /** 组件对应的实例, 判断是否已经初始化 */, match /** 路由信息 */, key /** 命名视图的 key, 默认为 default */) { 
+      var guard = extractGuard(def, name); // 提取出指定 name 的守卫
+      if (guard) { // 如果存在的话
+        return Array.isArray(guard) // 如果是一个数组
+          ? guard.map(function (guard) { return bind(guard, instance, match, key); }) // 那么调用数组, 再去通过 bind 去绑定上下文组件 vm 实例
           : bind(guard, instance, match, key)
       }
     });
-    return flatten(reverse ? guards.reverse() : guards)
+    // 我们通过 guards 已经提取好了我们需要的组件守卫
+    return flatten(reverse ? guards.reverse() : guards) // flatten: 拍平二维数组, 
   }
 
+  // 从组件中提取出指定的守卫
+  /**
+   * beforeRouteLeave: 离开守卫, 因为需要调用离开守卫的组件是已经被渲染过的, 所以如果我们注册的懒路由, 此时也是被渲染了的, 那么直接在组件中的去取用
+   */
   function extractGuard (
-    def,
-    key
+    def, // 组件配置项
+    key // 提取选项 name
   ) {
-    if (typeof def !== 'function') {
-      // extend now so that global mixins are applied.
-      def = _Vue.extend(def);
+    if (typeof def !== 'function') { // 如果不等于 function 的时候
+      // extend now so that global mixins are applied. 现在就扩展，以便应用全局混合
+      def = _Vue.extend(def); // 在这里通过 extend 进行组件的选项的合并
     }
-    return def.options[key]
+    return def.options[key] // 提取出指定的守卫
   }
 
+  // 获取失活的组件离开守卫
   function extractLeaveGuards (deactivated) {
+    // deactivated: 失活组件集合
+    // beforeRouteLeave: 在组件中定义的离开守卫
+    // bindGuard: 绑定守卫的上下文以及函数柯里化
+    /**
+     * 我们可以通过第四个参数 true 判断: 离开守卫是先执行子路由的
+     * 因为我们 deactivated 的顺序是栈顶是父路由 -> 子路由, 在这里 true 表示颠倒解析后的守卫顺序, 那么就可以得出离开守卫是从 子路由 -> 父路由
+     */
     return extractGuards(deactivated, 'beforeRouteLeave', bindGuard, true)
   }
 
+  // 获取更新的组件更新守卫
   function extractUpdateHooks (updated) {
+    /**
+     * 与组件离开守卫类似
+     * 但是我们没有传递第四个参数, 这样就不需要颠倒数组顺序, 那么我们执行的实际应该 父路由 -> 子路由
+     */
     return extractGuards(updated, 'beforeRouteUpdate', bindGuard)
   }
 
+  // 绑定守卫的上下文以及函数柯里化
   function bindGuard (guard, instance) {
-    if (instance) {
+    if (instance) { // instance: 组件对应的组件实例, 如果是已经渲染过的组件
+      // 如果存在组件实例的话, 那我们的守卫上下文 this 应该指向这个组件实例
       return function boundRouteGuard () {
         return guard.apply(instance, arguments)
       }
     }
   }
 
+  // 获取激活路由的 beforeRouteEnter 进入守卫
   function extractEnterGuards (
     activated
   ) {
     return extractGuards(
       activated,
       'beforeRouteEnter',
-      function (guard, _, match, key) {
-        return bindEnterGuard(guard, match, key)
+      /** 
+       * beforeRouteEnter 守卫 不能 访问 this，因为守卫在导航确认前被调用，因此即将登场的新组件还没被创建。
+       * 不过，你可以通过传一个回调给 next来访问组件实例。在导航被确认的时候执行回调，并且把组件实例作为回调方法的参数。
+       */
+      function (guard, _, match, key) { // 用于对守卫进行进一步封装, 绑定上下文, 以及在渲染 DOM 后将 vm 实例传递给 next 的回调中
+        return bindEnterGuard(guard /**守卫 */, match /**路由信息 */, key /**命名视图的 key, 默认为 default */)
       }
     )
   }
 
+  // 对 beforeRouteEnter 进入守卫进行进一步封装
   function bindEnterGuard (
-    guard,
-    match,
-    key
+    guard, // 守卫
+    match, // 路由信息
+    key // 命名视图
   ) {
+    // 进行封装, 返回一个封装后的函数
     return function routeEnterGuard (to, from, next) {
-      return guard(to, from, function (cb) {
-        if (typeof cb === 'function') {
-          if (!match.enteredCbs[key]) {
+      // 在这个函数内部, 执行守卫, 将 to, from, 原封不动的传递进去, 但是我们需要对 next 进行额外的处理
+      return guard(to, from, function (cb) { // 我们需要传递一个
+        if (typeof cb === 'function') { // 如果用户在守卫内部通过 next(vm => vm.xxx) 来访问 vm 实例时
+          // 我们需要将 vm 组件实例作为参数传递进去
+          if (!match.enteredCbs[key]) { // 在路由信息中存储着 enteredCbs 属性, 用于是否存在 beforeRouteEnter 进入守卫中引用了 vm 实例的
             match.enteredCbs[key] = [];
           }
-          match.enteredCbs[key].push(cb);
+          match.enteredCbs[key].push(cb); // 将这个回调存储起来, 将来执行
         }
-        next(cb);
+        next(cb); // 我们成功将 cb 回调收集了起来, 之后我们继续 next, 将控制流程交给守卫队列执行机制
       })
     }
   }
@@ -2951,26 +3157,30 @@
     HashHistory.prototype = Object.create( History && History.prototype ); // 原型链继承, 直接通过 Object.create() 方式, 简单快捷
     HashHistory.prototype.constructor = HashHistory; // 保持 constructor 指针引用
 
-    // this is delayed until the app mounts
-    // to avoid the hashchange listener being fired too early
+    // this is delayed until the app mounts 这将延迟到应用安装完成
+    // to avoid the hashchange listener being fired too early 避免过早地触发 hashchange 监听器
     HashHistory.prototype.setupListeners = function setupListeners () {
       var this$1 = this;
 
-      if (this.listeners.length > 0) {
+      if (this.listeners.length > 0) { // 如果已经存在侦听器的话
         return
       }
 
-      var router = this.router;
-      var expectScroll = router.options.scrollBehavior;
-      var supportsScroll = supportsPushState && expectScroll;
+      var router = this.router; // 路由器 - VueRouter 实例
+      var expectScroll = router.options.scrollBehavior; // 控制滚动行为的方法
+      var supportsScroll = supportsPushState && expectScroll; // 是否支持 history.pushState 原生方法
 
       if (supportsScroll) {
+        // 如果支持 history.pushState 方法, 并且用户需要控制滚动行为, 那么我们就通过 setupScroll 初始化滚动
+        // 并且将  setupScroll() 返回值(返回一个取消 popstate 事件侦听器方法)推入到取消侦听器集合中
         this.listeners.push(setupScroll());
       }
 
+      // 事件处理器
       var handleRoutingEvent = function () {
-        var current = this$1.current;
-        if (!ensureSlash()) {
+        // debugger;
+        var current = this$1.current; // 当前路由对象
+        if (!ensureSlash()) { // 判断当前 hash 模式下 url 是否符合规则, 否则重置路由 - 如果返回了 false, 那么 url 就会被重置, 就会再次触发历史事件, 那么这次的事件就略过
           return
         }
         this$1.transitionTo(getHash(), function (route) {
@@ -2982,12 +3192,12 @@
           }
         });
       };
-      var eventType = supportsPushState ? 'popstate' : 'hashchange';
-      window.addEventListener(
+      var eventType = supportsPushState ? 'popstate' : 'hashchange'; // 优先使用 popstate 事件
+      window.addEventListener( // 侦听历史事件
         eventType,
         handleRoutingEvent
       );
-      this.listeners.push(function () {
+      this.listeners.push(function () { // 将取消这个侦听器的方法推入到集合中
         window.removeEventListener(eventType, handleRoutingEvent);
       });
     };
@@ -3191,12 +3401,12 @@
   var VueRouter = function VueRouter (options) {
     if ( options === void 0 ) options = {}; // 如果 options 为空, 则将其置为 {}
 
-    this.app = null;
-    this.apps = [];
+    this.app = null; // 主应用程序
+    this.apps = []; // 配置了这个路由器的应用程序
     this.options = options; // 路由配置项
-    this.beforeHooks = [];
-    this.resolveHooks = [];
-    this.afterHooks = [];
+    this.beforeHooks = []; // 全局离开守卫
+    this.resolveHooks = []; // 全局解析守卫
+    this.afterHooks = []; // 全局后置守卫
     // 操作用户注册路由表信息
     this.matcher = createMatcher(options.routes || [], this);
 
@@ -3295,8 +3505,10 @@
           handleScroll(this$1, routeOrError, from, false);
         }
       };
+      // 导航成功或失败都走这个回调 - 在这里我们会进行初始化历史侦听器, 以响应 url 的变化
       var setupListeners = function (routeOrError) {
-        history.setupListeners();
+        debugger;
+        history.setupListeners(); // 设置历史侦听器
         handleInitialScroll(routeOrError);
       };
       history.transitionTo(
@@ -3306,29 +3518,37 @@
       );
     }
 
+    // 监听路由导航成功
     history.listen(function (route) {
+      // route: 导航成功的路由
       this$1.apps.forEach(function (app) {
-        app._route = route;
+        app._route = route; // 我们需要修正 app 应用程序的 _route 指向 route 路由对象, 保证通过 $route 访问 _route 的时候, 是正确的
       });
     });
   };
 
+  // 添加全局前置守卫
   VueRouter.prototype.beforeEach = function beforeEach (fn) {
+    // 通过 registerHook 添加
     return registerHook(this.beforeHooks, fn)
   };
 
+  // 添加全局解析守卫
   VueRouter.prototype.beforeResolve = function beforeResolve (fn) {
-    return registerHook(this.resolveHooks, fn)
+    return registerHook(this.resolveHooks, fn) // 添加到 resolveHooks 集合中
   };
 
   VueRouter.prototype.afterEach = function afterEach (fn) {
     return registerHook(this.afterHooks, fn)
   };
 
+  // 该方法把一个回调排队，在路由完成初始导航时调用，这意味着它可以解析所有的异步进入钩子和路由初始化相关联的异步组件。
+  // 也就是只会在初始化导航的时候有效
   VueRouter.prototype.onReady = function onReady (cb, errorCb) {
     this.history.onReady(cb, errorCb);
   };
 
+  // 注册一个回调，该回调会在路由导航过程中出错时被调用。
   VueRouter.prototype.onError = function onError (errorCb) {
     this.history.onError(errorCb);
   };
@@ -3434,10 +3654,14 @@
 
   Object.defineProperties( VueRouter.prototype, prototypeAccessors );
 
-  function registerHook (list, fn) {
-    list.push(fn);
-    return function () {
-      var i = list.indexOf(fn);
+  // 添加全局各式守卫
+  function registerHook (
+    list, // 对应守卫的集合
+    fn // 添加守卫
+  ) {
+    list.push(fn); // 直接添加进守卫集合
+    return function () { // 并且返回一个可以移除这个守卫的方法
+      var i = list.indexOf(fn); // 很简单, 从这个守卫集合中去除这个守卫即可
       if (i > -1) { list.splice(i, 1); }
     }
   }
