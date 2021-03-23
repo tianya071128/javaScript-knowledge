@@ -63,7 +63,19 @@
  *        10.调用全局的 afterEach 钩子。
  *        11. 触发 DOM 更新。
  *        12. 调用 beforeRouteEnter 守卫中传给 next 的回调函数，创建好的组件实例会作为回调函数的参数传入。
- * 4. 在完成导航操作后, 我们
+ * 
+ * 4. 在初始化导航完成操作后, 我们通过 setupListeners 来侦听历史, 我们在内部优先侦听 popstate' 事件, 而 'hashchange' 是代替使用的
+ *     popstate事件: 如下所述, 我们不会响应 this.push, 点击 routerLink 等方式的变化, 但是通过 go(n), back() 等方式就会响应到
+ *      需要注意的是调用 history.pushState() 或 history.replaceState() 不会触发popstate事件。
+ *      只有在做出浏览器动作时，才会触发该事件，如用户点击浏览器的回退按钮（或者在Javascript代码中调用history.back()或者history.forward()方法）
+ *     hashchange事件: 这个事件无论是怎样变化 url 的, 只要响应到 hash 变化就会响应, 这样的话在 VueRouter.prototype.push 相关方法中就会通过 transitionTo 去导航路由
+ *      在 hashchange 事件中会重复调用 transitionTo 方法, 但是没有关系, 在这个方法中, 我们会对重复路由进行处理
+ * 
+ * 5. 这样我们就完成了初始化导航的操作, 接下来的导航无非是通过编程式导航, 手动修改 url 等方式来改变路由, 最终都是通过 transitionTo 方法来导航路由
+ * 6. RouterLink 全局组件:
+ *    在这个组件中, 通过依赖 this.$route 属性来监听 this.$route 属性变化, 因为这个 $route 已经通过 Vue 的方法来进行响应式数据的
+ *    具体细则见组件注释
+ * 7. RouterView 全局组件
  */
 
 /*!
@@ -353,16 +365,18 @@
     })
   }
 
+  // 判断当前路由是否包含目标路由, 也就是说, target 路由是否被激活, 无需精准匹配
   function isIncludedRoute (current, target) {
     return (
-      current.path.replace(trailingSlashRE, '/').indexOf(
+      current.path.replace(trailingSlashRE, '/').indexOf( 
         target.path.replace(trailingSlashRE, '/')
       ) === 0 &&
-      (!target.hash || current.hash === target.hash) &&
-      queryIncludes(current.query, target.query)
+      (!target.hash || current.hash === target.hash) && // hash 一致
+      queryIncludes(current.query, target.query) // query 一致
     )
   }
 
+  // query 是否包含
   function queryIncludes (current, target) {
     for (var key in target) {
       if (!(key in current)) {
@@ -1161,79 +1175,100 @@
 
   var noop = function () {};
 
-  var warnedCustomSlot;
-  var warnedTagProp;
-  var warnedEventProp;
+  var warnedCustomSlot; // 警告一次标识
+  var warnedTagProp; // 警告一次标识
+  var warnedEventProp; // 警告一次标识
 
+  // 全局组件 router-link
   var Link = {
     name: 'RouterLink',
     props: {
-      to: {
+      to: { // 表示目标路由的链接。
         type: toTypes,
-        required: true
+        required: true // 必传项
       },
-      tag: {
+      tag: { // 渲染标签
         type: String,
-        default: 'a'
+        default: 'a' // 默认为 a 标签
       },
       custom: Boolean,
-      exact: Boolean,
-      exactPath: Boolean,
-      append: Boolean,
-      replace: Boolean,
-      activeClass: String,
-      exactActiveClass: String,
-      ariaCurrentValue: {
+      exact: Boolean, // 是否精准匹配模式默认类名  -- 例如: <router-link to="/" exact></router-link> 这个链接只会在地址为 / 的时候被激活
+      exactPath: Boolean, // 是否精准匹配 hash, query? -- 暂时没有暴露在 API 文档上
+      append: Boolean, // 设置 append 属性后，则在当前 (相对) 路径前添加基路径
+      replace: Boolean, // 设置 replace 属性的话，当点击时，会调用 router.replace() 而不是 router.push()，于是导航后不会留下 history 记录。
+      activeClass: String, // 设置链接激活时使用的 CSS 类名。 默认值可以通过路由的构造选项 linkActiveClass 来全局配置 -- router-link-active
+      exactActiveClass: String, // 配置当链接被精确匹配的时候应该激活的 class。注意默认值也是可以通过路由构造函数选项 linkExactActiveClass 进行全局配置的 -- router-link-exact-active
+      // 无障碍属性
+      ariaCurrentValue: { // 当链接根据精确匹配规则激活时配置的 aria-current 的值。这个值应该是 ARIA 规范中允许的 aria-current 的值。在绝大多数场景下，默认值 page 应该是最合适的。
         type: String,
         default: 'page'
       },
-      event: {
+      event: { // 声明可以用来触发导航的事件。可以是一个字符串或是一个包含字符串的数组。
         type: eventTypes,
         default: 'click'
       }
     },
+    /**
+     * 我们判断一个组件是否响应式, 应该查看这个组件的渲染函数 render 中是否依赖了响应式对象, 此时就会观察到数据变动
+     * 在这里, 我们依赖了 this.$route, 所以我们会在路由变化时我们可以动态响应
+     */
     render: function render (h) {
-      var this$1 = this;
+      debugger;
+      var this$1 = this; // 组件实例
 
-      var router = this.$router;
-      var current = this.$route;
+      var router = this.$router; // 路由器 - VueRotuer 实例
+      // this.$route 这个属性是一个响应式数据, 在 VueRouter.install 方法中注册插件时, 我们通过 
+      // Vue.util.defineReactive(this, '_route', this._router.history.current) 添加了响应式数据, 并不会深度监听, 因为 this._router.history.current 这个对象是一个冻结对象
+      // 但是我们这个 routerLink 收集了 $route 依赖, 那么我们就会在 $route 变化时, 重新渲染这个组件
+      var current = this.$route; // 当前路由对象
+
+      // 解析目标位置, 返回路径相关信息
+      /**
+       * location: 解析出 path, hash, query ... 信息
+       * route: 匹配路由对象
+       * href: 完整 url
+       * ... 向后兼容属性
+       */
       var ref = router.resolve(
         this.to,
         current,
         this.append
       );
+
       var location = ref.location;
       var route = ref.route;
       var href = ref.href;
 
-      var classes = {};
-      var globalActiveClass = router.options.linkActiveClass;
-      var globalExactActiveClass = router.options.linkExactActiveClass;
-      // Support global empty active class
+      var classes = {}; // 使用类集合
+      var globalActiveClass = router.options.linkActiveClass; // 全局配置 <router-link> 默认的激活的 class。
+      var globalExactActiveClass = router.options.linkExactActiveClass; // 全局配置 <router-link> 默认的精确激活的 class。
+      // Support global empty active class 支持全局空活动类
       var activeClassFallback =
-        globalActiveClass == null ? 'router-link-active' : globalActiveClass;
+        globalActiveClass == null ? 'router-link-active' : globalActiveClass; // 默认为 'router-link-active'
       var exactActiveClassFallback =
-        globalExactActiveClass == null
+        globalExactActiveClass == null // 默认为 'router-link-exact-active'
           ? 'router-link-exact-active'
           : globalExactActiveClass;
-      var activeClass =
+      var activeClass = // 激活路由的最终类名, 先使用组件 prop
         this.activeClass == null ? activeClassFallback : this.activeClass;
-      var exactActiveClass =
+      var exactActiveClass = // 精确激活路由的最终类名, 先使用组件 prop
         this.exactActiveClass == null
           ? exactActiveClassFallback
           : this.exactActiveClass;
 
-      var compareTarget = route.redirectedFrom
-        ? createRoute(null, normalizeLocation(route.redirectedFrom), null, router)
+      var compareTarget = route.redirectedFrom // 是否为重定向路由
+        ? createRoute(null, normalizeLocation(route.redirectedFrom), null, router) // 使用重定向来源创建一个路由对象
         : route;
 
-      classes[exactActiveClass] = isSameRoute(current, compareTarget, this.exactPath);
-      classes[activeClass] = this.exact || this.exactPath
-        ? classes[exactActiveClass]
-        : isIncludedRoute(current, compareTarget);
+      // 比较 current 和 compareTarget 路由, 也就是比较当前路由和 routerLink 精准匹配路由是否相同, 决定是否使用 exactActiveClass 精准匹配类
+      classes[exactActiveClass] = isSameRoute(current, compareTarget, this.exactPath); 
+      classes[activeClass] = this.exact || this.exactPath // 如果需要精准匹配
+        ? classes[exactActiveClass] // 那么直接使用 exactActiveClass 精准匹配的结果
+        : isIncludedRoute(current, compareTarget); // 否则比较下 path, hash, query
 
-      var ariaCurrentValue = classes[exactActiveClass] ? this.ariaCurrentValue : null;
+      var ariaCurrentValue = classes[exactActiveClass] ? this.ariaCurrentValue : null; // 无障碍属性
 
+      // 点击事件处理器
       var handler = function (e) {
         if (guardEvent(e)) {
           if (this$1.replace) {
@@ -1244,21 +1279,22 @@
         }
       };
 
-      var on = { click: guardEvent };
-      if (Array.isArray(this.event)) {
-        this.event.forEach(function (e) {
+      var on = { click: guardEvent }; // 添加点击事件
+      if (Array.isArray(this.event)) { // this.event: 用来触发导航的事件
+        this.event.forEach(function (e) { // 数组时, 遍历数组
           on[e] = handler;
         });
       } else {
         on[this.event] = handler;
       }
 
+      // 组件的 data 属性
       var data = { class: classes };
 
       var scopedSlot =
-        !this.$scopedSlots.$hasNormal &&
-        this.$scopedSlots.default &&
-        this.$scopedSlots.default({
+        !this.$scopedSlots.$hasNormal && // $hasNormal vue内部属性, 应该是表示是否为正常插槽, 此时应该表示是否使用了作用域插槽
+        this.$scopedSlots.default && // 默认插槽
+        this.$scopedSlots.default({ // 如果是作用域插槽, 那么我们应该传递一些值给作用域插槽使用
           href: href,
           route: route,
           navigate: handler,
@@ -1266,21 +1302,24 @@
           isExactActive: classes[exactActiveClass]
         });
 
+      // 这是当使用作用域插槽时, 我们就由插槽来决定 routerlink 的 VNode
       if (scopedSlot) {
         if ( !this.custom) {
+          // 在Vue路由器4中，v-slot API将默认使用元素包装其内容。使用自定义的支柱来移除这个警告
           !warnedCustomSlot && warn(false, 'In Vue Router 4, the v-slot API will by default wrap its content with an <a> element. Use the custom prop to remove this warning:\n<router-link v-slot="{ navigate, href }" custom></router-link>\n');
           warnedCustomSlot = true;
         }
-        if (scopedSlot.length === 1) {
-          return scopedSlot[0]
-        } else if (scopedSlot.length > 1 || !scopedSlot.length) {
+        if (scopedSlot.length === 1) { // 插槽需要提供一个根节点
+          return scopedSlot[0] // 返回这个, 由插槽内容决定显示值
+        } else if (scopedSlot.length > 1 || !scopedSlot.length) { // 如果具有多个, 那么我们需要发出提示
           {
             warn(
               false,
+              // 正在尝试使用一个作用域插槽，但它没有提供确切的一个子。用span元素包装内容
               ("<router-link> with to=\"" + (this.to) + "\" is trying to use a scoped slot but it didn't provide exactly one child. Wrapping the content with a span element.")
             );
           }
-          return scopedSlot.length === 0 ? h() : h('span', {}, scopedSlot)
+          return scopedSlot.length === 0 ? h() : h('span', {}, scopedSlot) // 如果插槽没有返回返回节点, 则使用 '' : 使用 span 包括插槽
         }
       }
 
@@ -1288,6 +1327,8 @@
         if ('tag' in this.$options.propsData && !warnedTagProp) {
           warn(
             false,
+            // < Router -link>的标签道具已弃用，并已在Vue路由器4中移除。使用v-slot API删除此警告:https://next.router.vuejs.org/guide/migration/#removal-of-event-and-tag-props-in-router-link。
+            // 这个警告是为了兼容 vueRouter 4
             "<router-link>'s tag prop is deprecated and has been removed in Vue Router 4. Use the v-slot API to remove this warning: https://next.router.vuejs.org/guide/migration/#removal-of-event-and-tag-props-in-router-link."
           );
           warnedTagProp = true;
@@ -1295,31 +1336,33 @@
         if ('event' in this.$options.propsData && !warnedEventProp) {
           warn(
             false,
+            // < Router -link>的事件道具已弃用，并已在Vue路由器4中移除。使用v-slot API删除此警告:https://next.router.vuejs.org/guide/migration/#removal-of-event-and-tag-props-in-router-link
             "<router-link>'s event prop is deprecated and has been removed in Vue Router 4. Use the v-slot API to remove this warning: https://next.router.vuejs.org/guide/migration/#removal-of-event-and-tag-props-in-router-link."
           );
           warnedEventProp = true;
         }
       }
 
-      if (this.tag === 'a') {
-        data.on = on;
-        data.attrs = { href: href, 'aria-current': ariaCurrentValue };
+      // 否则我们就将内部生成 VNode
+      if (this.tag === 'a') { // 如果 tag 为 a 标签的话
+        data.on = on; // 元素事件
+        data.attrs = { href: href, 'aria-current': ariaCurrentValue }; // 元素属性
       } else {
-        // find the first <a> child and apply listener and href
-        var a = findAnchor(this.$slots.default);
+        // find the first <a> child and apply listener and href 找到第一个子节点并应用listener和href
+        var a = findAnchor(this.$slots.default); // 找到 children 表示的第一个 a 节点
         if (a) {
-          // in case the <a> is a static node
+          // in case the <a> is a static node 如果是一个静态节点
           a.isStatic = false;
-          var aData = (a.data = extend({}, a.data));
-          aData.on = aData.on || {};
-          // transform existing events in both objects into arrays so we can push later
+          var aData = (a.data = extend({}, a.data)); 
+          aData.on = aData.on || {}; // 添加事件
+          // transform existing events in both objects into arrays so we can push later 将两个对象中的现有事件转换为数组，以便稍后推送
           for (var event in aData.on) {
             var handler$1 = aData.on[event];
             if (event in on) {
               aData.on[event] = Array.isArray(handler$1) ? handler$1 : [handler$1];
             }
           }
-          // append new listeners for router-link
+          // append new listeners for router-link 为router-link添加新的监听器
           for (var event$1 in on) {
             if (event$1 in aData.on) {
               // on[event] is always a function
@@ -1333,11 +1376,12 @@
           aAttrs.href = href;
           aAttrs['aria-current'] = ariaCurrentValue;
         } else {
-          // doesn't have <a> child, apply listener to self
+          // doesn't have <a> child, apply listener to self 没有子节点，将listener应用到self
           data.on = on;
         }
       }
 
+      // h 渲染 Vnode, this.$slots.default 表示子节点
       return h(this.tag, data, this.$slots.default)
     }
   };
@@ -1361,15 +1405,16 @@
     return true
   }
 
+  // 找到 children 表示的第一个 a 节点
   function findAnchor (children) {
-    if (children) {
+    if (children) { 
       var child;
-      for (var i = 0; i < children.length; i++) {
+      for (var i = 0; i < children.length; i++) { // 遍历 children
         child = children[i];
-        if (child.tag === 'a') {
-          return child
+        if (child.tag === 'a') { // 如果找到
+          return child // 直接返回这个节点 vnode
         }
-        if (child.children && (child = findAnchor(child.children))) {
+        if (child.children && (child = findAnchor(child.children))) { // 否则, 我们就递归查找
           return child
         }
       }
@@ -2060,46 +2105,51 @@
     }
   }
 
+  // 处理滚动位置
   function handleScroll (
-    router,
-    to,
-    from,
-    isPop
+    router, // 路由器 - VueRouter
+    to, // 上一个路由
+    from, // 下一个路由
+    isPop // 是否使用以前的滚动位置 - 在通过浏览器前进后退的时候置为 true
   ) {
-    if (!router.app) {
-      return
+    debugger;
+    if (!router.app) { // 如果该路由器应用程序
+      return // 说明这个路由器是闲置状态
     }
 
-    var behavior = router.options.scrollBehavior;
-    if (!behavior) {
+    var behavior = router.options.scrollBehavior; // 用户定义滚动行为
+    if (!behavior) { // 如果没有定义的话, 不做处理
       return
     }
 
     {
-      assert(typeof behavior === 'function', "scrollBehavior must be a function");
+      // 检测用户定义是否为 true, 否则触发警告
+      assert(typeof behavior === 'function', "scrollBehavior must be a function"); // scrollBehavior必须是一个函数
     }
 
-    // wait until re-render finishes before scrolling
+    // wait until re-render finishes before scrolling 等到重新渲染完成后再滚动
+    // 我们借助 $nextTick 方法来等待页面渲染 OK 后我们就可以做滚动位置的跳转
     router.app.$nextTick(function () {
-      var position = getScrollPosition();
+      var position = getScrollPosition(); // 获取页面 key 对应的滚动位置 - 如果是新页面, 那么应该为 undefined
+      // 调用 behavior 用户定义滚动方法, 来判断用户返回的滚动位置
       var shouldScroll = behavior.call(
-        router,
-        to,
-        from,
+        router, // 在路由器的上下文中执行
+        to, // 下一个路由
+        from, // 上一个路由
         isPop ? position : null
       );
 
-      if (!shouldScroll) {
+      if (!shouldScroll) { // 如果返回为 false 值
         return
       }
 
-      if (typeof shouldScroll.then === 'function') {
+      if (typeof shouldScroll.then === 'function') { // 如果返回一个 promise
         shouldScroll
-          .then(function (shouldScroll) {
+          .then(function (shouldScroll) { // 成功态
             scrollToPosition((shouldScroll), position);
           })
-          .catch(function (err) {
-            {
+          .catch(function (err) { // 失败态
+            { // 发出错误
               assert(false, err.toString());
             }
           });
@@ -2128,15 +2178,21 @@
     }
   }
 
+  // 获取当前页面 key 对应的滚动位置
   function getScrollPosition () {
     var key = getStateKey();
+    // 获取当前页面的滚动位置
     if (key) {
       return positionStore[key]
     }
   }
 
+  // 获取元素的位置
   function getElementPosition (el, offset) {
     var docEl = document.documentElement;
+    /**
+     * getBoundingClientRect用于获取某个元素相对于视窗的位置集合
+     */
     var docRect = docEl.getBoundingClientRect();
     var elRect = el.getBoundingClientRect();
     return {
@@ -2156,6 +2212,7 @@
     }
   }
 
+  // 规范化 offset 滚动位置, 我们需要返回 number 值
   function normalizeOffset (obj) {
     return {
       x: isNumber(obj.x) ? obj.x : 0,
@@ -2169,31 +2226,41 @@
 
   var hashStartsWithNumberRE = /^#\d/;
 
-  function scrollToPosition (shouldScroll, position) {
+  function scrollToPosition (
+    shouldScroll, // 期望滚动位置
+    position // 存储的滚动位置
+  ) {
     var isObject = typeof shouldScroll === 'object';
+    // shouldScroll.selector: 模拟“滚动到锚点” -- 例如: selector: to.hash
     if (isObject && typeof shouldScroll.selector === 'string') {
-      // getElementById would still fail if the selector contains a more complicated query like #main[data-attr]
-      // but at the same time, it doesn't make much sense to select an element with an id and an extra selector
+      // getElementById would still fail if the selector contains a more complicated query like #main[data-attr] getElementById仍然会失败，如果选择器包含一个更复杂的查询#main[data-attr]
+      // but at the same time, it doesn't make much sense to select an element with an id and an extra selector 但与此同时，选择一个带有id和额外选择器的元素没有多大意义
       var el = hashStartsWithNumberRE.test(shouldScroll.selector) // $flow-disable-line
         ? document.getElementById(shouldScroll.selector.slice(1)) // $flow-disable-line
         : document.querySelector(shouldScroll.selector);
 
+      // 找到锚点元素
       if (el) {
         var offset =
           shouldScroll.offset && typeof shouldScroll.offset === 'object'
             ? shouldScroll.offset
             : {};
-        offset = normalizeOffset(offset);
-        position = getElementPosition(el, offset);
+        offset = normalizeOffset(offset); // 规范化 offset 滚动位置, 我们需要返回 number 值
+        position = getElementPosition(el, offset); // 获取锚点的位置
       } else if (isValidPosition(shouldScroll)) {
-        position = normalizePosition(shouldScroll);
+        position = normalizePosition(shouldScroll); // 使用 shouldScroll 用户定义位置
       }
     } else if (isObject && isValidPosition(shouldScroll)) {
-      position = normalizePosition(shouldScroll);
+      position = normalizePosition(shouldScroll); // 使用 shouldScroll 用户定义位置
     }
 
+    // 我们在上面代码的目的就在于找出我们需要滚动的位置, 如果用户传入的 shouldScroll 有效, 优先使用
     if (position) {
       // $flow-disable-line
+      /**
+       * window.scrollTo: 滚动到文档中的某个坐标。
+       * options 是一个包含三个属性的对象: behavior 表示滚动行为,支持参数 smooth(平滑滚动),instant(瞬间滚动),默认值auto
+       */
       if ('scrollBehavior' in document.documentElement.style) {
         window.scrollTo({
           left: position.x,
@@ -3178,20 +3245,30 @@
 
       // 事件处理器
       var handleRoutingEvent = function () {
-        // debugger;
         var current = this$1.current; // 当前路由对象
         if (!ensureSlash()) { // 判断当前 hash 模式下 url 是否符合规则, 否则重置路由 - 如果返回了 false, 那么 url 就会被重置, 就会再次触发历史事件, 那么这次的事件就略过
           return
         }
+        // 通过 transitionTo 来进行路由的导航完成, 当导航完成时, 我们就会使用传入的回调
+        // getHash(): 匹配路径
         this$1.transitionTo(getHash(), function (route) {
+          // 路由导航成功后, 进行滚动位置的修正
           if (supportsScroll) {
-            handleScroll(this$1.router, route, current, true);
+            handleScroll(this$1.router, route, current, true); // 滚动行为
           }
-          if (!supportsPushState) {
-            replaceHash(route.fullPath);
+          if (!supportsPushState) { // 如果不支持 history.pushstate 的话
+            replaceHash(route.fullPath); // 那么就使用当前 url
           }
         });
       };
+      /** 
+       * popstate事件: 如下所述, 我们不会响应 this.push, 点击 routerLink 等方式的变化, 但是通过 go(n), back() 等方式就会响应到
+       *  需要注意的是调用 history.pushState() 或 history.replaceState() 不会触发popstate事件。
+       *  只有在做出浏览器动作时，才会触发该事件，如用户点击浏览器的回退按钮（或者在Javascript代码中调用history.back()或者history.forward()方法）
+       * 
+       * hashchange事件: 这个事件无论是怎样变化 url 的, 只要响应到 hash 变化就会响应, 这样的话在 VueRouter.prototype.push 相关方法中就会通过 transitionTo 去导航路由
+       *  在 hashchange 事件中会重复调用 transitionTo 方法, 但是没有关系, 在这个方法中, 我们会对重复路由进行处理
+       */
       var eventType = supportsPushState ? 'popstate' : 'hashchange'; // 优先使用 popstate 事件
       window.addEventListener( // 侦听历史事件
         eventType,
@@ -3496,18 +3573,18 @@
     var history = this.history; // 操控路由的实例
 
     if (history instanceof HTML5History || history instanceof HashHistory) { // 如果是 HTML5History 实例 || HashHistory 实例 -- 在这种情况下
+      // 处理初始滚动
       var handleInitialScroll = function (routeOrError) {
-        var from = history.current;
-        var expectScroll = this$1.options.scrollBehavior;
+        var from = history.current; // 当前路由对象
+        var expectScroll = this$1.options.scrollBehavior; // 滚动行为
         var supportsScroll = supportsPushState && expectScroll;
 
         if (supportsScroll && 'fullPath' in routeOrError) {
-          handleScroll(this$1, routeOrError, from, false);
+          handleScroll(this$1, routeOrError, from, false); // 借助 handleScroll 方法进行滚动
         }
       };
       // 导航成功或失败都走这个回调 - 在这里我们会进行初始化历史侦听器, 以响应 url 的变化
       var setupListeners = function (routeOrError) {
-        debugger;
         history.setupListeners(); // 设置历史侦听器
         handleInitialScroll(routeOrError);
       };
@@ -3610,22 +3687,29 @@
     )
   };
 
+  // 解析目标位置, 返回路径相关信息
+  /**
+   * location: 解析出 path, hash, query ... 信息
+   * route: 匹配路由对象
+   * href: 完成 url
+   * ... 向后兼容属性
+   */
   VueRouter.prototype.resolve = function resolve (
-    to,
-    current,
-    append
+    to, // 去往的路径信息(例如: {name: 'xx'} || '/xx')
+    current, // 当前默认的路由 (通常你不需要改变它)
+    append // 在 current 路由上附加路径 (如同 router-link)
   ) {
-    current = current || this.history.current;
-    var location = normalizeLocation(to, current, append, this);
-    var route = this.match(location, current);
-    var fullPath = route.redirectedFrom || route.fullPath;
-    var base = this.history.base;
-    var href = createHref(base, fullPath, this.mode);
+    current = current || this.history.current; // 默认为当前路由
+    var location = normalizeLocation(to, current, append, this); // 通过匹配信息和当前路由对象来解析出 path, hash, query ... 信息
+    var route = this.match(location, current); // 匹配路由对象
+    var fullPath = route.redirectedFrom || route.fullPath; // 优先使用重定向来源的路由的名字 || 自身路由 -- 如果是重定向的话, 那么我们需要重定向来源的路由的名字
+    var base = this.history.base; // 基路由
+    var href = createHref(base, fullPath, this.mode); // 创建一个最终路径
     return {
       location: location,
       route: route,
       href: href,
-      // for backwards compat
+      // for backwards compat 为了向后兼容
       normalizedTo: location,
       resolved: route
     }
@@ -3666,9 +3750,10 @@
     }
   }
 
+  // 创建一个 href 路径
   function createHref (base, fullPath, mode) {
-    var path = mode === 'hash' ? '#' + fullPath : fullPath;
-    return base ? cleanPath(base + '/' + path) : path
+    var path = mode === 'hash' ? '#' + fullPath : fullPath; // 如果是 hash 模式, 则使用 # 拼接路径
+    return base ? cleanPath(base + '/' + path) : path // 返回拼接路径
   }
 
   VueRouter.install = install;
