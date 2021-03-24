@@ -73,9 +73,13 @@
  * 
  * 5. 这样我们就完成了初始化导航的操作, 接下来的导航无非是通过编程式导航, 手动修改 url 等方式来改变路由, 最终都是通过 transitionTo 方法来导航路由
  * 6. RouterLink 全局组件:
- *    在这个组件中, 通过依赖 this.$route 属性来监听 this.$route 属性变化, 因为这个 $route 已经通过 Vue 的方法来进行响应式数据的
- *    具体细则见组件注释
- * 7. RouterView 全局组件
+ *      在这个组件中, 通过依赖 this.$route 属性来监听 this.$route 属性变化, 因为这个 $route 已经通过 Vue 的方法来进行响应式数据的
+ *      具体细则见组件注释
+ * 7. RouterView 全局组件:
+ *      在这里, 我们是通过递归查找 $parant 父组件来确定当前视图的路由层级, 从而渲染出相应的组件
+ *      我们通过注入一个 registerRouteInstance 钩子, 而且在注册 VueRouter.install 方法中, 我们通过在组件的 beforeCreate 生命周期方法中执行这个钩子, 从而将组件实例添加到 instances 属性中
+ *      但是我们还需要考虑缓存组件的问题, 从而使得问题复杂化, 在 vue 的 keep-alive 机制还不是很清楚, 暂时略过部分
+ *      而且响应式也是一个问题, 但是这个还涉及到 函数式组件 问题, 唉
  */
 
 /*!
@@ -105,6 +109,7 @@
     }
   }
 
+  // 合并对象
   function extend (a, b) {
     for (var key in b) {
       a[key] = b[key];
@@ -125,7 +130,7 @@
       .replace(encodeReserveRE, encodeReserveReplacer)
       .replace(commaRE, ','); };
 
-  // 对制定字符串解码
+  // 对指定字符串解码
   function decode (str) {
     try {
       return decodeURIComponent(str) // 通过原生方法 decodeURIComponent 解码
@@ -166,7 +171,7 @@
   // 返回指定 value 解析后值
   var castQueryParamValue = function (value) { return (value == null || typeof value === 'object' ? value : String(value)); };
 
-  // 默认序列化查询参数方法
+  // 默认反序列化查询参数方法
   function parseQuery (query) {
     var res = {};
 
@@ -402,113 +407,123 @@
     }
   }
 
+  // RouterView 全局组件
   var View = {
     name: 'RouterView',
-    functional: true,
+    functional: true, // 函数式组件
     props: {
-      name: {
+      name: { // 如果 <router-view>设置了名称，则会渲染对应的路由配置中 components 下的相应组件。
         type: String,
         default: 'default'
       }
     },
+    // 函数式组件中, _: createElement 生成 VNode 函数 | ref: context, 组件上下文
+    /**
+     * 在这里, 我们是通过递归查找 $parant 父组件来确定当前视图的路由层级, 从而渲染出相应的组件
+     * 我们通过注入一个 registerRouteInstance 钩子, 而且在注册 VueRouter.install 方法中, 我们通过在组件的 beforeCreate 生命周期方法中执行这个钩子, 从而将组件实例添加到 instances 属性中
+     * 但是我们还需要考虑缓存组件的问题, 从而使得问题复杂化, 在 vue 的 keep-alive 机制还不是很清楚, 暂时略过部分
+     * 而且响应式也是一个问题, 但是这个还涉及到 函数式组件 问题, 唉
+     */
     render: function render (_, ref) {
-      var props = ref.props;
-      var children = ref.children;
-      var parent = ref.parent;
-      var data = ref.data;
+      var props = ref.props; // props
+      var children = ref.children; // VNode 子节点的数组
+      var parent = ref.parent; // 对父组件的引用
+      var data = ref.data; // 递给组件的整个数据对象，作为 createElement 的第二个参数传入组件
 
-      // used by devtools to display a router-view badge
-      data.routerView = true;
+      // used by devtools to display a router-view badge devtools用来显示路由器视图标签
+      data.routerView = true; // 用于标识这是一个路由组件, 提供给 devtools 使用 -- 同时也是用来确定当前视图的层级
 
-      // directly use parent context's createElement() function
-      // so that components rendered by router-view can resolve named slots
+      // directly use parent context's createElement() function 直接使用父上下文的 createElement() 函数
+      // so that components rendered by router-view can resolve named slots 这样，router-view 渲染的组件就可以解析命名槽
       var h = parent.$createElement;
       var name = props.name;
-      var route = parent.$route;
-      var cache = parent._routerViewCache || (parent._routerViewCache = {});
+      var route = parent.$route; // 路由对象
+      var cache = parent._routerViewCache || (parent._routerViewCache = {}); // 缓存路由组件
 
-      // determine current view depth, also check to see if the tree
-      // has been toggled inactive but kept-alive.
-      var depth = 0;
+      // determine current view depth, also check to see if the tree 确定当前视图的深度，也检查是否有树
+      // has been toggled inactive but kept-alive. 已被切换为不活动但仍保持活动状态
+      var depth = 0; // 层级
       var inactive = false;
-      while (parent && parent._routerRoot !== parent) {
-        var vnodeData = parent.$vnode ? parent.$vnode.data : {};
-        if (vnodeData.routerView) {
-          depth++;
+      while (parent && parent._routerRoot !== parent) { // 递归查找 parent, 确定当前视图在路由树中的层级
+        var vnodeData = parent.$vnode ? parent.$vnode.data : {}; // 向上查找父组件
+        if (vnodeData.routerView) { // 如果父组件中存在路由组件的话
+          depth++; // 说明此时层级应该 +1
         }
-        if (vnodeData.keepAlive && parent._directInactive && parent._inactive) {
-          inactive = true;
+        if (vnodeData.keepAlive && parent._directInactive && parent._inactive) { // 缓存组件 && 这之后应该是表示组件被停用状态
+          inactive = true; // 不活动缓存组件
         }
-        parent = parent.$parent;
+        parent = parent.$parent; // 递归查找
       }
-      data.routerViewDepth = depth;
+      data.routerViewDepth = depth; // 视图层级
 
-      // render previous view if the tree is inactive and kept-alive
-      if (inactive) {
+      // render previous view if the tree is inactive and kept-alive 如果树处于非活动状态并保持活动状态，则呈现前一个视图
+      if (inactive) { // 如果当前被缓存了的话
         var cachedData = cache[name];
         var cachedComponent = cachedData && cachedData.component;
-        if (cachedComponent) {
+        if (cachedComponent) { // 找到缓存的视图
           // #2301
           // pass props
-          if (cachedData.configProps) {
+          if (cachedData.configProps) { // 更新 props
             fillPropsinData(cachedComponent, data, cachedData.route, cachedData.configProps);
           }
-          return h(cachedComponent, data, children)
+          return h(cachedComponent, data, children) // 渲染
         } else {
-          // render previous empty view
+          // render previous empty view 渲染之前的空视图
           return h()
         }
       }
 
-      var matched = route.matched[depth];
-      var component = matched && matched.components[name];
+      var matched = route.matched[depth]; // 提取出当前路由层级对应的路由信息
+      var component = matched && matched.components[name]; // 提取出对应路由组件
 
-      // render empty node if no matched route or no config component
-      if (!matched || !component) {
-        cache[name] = null;
-        return h()
+      // render empty node if no matched route or no config component 如果没有匹配的路由或配置组件，则呈现空节点
+      if (!matched || !component) { // 如果没有找到的话
+        cache[name] = null; // 同时缓存到父组件中
+        return h() // 呈现空节点
       }
 
-      // cache component
-      cache[name] = { component: component };
+      // cache component 缓存组件
+      cache[name] = { component: component }; 
 
-      // attach instance registration hook
-      // this will be called in the instance's injected lifecycle hooks
+      // attach instance registration hook 附加实例注册钩子
+      // this will be called in the instance's injected lifecycle hooks 这将在实例的注入生命周期钩子中被调用
       data.registerRouteInstance = function (vm, val) {
-        // val could be undefined for unregistration
+        // val 如果存在的话, 说明是初始化组件阶段 -- registerInstance(this, this) 说明
+        // val could be undefined for unregistration 对于未注册，val可能是未定义的
         var current = matched.instances[name];
         if (
           (val && current !== vm) ||
           (!val && current === vm)
         ) {
-          matched.instances[name] = val;
+          matched.instances[name] = val; // 我们将组件实例挂入到 instances 属性中
         }
       }
 
-      // also register instance in prepatch hook
-      // in case the same component instance is reused across different routes
+      // also register instance in prepatch hook 同样在 prepatch 钩子中注册实例
+      // in case the same component instance is reused across different routes 如果同一个组件实例在不同的路由中被重用
+      // prepatch: 组件更新钩子 - 函数式组件中, 我们是没有这些组件钩子的, 我们手动添加一个, 会在更新阶段调用
       ;(data.hook || (data.hook = {})).prepatch = function (_, vnode) {
-        matched.instances[name] = vnode.componentInstance;
+        matched.instances[name] = vnode.componentInstance; // 将组件实例注册到路由信息中
       };
 
-      // register instance in init hook
-      // in case kept-alive component be actived when routes changed
+      // register instance in init hook 在 init 钩子中注册实例
+      // in case kept-alive component be actived when routes changed 以防 keep-alive 组件在路由改变时被激活
       data.hook.init = function (vnode) {
-        if (vnode.data.keepAlive &&
-          vnode.componentInstance &&
-          vnode.componentInstance !== matched.instances[name]
+        if (vnode.data.keepAlive && // 缓存组件
+          vnode.componentInstance && // 被实例化过
+          vnode.componentInstance !== matched.instances[name] // 重新被实例的话
         ) {
-          matched.instances[name] = vnode.componentInstance;
+          matched.instances[name] = vnode.componentInstance; // 将组件实例注册到路由信息中
         }
 
-        // if the route transition has already been confirmed then we weren't
-        // able to call the cbs during confirmation as the component was not
-        // registered yet, so we call it here.
-        handleRouteEntered(route);
+        // if the route transition has already been confirmed then we weren't 如果路线转换已经被确认，那么我们还没有
+        // able to call the cbs during confirmation as the component was not 能够在确认过程中调用cbs，因为组件没有调用
+        // registered yet, so we call it here. 还没登记，所以我们称之为这里
+        handleRouteEntered(route); // 执行 beforeRouteEnter 守卫中 next 的回调, 将组件实例传入其中
       };
 
-      var configProps = matched.props && matched.props[name];
-      // save route and configProps in cache
+      var configProps = matched.props && matched.props[name]; // 路由参数是否需要通过组件参数形式
+      // save route and configProps in cache 在缓存中保存路由和configProps
       if (configProps) {
         extend(cache[name], {
           route: route,
@@ -517,17 +532,23 @@
         fillPropsinData(component, data, route, configProps);
       }
 
-      return h(component, data, children)
+      return h(component, data, children) // 渲染组件, 当传递 component 组件配置项时, h 方法内部会去进行组件生成
     }
   };
 
-  function fillPropsinData (component, data, route, configProps) {
+  // 解析 props
+  function fillPropsinData (
+    component, // 组件配置项
+    data, // 组件数据
+    route,  // 路由对象
+    configProps // 配置 props 对象
+  ) {
     // resolve props
-    var propsToPass = data.props = resolveProps(route, configProps);
+    var propsToPass = data.props = resolveProps(route, configProps); // 解析出需要 props 传参
     if (propsToPass) {
-      // clone to prevent mutation
+      // clone to prevent mutation 克隆防止突变
       propsToPass = data.props = extend({}, propsToPass);
-      // pass non-declared props as attrs
+      // pass non-declared props as attrs 将未申报的道具作为attrs
       var attrs = data.attrs = data.attrs || {};
       for (var key in propsToPass) {
         if (!component.props || !(key in component.props)) {
@@ -538,19 +559,23 @@
     }
   }
 
-  function resolveProps (route, config) {
+  // 解析 props
+  function resolveProps (
+    route, // 路由对象
+    config // 配置 props 对象
+  ) {
     switch (typeof config) {
-      case 'undefined':
-        return
-      case 'object':
-        return config
-      case 'function':
-        return config(route)
-      case 'boolean':
+      case 'undefined': // 不存在, 
+        return // 返回空
+      case 'object': // object
+        return config // 直接返回
+      case 'function': // 函数
+        return config(route) // 则调用这个函数
+      case 'boolean': // 布尔值
         return config ? route.params : undefined
-      default:
+      default: // 其他情况
         {
-          warn(
+          warn( // 发出警告
             false,
             "props in \"" + (route.path) + "\" is a " + (typeof config) + ", " +
             "expecting an object, function or boolean."
@@ -634,6 +659,7 @@
     return path.replace(/\/\//g, '/')
   }
 
+  // 判断是否为数组方法
   var isarray = Array.isArray || function (arr) {
     return Object.prototype.toString.call(arr) == '[object Array]';
   };
@@ -1213,7 +1239,6 @@
      * 在这里, 我们依赖了 this.$route, 所以我们会在路由变化时我们可以动态响应
      */
     render: function render (h) {
-      debugger;
       var this$1 = this; // 组件实例
 
       var router = this.$router; // 路由器 - VueRotuer 实例
@@ -1386,19 +1411,20 @@
     }
   };
 
+  // 我们需要处理各种点击方式
   function guardEvent (e) {
-    // don't redirect with control keys
+    // don't redirect with control keys 不要用控制键重定向
     if (e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) { return }
-    // don't redirect when preventDefault called
+    // don't redirect when preventDefault called 当 preventDefault 调用时不要重定向
     if (e.defaultPrevented) { return }
-    // don't redirect on right click
+    // don't redirect on right click 不要用右键重定向
     if (e.button !== undefined && e.button !== 0) { return }
-    // don't redirect if `target="_blank"`
+    // don't redirect if `target="_blank"` 如果'target="_blank"，不要重定向
     if (e.currentTarget && e.currentTarget.getAttribute) {
       var target = e.currentTarget.getAttribute('target');
       if (/\b_blank\b/i.test(target)) { return }
     }
-    // this may be a Weex event which doesn't have this method
+    // this may be a Weex event which doesn't have this method 这可能是一个 Weex 事件，没有这个方法
     if (e.preventDefault) {
       e.preventDefault();
     }
@@ -2108,11 +2134,10 @@
   // 处理滚动位置
   function handleScroll (
     router, // 路由器 - VueRouter
-    to, // 上一个路由
-    from, // 下一个路由
+    to, // 即将要进入的目标 - 下一个路由
+    from, // 当前导航正要离开的路由 - 上一个路由
     isPop // 是否使用以前的滚动位置 - 在通过浏览器前进后退的时候置为 true
   ) {
-    debugger;
     if (!router.app) { // 如果该路由器应用程序
       return // 说明这个路由器是闲置状态
     }
@@ -2201,10 +2226,12 @@
     }
   }
 
+  // 验证滚动位置是否为 number 类型的对象
   function isValidPosition (obj) {
     return isNumber(obj.x) || isNumber(obj.y)
   }
 
+  // 规范化滚动位置 position
   function normalizePosition (obj) {
     return {
       x: isNumber(obj.x) ? obj.x : window.pageXOffset,
@@ -2220,12 +2247,14 @@
     }
   }
 
+  // 判断是否为 number 类型
   function isNumber (v) {
     return typeof v === 'number'
   }
 
   var hashStartsWithNumberRE = /^#\d/;
 
+  // 最终实现滚动行为 - 我们通过解析出滚动位置, 通过 window.scrollTo 原生方法来处理
   function scrollToPosition (
     shouldScroll, // 期望滚动位置
     position // 存储的滚动位置
@@ -2422,6 +2451,7 @@
 
   var propertiesToLog = ['params', 'query', 'hash'];
 
+  // 序列化路由信息 - 用于提示用户信息
   function stringifyRoute (to) {
     if (typeof to === 'string') { return to }
     if ('path' in to) { return to.path }
@@ -2561,6 +2591,7 @@
     return Array.prototype.concat.apply([], arr) // 借用 concat 方法
   }
 
+  // 是否支持 symbol
   var hasSymbol =
     typeof Symbol === 'function' &&
     typeof Symbol.toStringTag === 'symbol';
@@ -2923,6 +2954,7 @@
     this.cb && this.cb(route); // 如果存在监听导航成功引用的话, 那么我们就执行这个监听器
   };
 
+  // 应该由子类实现 - 抽象方法
   History.prototype.setupListeners = function setupListeners () {
     // Default implementation is empty
   };
@@ -3096,57 +3128,65 @@
   /*  */
 
   var HTML5History = /*@__PURE__*/(function (History) {
+    // 构造器
     function HTML5History (router, base) {
-      History.call(this, router, base);
+      History.call(this, router, base); // 同样的, 通过 History 父类创建相关属性
 
-      this._startLocation = getLocation(this.base);
+      this._startLocation = getLocation(this.base); // 获取开始路径
     }
 
-    if ( History ) HTML5History.__proto__ = History;
-    HTML5History.prototype = Object.create( History && History.prototype );
-    HTML5History.prototype.constructor = HTML5History;
+    if ( History ) HTML5History.__proto__ = History; // 构造器继承
+    HTML5History.prototype = Object.create( History && History.prototype ); // 原型链继承
+    HTML5History.prototype.constructor = HTML5History; // constructor 指针修复引用
 
+    // 设置历史侦听器
     HTML5History.prototype.setupListeners = function setupListeners () {
       var this$1 = this;
 
-      if (this.listeners.length > 0) {
+      if (this.listeners.length > 0) { // 防止重复侦听
         return
       }
 
-      var router = this.router;
-      var expectScroll = router.options.scrollBehavior;
-      var supportsScroll = supportsPushState && expectScroll;
+      var router = this.router; // VueRouter 实例, 路由器
+      var expectScroll = router.options.scrollBehavior; // 用户自定义滚动行为
+      var supportsScroll = supportsPushState && expectScroll;  // 是否支持 history.pushState 原生方法
 
       if (supportsScroll) {
+        // 如果支持 history.pushState 方法, 并且用户需要控制滚动行为, 那么我们就通过 setupScroll 初始化滚动
+        // 并且将  setupScroll() 返回值(返回一个取消 popstate 事件侦听器方法)推入到取消侦听器集合中
         this.listeners.push(setupScroll());
       }
 
       var handleRoutingEvent = function () {
         var current = this$1.current;
 
-        // Avoiding first `popstate` event dispatched in some browsers but first
-        // history route not updated since async guard at the same time.
+        // Avoiding first `popstate` event dispatched in some browsers but first 避免在某些浏览器中首先分派“popstate”事件
+        // history route not updated since async guard at the same time. 由于异步保护，历史路由没有同时更新
         var location = getLocation(this$1.base);
         if (this$1.current === START && location === this$1._startLocation) {
           return
         }
 
+        // 通过 transitionTo 导航路由
         this$1.transitionTo(location, function (route) {
           if (supportsScroll) {
-            handleScroll(router, route, current, true);
+            handleScroll(router, route, current, true); // 滚动行为
           }
         });
       };
+      // 在 mode 为 history 模式时, 我们是选择侦听 popstate 事件
       window.addEventListener('popstate', handleRoutingEvent);
       this.listeners.push(function () {
         window.removeEventListener('popstate', handleRoutingEvent);
       });
     };
 
+    // 导航路由, 与 HashHistory 方法相同
     HTML5History.prototype.go = function go (n) {
       window.history.go(n);
     };
 
+    // 导航路由, 与 HashHistory 方法相同
     HTML5History.prototype.push = function push (location, onComplete, onAbort) {
       var this$1 = this;
 
@@ -3159,6 +3199,7 @@
       }, onAbort);
     };
 
+    // 导航路由, 与 HashHistory 方法相同
     HTML5History.prototype.replace = function replace (location, onComplete, onAbort) {
       var this$1 = this;
 
@@ -3171,13 +3212,15 @@
       }, onAbort);
     };
 
+    // 通过当前路由对象 this.current 来设置 url
     HTML5History.prototype.ensureURL = function ensureURL (push) {
-      if (getLocation(this.base) !== this.current.fullPath) {
+      if (getLocation(this.base) !== this.current.fullPath) { // 如果当前 url 表现不是路由对象 fullPath 表示的路由,
         var current = cleanPath(this.base + this.current.fullPath);
-        push ? pushState(current) : replaceState(current);
+        push ? pushState(current) : replaceState(current); // 那么就修正 url
       }
     };
 
+    // 获取 location 路径
     HTML5History.prototype.getCurrentLocation = function getCurrentLocation () {
       return getLocation(this.base)
     };
@@ -3279,22 +3322,27 @@
       });
     };
 
+    // 导航路由 - 追加历史记录
     HashHistory.prototype.push = function push (location, onComplete, onAbort) {
       var this$1 = this;
 
       var ref = this;
-      var fromRoute = ref.current;
+      var fromRoute = ref.current; // 保存将要离开的路由 -- 上一个路由
+      // 我们在这里不会通过 url 变化来触发历史监听器, 因为在 history.popstate 方法不会触发 popstate 事件
+      // 而对于 hashchange 事件来讲, 虽然之后还是会触发历史监听器, 但是在内部我们已经处理了重复导航的问题, 所以不会存在问题
+      // 所以我们在这里手动调用 transitionTo 方法来导航路由
       this.transitionTo(
         location,
         function (route) {
-          pushHash(route.fullPath);
-          handleScroll(this$1.router, route, fromRoute, false);
-          onComplete && onComplete(route);
-        },
-        onAbort
+          pushHash(route.fullPath); // 导航成功后通过 pushHash 修正 url
+          handleScroll(this$1.router, route, fromRoute, false); // 设置滚动位置
+          onComplete && onComplete(route); // 执行成功回调
+        }, 
+        onAbort // 导航失败直接执行失败回调
       );
     };
 
+    // 与 push 方法类似, 只会会替换路由
     HashHistory.prototype.replace = function replace (location, onComplete, onAbort) {
       var this$1 = this;
 
@@ -3303,7 +3351,7 @@
       this.transitionTo(
         location,
         function (route) {
-          replaceHash(route.fullPath);
+          replaceHash(route.fullPath); // 使用 replaceHash 方法替换 url
           handleScroll(this$1.router, route, fromRoute, false);
           onComplete && onComplete(route);
         },
@@ -3311,11 +3359,12 @@
       );
     };
 
+    // 直接通过 window.history.go 方式来触发历史侦听器, 这个相当于点击浏览器的回退按钮
     HashHistory.prototype.go = function go (n) {
       window.history.go(n);
     };
 
-    // 校正 url - 使 url 表现与路有对象表示一致
+    // // 通过当前路由对象 this.current 来设置 url
     HashHistory.prototype.ensureURL = function ensureURL (push) {
       var current = this.current.fullPath; // 当前路由的完整路径
       if (getHash() !== current) { // 当前 url 是否与路由对象的完整路径相同
@@ -3524,6 +3573,7 @@
     }
   };
 
+  // 在 VueRouter 上添加 currentRoute 属性 - 
   var prototypeAccessors = { currentRoute: { configurable: true } };
 
   // 根据指定路径, 来匹配用户注册的路由信息, 并封装为路由对象
@@ -3531,6 +3581,7 @@
     return this.matcher.match(raw, current, redirectedFrom) // 借用 matcher 内部封装 api 来操作用户注册信息进行匹配
   };
 
+  // 设置 VueRouter.prototype 上添加 currentRoute 的 getter, 用于获取当前路由对象
   prototypeAccessors.currentRoute.get = function () {
     return this.history && this.history.current
   };
@@ -3577,7 +3628,7 @@
       var handleInitialScroll = function (routeOrError) {
         var from = history.current; // 当前路由对象
         var expectScroll = this$1.options.scrollBehavior; // 滚动行为
-        var supportsScroll = supportsPushState && expectScroll;
+        var supportsScroll = supportsPushState && expectScroll; // 是否支持 history.pushState 原生方法
 
         if (supportsScroll && 'fullPath' in routeOrError) {
           handleScroll(this$1, routeOrError, from, false); // 借助 handleScroll 方法进行滚动
@@ -3615,6 +3666,7 @@
     return registerHook(this.resolveHooks, fn) // 添加到 resolveHooks 集合中
   };
 
+  // 添加全局后置守卫
   VueRouter.prototype.afterEach = function afterEach (fn) {
     return registerHook(this.afterHooks, fn)
   };
@@ -3630,56 +3682,62 @@
     this.history.onError(errorCb);
   };
 
+  // 导航路由 -- 这个方法会向 history 栈添加一个新的记录，所以，当用户点击浏览器后退按钮时，则回到之前的 URL。
   VueRouter.prototype.push = function push (location, onComplete, onAbort) {
       var this$1 = this;
 
     // $flow-disable-line
-    if (!onComplete && !onAbort && typeof Promise !== 'undefined') {
-      return new Promise(function (resolve, reject) {
-        this$1.history.push(location, resolve, reject);
+    if (!onComplete && !onAbort && typeof Promise !== 'undefined') { // 如果没有注册成功失败回调 && 支持 promise 形式
+      return new Promise(function (resolve, reject) { // 那么返回一个 promise
+        this$1.history.push(location, resolve, reject); // 借助 history 实例跳转
       })
     } else {
       this.history.push(location, onComplete, onAbort);
     }
   };
 
+  // 导航路由 -- 它不会向 history 添加新记录，而是跟它的方法名一样 —— 替换掉当前的 history 记录。
   VueRouter.prototype.replace = function replace (location, onComplete, onAbort) {
       var this$1 = this;
 
     // $flow-disable-line
-    if (!onComplete && !onAbort && typeof Promise !== 'undefined') {
-      return new Promise(function (resolve, reject) {
+    if (!onComplete && !onAbort && typeof Promise !== 'undefined') { // 如果没有注册成功失败回调 && 支持 promise 形式
+      return new Promise(function (resolve, reject) { // 那么返回一个 promise
         this$1.history.replace(location, resolve, reject);
       })
     } else {
-      this.history.replace(location, onComplete, onAbort);
+      this.history.replace(location, onComplete, onAbort); // 借助 history 实例跳转
     }
   };
 
+  // 向前或者后退多少步
   VueRouter.prototype.go = function go (n) {
     this.history.go(n);
   };
 
+  // 回退一步
   VueRouter.prototype.back = function back () {
     this.go(-1);
   };
 
+  // 前进一步
   VueRouter.prototype.forward = function forward () {
     this.go(1);
   };
 
+  // 返回目标位置或是当前路由匹配的组件数组 (是数组的定义/构造类，不是实例) -- 并没有在 API 文档上体现, 并且没有在内部使用
   VueRouter.prototype.getMatchedComponents = function getMatchedComponents (to) {
-    var route = to
-      ? to.matched
-        ? to
-        : this.resolve(to).route
-      : this.currentRoute;
-    if (!route) {
+    var route = to // 如果传递了 to
+      ? to.matched // 是否传递了一个路由对象进来
+        ? to // 此时直接使用
+        : this.resolve(to).route // 否则通过 resolve 方法解析
+      : this.currentRoute; // 否则直接使用当前路由对象
+    if (!route) { // 如果没有找到
       return []
     }
     return [].concat.apply(
       [],
-      route.matched.map(function (m) {
+      route.matched.map(function (m) { // 返回组件数组
         return Object.keys(m.components).map(function (key) {
           return m.components[key]
         })
@@ -3687,7 +3745,7 @@
     )
   };
 
-  // 解析目标位置, 返回路径相关信息
+  // 解析目标位置, 返回路径相关信息, 路由对象等信息
   /**
    * location: 解析出 path, hash, query ... 信息
    * route: 匹配路由对象
@@ -3715,28 +3773,37 @@
     }
   };
 
+  // 获取所有活跃的路由记录列表。
   VueRouter.prototype.getRoutes = function getRoutes () {
     return this.matcher.getRoutes()
   };
 
+  // 添加一条新路由规则。如果该路由规则有 name，并且已经存在一个与之相同的名字，则会覆盖它。 -- addRoute(route: RouteConfig): () => void
+  // 添加一条新的路由规则记录作为现有路由的子路由。如果该路由规则有 name，并且已经存在一个与之相同的名字，则会覆盖它。 -- addRoute(parentName: string, route: RouteConfig): () => void
   VueRouter.prototype.addRoute = function addRoute (parentOrRoute, route) {
-    this.matcher.addRoute(parentOrRoute, route);
-    if (this.history.current !== START) {
-      this.history.transitionTo(this.history.getCurrentLocation());
+    this.matcher.addRoute(parentOrRoute, route); // 通过 this.matcher 去完成这个操作
+    /** 
+     * this.history.current === START 如果条件满足
+     * 说明还没有完成初始导航
+     * 或者路由器被卸载
+     */
+    if (this.history.current !== START) { // 这一步是因为, 如果当前路由对象不是初始路由, 说明初始导航还没有完成
+      this.history.transitionTo(this.history.getCurrentLocation()); // 总之我们需要重新导航一次, 因为当前路由可能使我们刚添加进来的
     }
   };
 
+  // 动态添加更多的路由规则。 -- 已废弃：使用 router.addRoute() 代替。
   VueRouter.prototype.addRoutes = function addRoutes (routes) {
-    {
-      warn(false, 'router.addRoutes() is deprecated and has been removed in Vue Router 4. Use router.addRoute() instead.');
+    { // 方法被弃用, 发出警告
+      warn(false, 'router.addRoutes() is deprecated and has been removed in Vue Router 4. Use router.addRoute() instead.'); // Router . addrroutes()已弃用，已在Vue路由器4中移除。使用router.addRoute ()
     }
-    this.matcher.addRoutes(routes);
+    this.matcher.addRoutes(routes); // 与 addRoute 同理
     if (this.history.current !== START) {
       this.history.transitionTo(this.history.getCurrentLocation());
     }
   };
 
-  Object.defineProperties( VueRouter.prototype, prototypeAccessors );
+  Object.defineProperties( VueRouter.prototype, prototypeAccessors ); // 在 VueRotuer.prototype 中添加属性
 
   // 添加全局各式守卫
   function registerHook (

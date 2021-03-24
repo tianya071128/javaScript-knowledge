@@ -4208,7 +4208,7 @@
     // 下面就是一些内部属性
     vm._watcher = null; // 组件的渲染函数 watcher 观察对象
     vm._inactive = null;
-    vm._directInactive = false;
+    vm._directInactive = false; // 缓存组件停用的状态
     vm._isMounted = false; // 组件是否已经初始渲染
     vm._isDestroyed = false; // 组件是否已经被渲染
     vm._isBeingDestroyed = false; // 组件是否被销毁中
