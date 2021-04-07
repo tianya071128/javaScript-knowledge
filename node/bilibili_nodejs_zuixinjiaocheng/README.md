@@ -9,3 +9,8 @@
   * 使用: `nodemon 文件名`
 - forever
 - pm2
+
+
+## mongoDB 非关系型数据库
+1. 安装: 根据教程安装
+...
