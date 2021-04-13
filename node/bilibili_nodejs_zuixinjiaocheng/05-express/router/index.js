@@ -4,23 +4,20 @@ const express = require('express');
 const router = express.Router();
 
 router
-  .get('/index', (req, res, next) => {
-    const query = req.query; // 获取前端 query 参数
+  // test: 1. 路由参数 2. res.send() 是否可以重复调用 3. 执行 next() 后是否会继续进入下一个中间件
+  .get('/users/:userId', (req, res, next) => {
+    // 路由参数 - 类似于 vue-router 的 params
+    const params = req.params; // { userId: id }
 
-    res.send('index pages');
-  })
-  .post('/index', (req, res, next) => {
-    const data = req.body;
+    res.send(params);
 
-    res.send(data);
-  })
-  .get('/api/list', (req, res, next) => {
-    const dataArray = (new Array(1000)).fill(1).map((item, index) => 'line' + index);
+    // res.send('是否会替换掉'); // no - 不能重复发送请求
+    // 当使用了 send 方法时, 是否还会执行下面代码? -- yes, 还是会执行的
+    console.log('是否执行?');
 
-    // 通过 art-template 注入到 res 的方法渲染模板并返回给前端
-    res.render('list', {
-      data: dataArray
-    })
+    next(); // 执行 next 后是否会进入下一个中间件? -- yes, 还是会走到这一个中间件
+  }, (req, res, next) => {
+    console.log('中间件');
   })
 
 module.exports = router;

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon server02.js"
+    "dev": "nodemon app.js"
   },
   "keywords": [],
   "author": "",
@@ -13,5 +13,8 @@
     "art-template": "^4.13.2",
     "express": "^4.17.1",
     "express-art-template": "^1.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   }
 }
