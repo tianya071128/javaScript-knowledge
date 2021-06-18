@@ -8,6 +8,7 @@ module.exports = {
     pageB: "./pageB",
     pageC: "./pageC",
   },
+  devtool: 'source-map',
   optimization: {
     chunkIds: "named", // 指定打包过程中的chunkId，设为named会生成可读性好的chunkId，便于debug
     splitChunks: {

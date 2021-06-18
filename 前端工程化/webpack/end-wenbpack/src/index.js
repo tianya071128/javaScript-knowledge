@@ -26,3 +26,5 @@ document.body.onclick = function() {
 };
 
 console.log(vue, vueRouter, vuex, test(1, 2, 1, 3));
+
+console.log(aaaa, '测试一下 souremap 的 module');

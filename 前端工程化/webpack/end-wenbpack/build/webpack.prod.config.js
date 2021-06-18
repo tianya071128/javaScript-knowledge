@@ -12,6 +12,7 @@ const TerserJSPlugin = require("terser-webpack-plugin");
 
 module.exports = merge(baseWebpackConfig, {
   mode: "production", // production
+  devtool: 'eval-source-map',
   output: {
     filename: "js/[name].[contenthash:6].js", // 打包后的文件名称
     path: path.resolve(__dirname, "../dist") // 打包后的目录，必须是绝对路径

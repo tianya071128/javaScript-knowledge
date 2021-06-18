@@ -8,7 +8,7 @@ module.exports = {
   context: path.resolve(__dirname, "../"),
   entry: {
     main: "./src/index.js",
-    main2: "./src/index01.js"
+    // main2: "./src/index01.js"
   }, // 入口文件
   output: {
     filename: "[name].js", // 打包后的文件名称
