@@ -1,0 +1,49 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2021-07-12 23:13:14
+ * @LastEditors: sueRimn
+ * @LastEditTime: 2021-07-12 23:54:54
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hello world</title>
+  <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+
+<body>
+  <!-- 容器, 与 vue 概念类似 -->
+  <div id="root"></div>
+</body>
+
+</html>
+
+<script type="text/babel"> /** 使用 babel 转译 jsx */
+  /**
+   * JSX 语法规则
+   * 1. 不要用引号, 当换行时使用 () 包裹起来
+   * 2. 表达式使用 {} 
+   * 3. class 在是一个关键字, 应使用 className 替换
+   * 4. style 不能使用字符串, 需要传入 对象表达式
+   * 5. 常规下只能使用一个根标签(与 vue 类似, 在 vue3 中,可以使用多个根标签)
+   * 6. 标签首字母:
+   *    * 若以小写字母开头, 会强制渲染为 html 元素
+   *    * 若以大写字母开头, 会视为组件
+   */
+
+  const VDOM = (
+    <h1 id={'myId'} style={{ color: 'red' }}>Hello, world!</h1>
+  )
+  ReactDOM.render(
+    VDOM,
+    document.getElementById('root')
+  );
+
+</script>

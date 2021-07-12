@@ -1,0 +1,41 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2021-07-12 23:13:14
+ * @LastEditors: sueRimn
+ * @LastEditTime: 2021-07-13 00:18:08
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hello world</title>
+  <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+
+<body>
+  <!-- 容器, 与 vue 概念类似 -->
+  <div id="root"></div>
+</body>
+
+</html>
+
+<script type="text/babel"> /** 使用 babel 转译 jsx */
+  const data = ['Angular', 'react', 'Vue']; // 模拟数据
+  const VDOM = (
+    <div>
+      <h1>前端 JS 框架列表</h1>
+      {data.map((item, i) => <li key={i}>{item}</li>)}
+    </div>
+  )
+  ReactDOM.render(
+    VDOM,
+    document.getElementById('root')
+  );
+
+</script>
