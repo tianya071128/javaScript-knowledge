@@ -83,13 +83,13 @@ import "./less01.less";
 
 soure-map: 单独生成 .map 文件，映射原始代码
 
-inline: 以内联的形式嵌入打包后 js 文件（也就是也原本生成的 .map 文件以 base64 形式放在 js 文件中）- 更消耗性能
+inline: 以内联的形式嵌入打包后 js 文件（也就是也原本生成的 .map 文件以 base64 形式放在 js 文件中）- 更消耗性能(base64 体积会更大)
 
 cheap: 仅定位至行，忽略列 - 减少性能消耗
 
 eval: 将每个模块包装在一个`eval`函数中的代码
 
-module: 包含`loader`的`sourcemap`
+module: 包含`loader`的`sourcemap` -- 经过测试, 如果存在 cheap 的话, 那么就不会包含 loader 的 sourcemap, 其他情况, 会默认包含 -- webpack 处理模块是通过 loader 的链式处理, 如果不含 module 的话, 那么 soucemap 只会映射到最后一个环节的源码, 例如通过 babel 转译的就不会映射到
 
 推荐：
 
