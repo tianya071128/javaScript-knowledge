@@ -1,0 +1,59 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2021-07-12 23:13:14
+ * @LastEditors: sueRimn
+ * @LastEditTime: 2021-07-16 00:19:43
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hello world</title>
+  <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+
+<body>
+  <!-- 容器, 与 vue 概念类似 -->
+  <div id="root"></div>
+</body>
+
+</html>
+
+<script type="text/babel"> /** 使用 babel 转译 jsx */
+  // 函数式组件使用 props
+  function MyComponet(props) {
+    console.log(props); // 函数式组件第一个参数就是 props
+  }
+
+  class Person extends React.Component {
+    // state 可以直接写在这里, class 的新语法, 会直接定义在实例上
+    render() {
+      /**
+       * props: 传入组件的数据
+       *  1. props 是一个只读属性, 不能进行修改(与 vue 类似, 修改对象属性是无法报错的)
+       *  2. props 的类型限制和默认值, 需要使用另一个库, 或者可以使用 ts 
+       */
+
+      // this.props.name = '问'; // 报错
+      // this.props.test.a = 2; // 不会报错, 因为改变的是对象的属性, 而没有改变对象内存地址
+
+      return (
+        <ul>
+          <li>姓名: {this.props.name}</li>
+          <li>姓名: {this.props.sex}</li>
+          <li>姓名: {this.props.age}</li>
+        </ul>
+      )
+    }
+  }
+
+  // ReactDOM.render(<Person name="tom" age="18" sex="女" test={{ a: 1 }} />, document.getElementById('root'));
+  // 批量传递 props 的方式
+  ReactDOM.render(<Person {...{ name: 'tom', age: 18, sex: '女' }} />, document.getElementById('root'));
+</script>

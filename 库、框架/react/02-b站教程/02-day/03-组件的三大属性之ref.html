@@ -1,0 +1,64 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2021-07-12 23:13:14
+ * @LastEditors: sueRimn
+ * @LastEditTime: 2021-07-16 00:41:59
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hello world</title>
+  <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+
+<body>
+  <!-- 容器, 与 vue 概念类似 -->
+  <div id="root"></div>
+</body>
+
+</html>
+
+<script type="text/babel"> /** 使用 babel 转译 jsx */
+  class MyComponent extends React.Component {
+    // 如果这样定义的箭头函数, 那么 this 引用的就是实例 -> 这是 class 的语法
+    // showData = () => {
+    /**
+     * class 也相当与一个语法糖而已, 类似于
+     * function MyComponent() {
+     *  // 而在这里的 this就是指向实例
+     *  this.showData = () => { // 这里的 this 引用的是外层的 this }
+     * }
+     */
+    // console.log(this); // 这样定义的 this 引用的作用域的 this, 而在 class 有其特殊性, 表示的就是实例
+    // }
+    showData() {
+      console.log(this);
+    }
+
+    render() {
+      /**
+       * ref 定义方式
+       *    1: 字符串形式, 例如 -> ref="input1"
+       *        目前不推荐使用, 并在未来版本中可能会被弃用, 主要是因为存在效率低下问题
+       *    2. 回调方式, 
+       *    
+       */
+      return (
+        <div>
+          <input ref="input1" type="text" placeholder="点击按钮提示数据" />
+          <button onClick={() => this.showData()}>点我提示左侧的数据</button>
+          <input ref="element => console.log(element)" type="text" placeholder="失去焦点提示数据" />
+        </div>
+      )
+    }
+  }
+
+  ReactDOM.render(<MyComponent />, document.getElementById('root'));
+</script>

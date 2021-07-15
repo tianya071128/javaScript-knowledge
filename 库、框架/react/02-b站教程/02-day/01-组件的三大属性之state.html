@@ -3,7 +3,7 @@
  * @Author: 温祖彪
  * @Date: 2021-07-12 23:13:14
  * @LastEditors: sueRimn
- * @LastEditTime: 2021-07-15 21:54:11
+ * @LastEditTime: 2021-07-15 23:03:54
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -26,28 +26,32 @@
 </html>
 
 <script type="text/babel"> /** 使用 babel 转译 jsx */
-  // 1. 创建函数式组件 -> 无状态的组件
-  function MyComponent() {
-    console.log(this); // 在这里, this 是 undefined, 因为 babel 转译成严格模式
-    return (
-      <h2>函数式组件</h2>
-    )
-  }
+  class MyComponent extends React.Component {
+    constructor(props) {
+      super(props);
 
-  // 渲染组件
-  ReactDOM.render(
-    <MyComponent />,
-    document.getElementById('root')
-  )
+      /**
+       * state: 数据
+       * 1. 保存着组件的状态
+       * 2. 直接修改不会触发视图更新, 需通过 this.setState() 更新数据
+       */
+      this.state = {
+        isHot: true,
+      }
+    }
 
-  // 2. 创建类式组件 -> 有状态的组件
-  class MyComponent2 extends React.Component {
+    changeWeather() {
+      this.setState({
+        isHot: !this.state.isHot,
+      })
+    }
+
     render() {
       return (
-        <h2>我是类式组件</h2>
+        <h2 onClick={() => this.changeWeather()}>今天天气很{ this.state.isHot ? '炎热' : '凉爽'}</h2>
       )
     }
   }
 
-  ReactDOM.render(<MyComponent2 />, document.getElementById('root'));
+  ReactDOM.render(<MyComponent />, document.getElementById('root'));
 </script>
