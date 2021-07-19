@@ -3,7 +3,7 @@
  * @Author: 温祖彪
  * @Date: 2021-07-12 23:13:14
  * @LastEditors: sueRimn
- * @LastEditTime: 2021-07-16 00:41:59
+ * @LastEditTime: 2021-07-19 18:58:38
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -42,19 +42,32 @@
       console.log(this);
     }
 
+    saveInput = (c) => {
+      console.log(c);
+    }
+
+    myRef = React.createRef(); // 创建一个 ref 容器
+
     render() {
       /**
        * ref 定义方式
        *    1: 字符串形式, 例如 -> ref="input1"
        *        目前不推荐使用, 并在未来版本中可能会被弃用, 主要是因为存在效率低下问题
-       *    2. 回调方式, 
-       *    
+       *    2. 回调方式, 例如 -> ref="element => console.log(element)"
+       *    3. createRef 方式, 最推荐的方式
+       *        
        */
       return (
         <div>
+          { /** 字符串形式 */}
           <input ref="input1" type="text" placeholder="点击按钮提示数据" />
           <button onClick={() => this.showData()}>点我提示左侧的数据</button>
-          <input ref="element => console.log(element)" type="text" placeholder="失去焦点提示数据" />
+          { /** 回调形式: 这种形式会在更新过程执行两次 */}
+          <input ref={element => console.log(element)} type="text" placeholder="失去焦点提示数据" />
+          { /** 回调形式: 使用 class 绑定函数方式, 即将方法挂载在 class 中 */}
+          <input ref={this.saveInput} type="text" placeholder="失去焦点提示数据" />
+          { /** createRef 形式, 会将该 DOM 或组件存入到 this.myRef 变量中 */}
+          <input ref={this.myRef} type="text" placeholder="失去焦点提示数据" />
         </div>
       )
     }

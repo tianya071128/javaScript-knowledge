@@ -1,0 +1,45 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2021-07-12 23:13:14
+ * @LastEditors: sueRimn
+ * @LastEditTime: 2021-07-19 19:31:44
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hello world</title>
+  <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+
+<body>
+  <!-- 容器, 与 vue 概念类似 -->
+  <div id="root"></div>
+</body>
+
+</html>
+
+<script type="text/babel"> /** 使用 babel 转译 jsx */
+  /**
+   * 1. 通过 onxxx 注册事件
+   *    1.1 xxx 首字母需大写, 例如 Click
+   *    1.2 在 react 内部, 是使用事件委托进行事件注册的
+   * 2. 通过 event.target 可以得到 DOM, event 是事件对象
+   */
+  class MyComponent extends React.Component {
+    render() {
+      return (
+        <h2 onClick={() => console.log(event)}>事件处理</h2>
+      )
+    }
+  }
+
+  ReactDOM.render(<MyComponent />, document.getElementById('root'));
+
+</script>

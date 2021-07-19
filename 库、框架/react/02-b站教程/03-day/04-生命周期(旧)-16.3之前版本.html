@@ -1,0 +1,107 @@
+<!--
+ * @Descripttion: 
+ * @Author: 温祖彪
+ * @Date: 2021-07-19 23:24:11
+ * @LastEditors: sueRimn
+ * @LastEditTime: 2021-07-20 00:06:53
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <img src="../image/01.png" alt="">
+</body>
+
+</html>
+
+<script type="text/babel">
+  /**
+   * 组件生命周期图例见图
+   */
+  class Count extends React.Component {
+    // 加 1 的回调
+    add() {
+      const { count } = this.state;
+
+      this.setState({
+        count: count + 1
+      })
+    }
+
+    // 卸载组件
+    death() {
+      ReactDOM.unmountComponentAtNode(document.getElementById('root'))
+    }
+
+    // 生命周期第一步: 初始化 -> 类似于 vue 的 beforeCreate, 以及初始化数据之后的 create
+    constructor(props) {
+      super(props);
+
+      this.state = { count: 0 };
+      console.log('初始化钩子');
+    }
+
+    // 挂载之前(已被弃用) -> 类似于 vue 的 beforeMount
+    componentWillMount() {
+      console.log('挂载之前, 在 render 之前调用');
+    }
+
+    // 组件挂载完毕, 相当于 vue 的 mounted
+    componentDidMount() {
+      console.log('组件挂载完毕');
+    }
+
+    // 子组件将要接收新的 props, 也就是初始化接收 props 时不会调用
+    componentWillReceiveProps() {
+      console.log('父组件传入的 props 变化了');
+    }
+
+    // 组件更新之前 -- 在 setState 调用之后会执行, 需要返回 Boolean, 如果返回的是 fasle, 那么会阻止组件更新\
+    // 如果手动调用 forceUpdate() 进行强制更新时, 不会执行这个生命周期
+    shouldComponentUpdate() {
+      console.log('组件更新之前');
+      return true;
+    }
+
+    // 组件将要更新的钩子
+    componentWillUpdate() {
+      console.log('组件将要进行更新, 之后调用 render 进行更新');
+    }
+
+    // 组件更新完毕
+    componentDidUpdate() {
+      console.log('组件更新完毕')
+    }
+
+    // 会在组件卸载及销毁之前直接调用, 相当于 vue 的 beforeDestroy
+    componentWillUnmount() {
+      console.log('组件销毁前');
+    }
+
+    // render 是其中一个很重要的生命周期, 在初次渲染和更新阶段会重复调用
+    render() {
+      const { count } = this.state;
+
+      return (
+        <div>
+          <h2>当前求和为: {count}</h2>
+          <button onClick={() => this.add()}>点我</button>
+          <button onClick={() => this.death()}>卸载组件</button>
+        </div>
+      )
+    }
+  }
+
+
+  ReactDOM.render(<Count />, document.getElementById('root'));
+</script>
