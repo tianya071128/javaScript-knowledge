@@ -21,3 +21,21 @@ console.log(myURL.search); // ?test=123
 
 // url.searchParams: 获取表示网址查询参数的 searchParams 对象, 通过操作 searchParams 对象, 也可更改这个网址实例
 console.log(myURL.searchParams); // URLSearchParams { 'test' => '123' }
+
+/**
+ * URLSearchParams 类: 全局类, 用于操作网址的查询参数
+ */
+const params = new URLSearchParams(myURL.searchParams);
+
+// urlSearchParams.append(name, value): 追加一个参数
+params.append('foo', 'foo2');
+console.log(params); // URLSearchParams { 'test' => '123', 'foo' => 'foo2' }
+
+/**
+ * urlSearchParams.delete(name): 删除参数
+ * urlSearchParams.get(name): 获取第一个匹配的参数
+ * urlSearchParams.getAll(name): 获取所有匹配的参数
+ * urlSearchParams.set(name, value): 设置参数, 如果不存在, 则追加参数
+ * urlSearchParams.sort(): 排序
+ * urlSearchParams.forEach(): 遍历
+ */
