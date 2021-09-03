@@ -71,13 +71,13 @@ async function copy(...args) {
 // copy('file/03.txt', 'file/04.txt');
 
 /**
- * 修改文件名
+ * 修改目录或文件名
  * fsPromise.rename(oldPath, newPath)
  */
 async function xiugai(...args) {
   try {
     await rename(...args);
-    console.log('查看成功');
+    console.log('修改成功');
   } catch (e) {
     console.log('修改失败', e);
   }
