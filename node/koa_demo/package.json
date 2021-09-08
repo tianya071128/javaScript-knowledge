@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --harmony ./app"
+    "dev": "nodemon --harmony ./src/app"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +13,7 @@
     "koa": "^2.13.1"
   },
   "dependencies": {
-    "koa-router": "^10.1.1"
+    "koa-router": "^10.1.1",
+    "koa-static-cache": "^5.1.4"
   }
 }
