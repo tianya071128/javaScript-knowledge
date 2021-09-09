@@ -3,7 +3,7 @@
  * @Author: 温祖彪
  * @Date: 2021-09-08 16:59:30
  * @LastEditors: sueRimn
- * @LastEditTime: 2021-09-08 17:12:51
+ * @LastEditTime: 2021-09-09 17:40:16
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -15,18 +15,109 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   </head>
   <body>
+    <!-- <img src="http://localhost:3000/img/01.png" alt="" /> -->
     <ul>
-      <li id="getID">get请求</li>
+      <li id="get">
+        <div>get请求</div>
+      </li>
+      <li id="post">
+        <div>post请求(application/json)</div>
+      </li>
+      <li id="postForm">
+        <div>post请求(application/x-www-form-urlencoded)</div>
+      </li>
+      <li id="postFormData">
+        <div>post请求(multipart/form-data)</div>
+      </li>
     </ul>
   </body>
 </html>
 <script>
-  document.getElementById('getID').addEventListener('click', async () => {
+  document.getElementById('get').addEventListener('click', async () => {
     try {
-      const data = await axios.get('http://localhost:3000/v1/test');
-      console.log(data);
+      const data = await axios.get('http://localhost:3000/v1/test/get', {
+        params: {
+          ID: 12345,
+        },
+      });
+      const dom = document.getElementById('get');
+
+      dom.innerHTML = dom.innerHTML + `<div>${JSON.stringify(data.data)}</div>`;
     } catch (e) {
       console.log(e);
     }
   });
+  document.getElementById('post').addEventListener('click', async () => {
+    try {
+      const data = await axios.post('http://localhost:3000/v1/test/post', {
+        ID: 12345,
+      });
+      console.log(data);
+      const dom = document.getElementById('post');
+
+      dom.innerHTML = dom.innerHTML + `<div>${JSON.stringify(data.data)}</div>`;
+    } catch (e) {
+      console.log(e);
+    }
+  });
+  document.getElementById('postForm').addEventListener('click', async () => {
+    try {
+      // const formData = new FormData({
+      //   id: 234234,
+      // });
+      const data = await axios.post(
+        'http://localhost:3000/v1/test/post',
+        {
+          ID: 12345,
+        },
+        {
+          // 不需要定义头部
+          // headers: { 'content-type': 'application/x-www-form-urlencoded' },
+          transformRequest: [
+            function (data) {
+              let ret = '';
+              for (let it in data) {
+                ret +=
+                  encodeURIComponent(it) +
+                  '=' +
+                  encodeURIComponent(data[it]) +
+                  '&';
+              }
+              ret = ret.substring(0, ret.lastIndexOf('&'));
+              return ret;
+            },
+          ],
+        }
+      );
+      console.log(data);
+      const dom = document.getElementById('postForm');
+
+      dom.innerHTML = dom.innerHTML + `<div>${JSON.stringify(data.data)}</div>`;
+    } catch (e) {
+      console.log(e);
+    }
+  });
+  document
+    .getElementById('postFormData')
+    .addEventListener('click', async () => {
+      try {
+        const formData = new FormData();
+        formData.append('id', '123');
+        const data = await axios.post(
+          'http://localhost:3000/v1/test/post',
+          formData,
+          {
+            // 不需要定义头部
+            // headers: { 'content-type': 'application/x-www-form-urlencoded' },
+          }
+        );
+        console.log(data);
+        const dom = document.getElementById('postFormData');
+
+        dom.innerHTML =
+          dom.innerHTML + `<div>${JSON.stringify(data.data)}</div>`;
+      } catch (e) {
+        console.log(e);
+      }
+    });
 </script>
