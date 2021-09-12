@@ -3,7 +3,7 @@
  * @Author: 温祖彪
  * @Date: 2021-09-09 16:35:08
  * @LastEditors: sueRimn
- * @LastEditTime: 2021-09-11 22:24:21
+ * @LastEditTime: 2021-09-12 22:58:33
  */
 const path = require('path');
 const cors = require('@koa/cors'); // 跨域
@@ -12,6 +12,9 @@ const koaBody = require('koa-bodyparser'); // body 请求体处理
 
 const routers = require('../routers/index'); // 加载路由器
 const formidable = require('./formidable'); // 解决文件上传问题
+const response = require('./response');
+const error = require('./error');
+const log = require('./log');
 
 /**
  * 跨域处理
@@ -42,6 +45,11 @@ const mdKoaBody = koaBody({
   strict: true,
 });
 
+/**
+ * 记录请求日志
+ */
+const mdLogger = log();
+
 
 /**
  * 静态资源处理
@@ -51,10 +59,19 @@ const mdStatic = staticCache(path.join(__dirname, '../../public'), {
 });
 
 /**
+ * 统一返回格式
+ */
+const mdResHandler = response();
+/**
+ * 错误处理
+ */
+const mdErrorHandler = error();
+
+/**
  * 路由处理
  */
 const mdRoute = routers.routes();
 const mdRouterAllowed = routers.allowedMethods();
 
 // 注意这些中间件的顺序问题
-module.exports = [mdCors, mdFormidable, mdKoaBody, mdRoute, mdRouterAllowed, mdStatic];
+module.exports = [mdCors, mdFormidable, mdKoaBody, mdLogger, mdResHandler, mdErrorHandler, mdRoute, mdRouterAllowed, mdStatic];
