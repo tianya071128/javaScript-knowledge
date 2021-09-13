@@ -1,30 +1,21 @@
 const path = require("path");
 // 返回相对于当前上下文目录的绝对路径
 const resolve = dir => path.join(__dirname, dir);
-const IS_PROD = ["production", "prod"].includes(process.env.NODE_ENV);
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const IS_PROD = ["production", "prod"].includes(process.env.NODE_ENV); // 是否为生产环境
 
-// 开启 gzip 压缩
-const zopfli = require("@gfx/zopfli");
-const BrotliPlugin = require("brotli-webpack-plugin");
-const CompressionWebpackPlugin = require("compression-webpack-plugin");
-const productionGzipExtensions = /\.(js|css|json|txt|html|ico|svg)(\?.*)?$/i;
+
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin"); // 压缩插件
+const vConsolePlugin = require('vconsole-webpack-plugin'); // console 插件
 
 // 添加打包分析
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
 
-// 只有以 VUE_APP 开头的变量会被 webpack.DefinePlugin 静态嵌入到客户端侧的包中
-// 但是在配置文件中，还是可以访问到所有的 环境变量
-// console.log(process.env);
-// C:\Users\天涯游子君莫问\Desktop\学习\javaScript-knowledge\库和框架\vue生态\project\my-project\src
-console.log(resolve("src"));
-
 module.exports = {
   publicPath: "./", // 默认'/'，部署应用包时的基本 URL
   outputDir: process.env.outputDir || "dist", // 'dist', 生产环境构建文件的目录
   assetsDir: "", // 相对于outputDir的静态资源(js、css、img、fonts)目录
-  lintOnSave: false, // 是否在开发环境下通过 eslint-loader 在每次保存时 lint 代码。
+  lintOnSave: !IS_PROD, // 是否在开发环境下通过 eslint-loader 在每次保存时 lint 代码。
   productionSourceMap: !IS_PROD, // 生产环境的 source map
   // 是一个函数, 允许对内部的 webpack 配置进行更细粒度的修改。
   chainWebpack: config => {
@@ -96,29 +87,13 @@ module.exports = {
           parallel: true
         })
       );
-      plugins.push(
-        new CompressionWebpackPlugin({
-          // 自定义压缩功能
-          algorithm(input, compressionOptions, callback) {
-            return zopfli.gzip(input, compressionOptions, callback);
-          },
-          // 传递给 algorithm 的选项
-          compressionOptions: {
-            numiterations: 15
-          },
-          // minRatio = 压缩大小 / 原始大小
-          // 只有压缩率比这个值小的资源才会被处理
-          minRatio: 0.99,
-          // 匹配文件类型
-          test: productionGzipExtensions
-        })
-      );
-      plugins.push(
-        new BrotliPlugin({
-          test: productionGzipExtensions,
-          minRatio: 0.99
-        })
-      );
+    }
+
+    // 测试环境
+    if (process.env.IS_TEST) {
+      plugins.push(new vConsolePlugin({
+        enable: true // 发布代码前记得改回 false
+      }))
     }
 
     config.externals = {

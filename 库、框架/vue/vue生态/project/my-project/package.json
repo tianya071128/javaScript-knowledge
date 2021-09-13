@@ -6,10 +6,12 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "analyz": "vue-cli-service build --mode analyz",
+    "test": "vue-cli-service build --mode test",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "core-js": "^3.6.4",
+    "lib-flexible": "^0.3.2",
     "node-sass": "^4.14.0",
     "sass-loader": "^8.0.2",
     "uglifyjs-webpack-plugin": "^2.2.0",
@@ -27,23 +29,12 @@
     "element-ui": "^2.13.1",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "postcss-px-to-viewport": "^1.1.1",
+    "postcss-pxtorem": "^6.0.0",
     "svg-sprite-loader": "^4.2.5",
+    "vconsole-webpack-plugin": "^1.7.1",
     "vue-template-compiler": "^2.6.11",
     "webpack-bundle-analyzer": "^3.7.0"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "parserOptions": {
-      "parser": "babel-eslint"
-    },
-    "rules": {}
   },
   "browserslist": [
     "> 1%",
