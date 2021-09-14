@@ -3,10 +3,10 @@
  * @Author: 温祖彪
  * @Date: 2021-09-11 22:11:28
  * @LastEditors: sueRimn
- * @LastEditTime: 2021-09-12 11:21:00
+ * @LastEditTime: 2021-09-14 09:47:26
  */
 const formidable = require('formidable');
-const { readFile } = require('fs/promises');
+const { readFile } = require('fs').promises;
 
 const { tempFilePath } = require('../../config');
 
