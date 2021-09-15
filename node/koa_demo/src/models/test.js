@@ -3,31 +3,24 @@
  * @Author: 温祖彪
  * @Date: 2021-09-13 17:45:06
  * @LastEditors: sueRimn
- * @LastEditTime: 2021-09-14 16:34:56
+ * @LastEditTime: 2021-09-15 09:58:14
  */
 const mongoose = require('../db');
 // 创建模式, 用于约束集合
-const testSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String, // 类型
-      required: true, // 必填
-      index: true,
-      unique: true,
-    },
-    age: {
-      type: Number,
-      required: true,
-      min: 18, //
-      max: 65,
-    },
+const testSchema = new mongoose.Schema({
+  name: {
+    type: String, // 类型
+    required: true, // 必填
   },
-  {
-    collection: 'test',
-  }
-);
+  age: {
+    type: Number,
+    required: true,
+    min: 18, //
+    max: 65,
+  },
+});
 
-// 创建模型
-const Test = mongoose.model('Test', testSchema, 'tests');
+// 创建模型 -- 模型代表着数据库的集合, 用于操作集合
+const Test = mongoose.model('test', testSchema);
 
 module.exports = Test;
