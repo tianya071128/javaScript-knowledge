@@ -4,7 +4,7 @@ module.exports = {
   endOfLine: 'auto', // 结尾是 \n \r \n\r auto
   singleQuote: true, // true: 单引号, false: 双引号
   semi: true, // 末尾是否需要分号
-  trailingComma: 'none', // 在对象或数组最后一个元素后面是否加逗号（在ES5中加尾逗号）
+  trailingComma: 'es5', // 在对象或数组最后一个元素后面是否加逗号（在ES5中加尾逗号）
   bracketSpacing: true, // 在对象，数组括号与文字之间加空格 "{ foo: bar }"
   bracketSameLine: true, // 文档显示为 html 结束标签不另起一行, 不起作用, 记录一下...
   jsxBracketSameLine: true,

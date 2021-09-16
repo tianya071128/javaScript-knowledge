@@ -1,16 +1,20 @@
-import Vue from "vue";
+import Vue from 'vue';
 
 // svg
-import "@/icons";
+import '@/icons';
 
 // vuex
-import stote from "./store";
+import store from './store';
 
-import App from "./App.vue";
+// vue
+import router from './router';
+
+import App from './App.vue';
 
 Vue.config.productionTip = false;
 
 new Vue({
   render: h => h(App),
-  stote
-}).$mount("#app");
+  store,
+  router
+}).$mount('#app');

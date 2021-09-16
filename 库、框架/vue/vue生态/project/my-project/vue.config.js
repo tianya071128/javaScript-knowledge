@@ -21,25 +21,6 @@ module.exports = {
   chainWebpack: config => {
     config.resolve.alias.set('@', resolve('src'));
 
-    // 添加 cdn
-    const cdn = {
-      // 访问https://unpkg.com/element-ui/lib/theme-chalk/index.css获取最新版本
-      css: ['//unpkg.com/element-ui@2.10.1/lib/theme-chalk/index.css'],
-      js: [
-        '//unpkg.com/vue@2.6.10/dist/vue.min.js', // 访问https://unpkg.com/vue/dist/vue.min.js获取最新版本
-        '//unpkg.com/vue-router@3.0.6/dist/vue-router.min.js',
-        '//unpkg.com/vuex@3.1.1/dist/vuex.min.js',
-        '//unpkg.com/axios@0.19.0/dist/axios.min.js',
-        '//unpkg.com/element-ui@2.10.1/lib/index.js'
-      ]
-    };
-
-    // html中添加cdn
-    config.plugin('html').tap(args => {
-      args[0].cdn = cdn;
-      return args;
-    });
-
     // 判断是否为打包分析命令
     if (process.env.IS_ANALYZ) {
       config.plugin('webpack-report').use(BundleAnalyzerPlugin, [
@@ -97,14 +78,6 @@ module.exports = {
         })
       );
     }
-
-    config.externals = {
-      vue: 'Vue',
-      'element-ui': 'ELEMENT',
-      'vue-router': 'VueRouter',
-      vuex: 'Vuex',
-      axios: 'axios'
-    };
 
     config.plugins = [...config.plugins, ...plugins];
   }
