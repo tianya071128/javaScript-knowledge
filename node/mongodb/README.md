@@ -91,56 +91,115 @@ round
 
 ### 4.1 插入文档
 
-`db.COLLECTION_NAME.insert(document)`: 若插入的文档主键存在, 那么就抛出错误 -- 如果传入数组, 表示插入多条
+`db.collection.insert(document)`: 若插入的文档主键存在, 那么就抛出错误 -- 如果传入数组, 表示插入多条
 
-```shell
+```bash
 > db.round.insert({ num: 1 })
 WriteResult({"nInserted": 1})
 ```
 
-### 4.2 更新文档
+> **注意：可以通过传入 _id 来覆盖默认的主键**
+>
+> ```she
+> > db.round.insert({ _id: 1, num: 2 })
+> WriteResult({ "nInserted" : 1 })
+> > db.round.find()
+> { "_id" : 1, "num" : 2 }
+> ```
 
-`db.collection.update(criteria, objNew, upsert, multi )`
 
-- `criteria`:update的查询条件，类似sql update查询内where后面的
-- `objNew`:update的对象和一些更新的操作符（如![,](https://math.jianshu.com/math?formula=%2C)inc...）等，也可以理解为sql update查询内set后面的。
-- `upsert` : 如果不存在update的记录，是否插入objNew,true为插入，默认是false，不插入。
-- `multi` : mongodb默认是false,只更新找到的第一条记录，如果这个参数为true,就把按条件查出来多条记录全部更新。
 
-```shell
-# 只更新第一条记录：
-db.col.update( { "count" : { $gt : 1 } } , { $set : { "test2" : "OK"} } );
-
-# 全部更新：
-db.col.update( { "count" : { $gt : 3 } } , { $set : { "test2" : "OK"} },false,true );
-
-# 只添加第一条：
-db.col.update( { "count" : { $gt : 4 } } , { $set : { "test5" : "OK"} },true,false );
-
-# 全部添加进去:
-db.col.update( { "count" : { $gt : 5 } } , { $set : { "test5" : "OK"} },true,true );
-
-# 全部更新：
-db.col.update( { "count" : { $gt : 15 } } , { $inc : { "count" : 1} },false,true );
-
-#只更新第一条记录：
-db.col.update( { "count" : { $gt : 10 } } , { $inc : { "count" : 1} },false,false );
-```
-
-### 4.3 删除文档
+### 4.2 删除文档
 
 **执行 remove() 方法之前先执行 find() 判断一下执行条件是否正确是一个好策略**
 
-`db.collection.remove(query[, options])`
+`db.collection.remove(条件[, 是否删除一条]`
 
 - **query** :（可选）删除的文档的条件。 -- 在 2.6 以后, 必须要传, 如果删除所有文档, 则可以传入 {}, 并且不会删除索引
-- **options**: 配置项
-  - **justOne** : （可选）如果设为 true 或 1，则只删除一个文档，如果不设置该参数，或使用默认值 false，则删除所有匹配条件的文档。
-  - **writeConcern** :（可选）抛出异常的级别。
+- 是否删除一条： true 删除一条 | false 删除匹配的全部(默认值)
 
 
 
+### 4.3 更新文档
 
+`db.collection.update(条件, 更新数据或一些更新的操作符[, 是否新增, 是否修改多条])`
+
+* 条件：与查询文档的条件一样
+
+* 更新操作符
+
+  | 操作       | 操作符  | 例子                                                         |
+  | ---------- | ------- | ------------------------------------------------------------ |
+  | 替换       | null    | { key: value, ... } -- 将文档替换成传入的数据，全部替换      |
+  | 修改列     | $set    | { $set: { key: value, ... } } -- 只修改指定的列              |
+  | 递增(递减) | $int    | { $int: { key: int(数字) } }                                 |
+  | 重命名列   | $rename | { $rename: { key: newKey } } -- 会将指定的列名 key 替换成 newKey |
+  | 删除列     | $unset  | { $unset: {key: true} } -- 删除指定的列                      |
+
+* 是否新增：true 不存在则新增 | false 不存在不新增(默认值)
+
+* 是否修改多条：true 将查询的数据全部更新 | false 只更新第一条数据(默认值)
+
+### 4.4 查询文档
+
+`db.collectionName.find(条件[,查询的列])`
+
+* 查询的列 - 不传为查询全部列
+  * { key: 0或1}: 0 表示除了 key 列， 1表示只显示 key 列
+  * 主键 _id 都会存在
+
+- 条件运算符
+
+| 操作         | 运算符 | 例子                                                         |
+| ------------ | ------ | ------------------------------------------------------------ |
+| 等于         | null   | { key: value }                                               |
+| 小于         | $lt    | { key: { $lt: value } }                                      |
+| 小于或等于   | $lte   | { key: { $lte: value } }                                     |
+| 大于         | $gt    | { key: {$gt: value }}                                        |
+| 大于或等于   | $gte   | { key: {$gte: value} }                                       |
+| 不等于       | $ne    | { key: {$ne: value} }                                        |
+| 在这个范围   | $in    | { key: { $in: [value1, value2,...] } } -- key 在 value1和 value2...之中 |
+| 排除这个范围 | $nit   | { key: { $nit: [value1, value2,...] } }                      |
+
+- 条件查询，查询title为`MongoDB 教程`的所有文档；
+
+```
+db.article.find({'title':'MongoDB 教程'})
+```
+
+- 条件查询，查询likes大于50的所有文档；
+
+```
+db.article.find({'likes':{$gt:50}})
+```
+
+- AND条件可以通过在`find()`方法传入多个键，以逗号隔开来实现，例如查询title为`MongoDB 教程`并且by为`Andy`的所有文档；
+
+```
+db.article.find({'title':'MongoDB 教程','by':'Andy'})
+```
+
+- OR条件可以通过使用`$or`操作符实现，例如查询title为`Redis 教程`或`MongoDB 教程`的所有文档；
+
+```
+db.article.find({$or:[{"title":"Redis 教程"},{"title": "MongoDB 教程"}]})
+```
+
+- AND 和 OR条件的联合使用，例如查询likes大于50，并且title为`Redis 教程`或者`"MongoDB 教程`的所有文档。
+
+```
+db.article.find({"likes": {$gt:50}, $or: [{"title": "Redis 教程"},{"title": "MongoDB 教程"}]})
+```
+
+
+
+#### 4.4.1 查询数据总数
+
+`db.collectionName.find(参数).count()`
+
+#### 4.4.2 查询一个文档
+
+`db.collectionName.findOne(条件[,查询的列])`
 
 参考文档：
 
