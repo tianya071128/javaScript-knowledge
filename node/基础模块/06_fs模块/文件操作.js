@@ -15,7 +15,7 @@ const { appendFile, readFile, unlink, writeFile, rename, copyFile, stat } =
 async function appen(...args) {
   try {
     await appendFile(...args);
-    await writeFile(...args); // 会替换掉写入的内容
+    // await writeFile(...args); // 会替换掉写入的内容
     console.log('成功');
   } catch (e) {
     console.log('失败', e);
@@ -93,7 +93,7 @@ async function view(...args) {
     const stats = await stat(...args);
     console.log('查看成功', stats);
   } catch (e) {
-    console.log('查看失败', e);
+    console.log('查看失败', e); // 如果不存在, 则会报错
   }
 }
 view('file/03.txt');

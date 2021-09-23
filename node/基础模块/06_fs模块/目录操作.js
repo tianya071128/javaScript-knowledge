@@ -1,6 +1,4 @@
-const { mkdir, writeFile, readdir, rmdir, stat, unlink } =
-  require('fs').promises;
-const path = require('path');
+const { mkdir, readdir, rmdir } = require('fs').promises;
 
 /**
  * fsPromise.mkdir(path[, options]): 创建文件目录
@@ -49,38 +47,3 @@ async function deleteDir(...args) {
 }
 
 // deleteDir('./file2');
-
-// 递归实现一下删除操作
-async function hasFile(path) {
-  try {
-    const stats = await stat(path);
-    return stats.isFile();
-  } catch (e) {
-    console.log(`判断 ${path} 类型失败`);
-    throw e; // 错误传递下去, 不要执行下面的语句了
-  }
-}
-
-async function init(pathStr) {
-  const type = await hasFile(pathStr);
-  if (type) {
-    // 是文件, 直接删除
-    await unlink(pathStr);
-  } else {
-    // 如果是目录, 则遍历目录, 直到删除完毕, 最后在清除这个目录
-    const list = await readdir(pathStr);
-    await Promise.all(
-      list.map(async (item) => {
-        await init(path.join(pathStr, item)); // 递归处理
-      })
-    );
-    // 删除目录
-    await rmdir(pathStr);
-  }
-}
-
-try {
-  init('./file2');
-} catch (e) {
-  console.log('错误信息', e);
-}

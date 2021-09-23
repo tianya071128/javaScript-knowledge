@@ -128,17 +128,52 @@ WriteResult({"nInserted": 1})
 
 * 更新操作符
 
-  | 操作       | 操作符  | 例子                                                         |
-  | ---------- | ------- | ------------------------------------------------------------ |
-  | 替换       | null    | { key: value, ... } -- 将文档替换成传入的数据，全部替换      |
-  | 修改列     | $set    | { $set: { key: value, ... } } -- 只修改指定的列              |
-  | 递增(递减) | $int    | { $int: { key: int(数字) } }                                 |
-  | 重命名列   | $rename | { $rename: { key: newKey } } -- 会将指定的列名 key 替换成 newKey |
-  | 删除列     | $unset  | { $unset: {key: true} } -- 删除指定的列                      |
+  * 字段更新操作符: 操作范围为字段
+
+    **注意: key 也可以使用 对象.属性 用来修改字段值为对象的**
+
+    | 操作                                    | 操作符  | 例子                                                         |
+    | --------------------------------------- | ------- | ------------------------------------------------------------ |
+    | 全部替换                                | null    | { key: value, ... } -- 将文档替换成传入的数据，全部替换      |
+    | 修改列 - 如果这个字段不存在，则创建它   | $set    | { $set: { key: value, ... } } -- 只修改指定的列              |
+    | 递增(递减) - 如果该键不存在就新创建一个 | $inc    | { $inc: { key: int(数字) } }                                 |
+    | 重命名列                                | $rename | { $rename: { key: newKey } } -- 会将指定的列名 key 替换成 newKey |
+    | 删除列                                  | $unset  | { $unset: {key: true} } -- 删除指定的列                      |
+
+  * 数组更新操作符: 操作范围为字段值为数组的字段
+
+    | 操作                                             | 操作符 | 例子 |
+    | ------------------------------------------------ | ------ | ---- |
+    | 向已有数组末尾追加元素，要是不存在就创建一个数组 | $push  | ...  |
 
 * 是否新增：true 不存在则新增 | false 不存在不新增(默认值)
 
 * 是否修改多条：true 将查询的数据全部更新 | false 只更新第一条数据(默认值)
+
+
+
+**example1: 全量替换**
+
+```bash
+> db.wen.insert([{ name: "温", age: 26, sex: 1 }, { name: "朱", age: 28, sex: 0 }])
+> db.wen.find()
+{ "_id" : ObjectId("614bd5e8aa76c89e507d6824"), "name" : "温", "age" : 26, "sex": 1 }
+{ "_id" : ObjectId("614bd5e8aa76c89e507d6825"), "name" : "朱", "age" : 28, "sex": 0 }
+> db.wen.update({ name: "朱" }, { name: "朱永红", age: 18 })
+db.wen.update({ name: "朱" }, { name: "朱永红", age: 18 })
+> db.wen.find()
+{ "_id" : ObjectId("614bd5e8aa76c89e507d6824"), "name" : "温", "age" : 26, "sex": 1 }
+{ "_id" : ObjectId("614bd5e8aa76c89e507d6825"), "name" : "朱永红", "age" : 18 }
+```
+
+**example2: 使用操作符进行更新**
+
+```bash
+> db.wen.update({ name: "温"}, { $set: { name: "温祖彪" }, $inc: { age: 2 }, $unset: { sex: true } })
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+```
+
+
 
 ### 4.4 查询文档
 
@@ -150,16 +185,20 @@ WriteResult({"nInserted": 1})
 
 - 条件运算符
 
-| 操作         | 运算符 | 例子                                                         |
-| ------------ | ------ | ------------------------------------------------------------ |
-| 等于         | null   | { key: value }                                               |
-| 小于         | $lt    | { key: { $lt: value } }                                      |
-| 小于或等于   | $lte   | { key: { $lte: value } }                                     |
-| 大于         | $gt    | { key: {$gt: value }}                                        |
-| 大于或等于   | $gte   | { key: {$gte: value} }                                       |
-| 不等于       | $ne    | { key: {$ne: value} }                                        |
-| 在这个范围   | $in    | { key: { $in: [value1, value2,...] } } -- key 在 value1和 value2...之中 |
-| 排除这个范围 | $nit   | { key: { $nit: [value1, value2,...] } }                      |
+  - 比较查询操作符
+
+    | 操作       | 运算符 | 例子                                                         |
+    | ---------- | ------ | ------------------------------------------------------------ |
+    | 等于       | null   | { key: value }                                               |
+    | 小于       | $lt    | { key: { $lt: value } }                                      |
+    | 小于或等于 | $lte   | { key: { $lte: value } }                                     |
+    | 大于       | $gt    | { key: {$gt: value }}                                        |
+    | 大于或等于 | $gte   | { key: {$gte: value} }                                       |
+    | 不等于     | $ne    | { key: {$ne: value} }                                        |
+    | 包含       | $in    | { key: { $in: [value1, value2,...] } } -- key 在 value1和 value2...之中 |
+    | 不包含     | $nit   | { key: { $nit: [value1, value2,...] } }                      |
+
+    
 
 - 条件查询，查询title为`MongoDB 教程`的所有文档；
 
