@@ -198,9 +198,10 @@ WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
     | 包含       | $in    | { key: { $in: [value1, value2,...] } } -- key 在 value1和 value2...之中 |
     | 不包含     | $nit   | { key: { $nit: [value1, value2,...] } }                      |
 
-    
 
-- 条件查询，查询title为`MongoDB 教程`的所有文档；
+**example**
+
+* 条件查询，查询title为`MongoDB 教程`的所有文档；
 
 ```
 db.article.find({'title':'MongoDB 教程'})
@@ -239,6 +240,37 @@ db.article.find({"likes": {$gt:50}, $or: [{"title": "Redis 教程"},{"title": "M
 #### 4.4.2 查询一个文档
 
 `db.collectionName.findOne(条件[,查询的列])`
+
+#### 4.4.3 排序
+
+`db.collectionName.find().sort({ key: 数字 })`
+
+* key 表示需要排序的字段
+* 数字：-1 表示降序，1 表示升序
+
+#### 4.4.4 分页
+
+`.skip(数字)`： 跳过指定数量
+
+`.limit数字)`：需要查询的数量
+
+**example: 查询第二页数据, 并且根据 age 排序**
+
+```bash
+> db.round.find().sort({ age: -1 }).skip(10).limit(10)
+```
+
+
+
+
+
+## 5. 索引
+
+### 5.1 索引的作用
+
+
+
+
 
 参考文档：
 
