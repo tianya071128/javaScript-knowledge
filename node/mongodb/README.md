@@ -268,7 +268,198 @@ db.article.find({"likes": {$gt:50}, $or: [{"title": "Redis 教程"},{"title": "M
 
 ### 5.1 索引的作用
 
+索引是一种特殊的数据结构，用来提高查询的效率
 
+* 优点：
+
+  > 提高数据查询的效率
+  >
+  > 通过索引对数据进行排序，降低数据排序的成本，降低 CPU 的消耗
+
+* 缺点：
+
+  > 占用磁盘空间(索引也是一种数据类型)
+  >
+  > 大量索引反而影响效率，因为每次插入和修改数据都需要更新索引
+
+### 5.2 语法
+
+* 创建索引
+
+  `db.collectionName.createIndex(keys[, optinos])`
+
+  * key： 你要创建的索引字段，1 为指定按升序创建索引，如果你想按降序来创建索引指定为 -1 即可。
+  * options： 配置项
+    * name： 索引的名称。如果未指定，MongoDB的通过连接索引的字段名和排序顺序生成一个索引名称。
+
+* 删除索引
+
+  * 全部删除 `db.collectionName.dropIndexes()`
+  * 指定删除 `db.collectionName.dropIndex(‘索引名称’)
+
+* 查看集合全部索引
+
+  `db.collectionName.getIndexes()`
+
+  ```bash
+  > db.c1.getIndexes()
+  [
+          {
+                  "v" : 2,
+                  "key" : {
+                          "_id" : 1
+                  },
+                  "name" : "_id_",
+                  "ns" : "test5.c1"
+          },
+          {
+                  "v" : 2,
+                  "key" : {
+                          "name" : 1 // 索引字段名
+                  },
+                  "name" : "name_1", // 索引名称，默认字段名和排序顺序生成一个索引名称
+                  "ns" : "test5.c1", // 数据库集合名
+          }
+  ]
+  ```
+
+
+
+### 5.3 创建索引的一般性规则
+
+* 为常做条件、排序、分组的字段建立索引
+* 选择唯一性索引(例如邮箱，身份证号)
+
+### 5.4 demo
+
+* 创建复合/组合索引
+
+  就是一次性给两个或多个字段建立索引
+
+  `db.collectionName.createIndex({ key: 方式, key2: 方式... })`
+
+* 创建唯一索引
+
+  **强制要求集合中的索引字段没有重复值** -- 使用 unique 配置项来配置
+
+  `db.collectionName.cretateIndex(keys, { unique: true })`
+
+  ```bash
+  > db.c1.insert({name: 'a'})
+  WriteResult({ "nInserted" : 1 })
+  > db.c1.insert({name: 'a'}) # 因为设置了唯一索引，当再次添加相同数据时就会报错
+  WriteResult({
+          "nInserted" : 0,
+          "writeError" : {
+                  "code" : 11000,
+                  "errmsg" : "E11000 duplicate key error collection: test5.c1 index: name_1 dup key: { name: \"a\" }"
+          }
+  })
+  ```
+
+
+
+## 6. 权限设置
+
+语法：
+
+```bash
+db.createUser({
+	"user": "账号",
+	"pwd": "密码",
+	"roles": [{
+		role: "角色",
+		db: "所属数据库"
+	}]
+})
+
+# 角色种类
+超级用户角色: root
+数据库用户角色：read、readWrite;
+数据库管理角色：dbAdmin、userAdmin；
+集群管理角色:clusterAdmin、...
+
+# 角色说明
+root：只在 admin 数据库中可用。超级账号，超级权限；
+read：允许用户读取指定数据库；
+readWrite：允许用户读写指定数据库
+```
+
+
+
+### 6.1 设置步骤
+
+```tex
+1. 添加超级管理员
+2. 退出卸载服务
+3. 重新安装需要输入账号密码的服务(在原安装命令基础上加上 --auth 即可)
+4. 启动服务 -> 登陆测试
+```
+
+1. 添加超级管理员
+
+   ```bash
+   # 切换到 admin 数据库
+   > use admin 
+   > db.createUser({
+   	"user": "admin",
+   	"pwd": "admin888",
+   	"roles": [{
+   		role: "root",
+   		db: "admin"
+   	}]
+   })
+   ```
+
+2. 卸载 mongod 服务
+
+   **注意：cmd 窗口需要以管理员身份运行(搜索 cmd 程序，右键点击菜单选择即可)**
+
+   ```bash
+   # 进入到 mongoDB 目录
+   C:\>cd C:\Program Files\MongoDB\Server\4.2\bin
+   # 卸载 mongod 服务
+   C:\Program Files\MongoDB\Server\4.2\bin>mongod --remove
+   2021-09-24T23:17:42.997+0800 I  CONTROL  [main] Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'
+   2021-09-24T23:17:43.002+0800 W  ASIO     [main] No TransportLayer configured during NetworkInterface startup
+   2021-09-24T23:17:43.002+0800 I  CONTROL  [main] Trying to remove Windows service 'MongoDB'
+   2021-09-24T23:17:44.130+0800 I  CONTROL  [main] Service MongoDB is currently running, stopping service
+   2021-09-24T23:17:44.131+0800 I  CONTROL  [main] Service 'MongoDB' stopped
+   2021-09-24T23:17:44.135+0800 I  CONTROL  [main] Service 'MongoDB' removed
+   ```
+
+3. 安装需要身份验证的 MongoDB 服务
+
+   `mongod --install --dbpath 存放数据的目录 --logpath 存放日志的目录(或文件，不能重复) --auth`
+
+   ```bash
+   # 因为文件路径存在空格， 所以使用 “”来包裹
+   > mongod --install --dbpath “C:\Program Files\MongoDB\Server\4.2\data” --logpath “C:\Program Files\MongoDB\Server\4.2\log\mongodb2.log” --auth
+   # 上一步成功不会有结果
+   > net start mongodb
+   MongoDB 服务正在启动 .
+   MongoDB 服务已经启动成功。
+   ```
+
+4. 启动服务 -> 登录测试
+
+   ![image-20210924233246353](./img/06.png)
+
+### 6.2 账号密码登录
+
+* 方式一
+
+  `mongo 地址(location或127.0.0.1):端口/数据库 -u 账号 -p 密码`
+
+  ```bash
+  mongo 127.0.0.1:27017/admin -u admin -p admin888
+  ```
+
+* 方式二： 先切换到数据库，在账号密码登录
+
+  ![image-20210924234316848](./img/07.png)
+
+  
 
 
 
