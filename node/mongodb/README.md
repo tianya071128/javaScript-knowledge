@@ -461,11 +461,58 @@ readWrite：允许用户读写指定数据库
 
   
 
+### 6.3 创建其他用户
+
+1. 通过 admin 超级管理员登录数据库
+
+2. 切换到需要用户的数据库
+
+   `use 数据库`
+
+3. 创建用户
+
+   > db.createUser({
+   > 	"user": "账号",
+   > 	"pwd": "密码",
+   > 	"roles": [{
+   > 		role: "角色",
+   > 		db: "所属数据库"
+   > 	}]
+   > })
+
+4. 使用创建的用户进行登录
+
+   [登录方式](#6.2 账号密码登录)
+
+### 6.4 查看数据库用户
+
+`show users`
+
+## 7. 备份还原
+
+### 7.1 备份
+
+`mongodump -h -port -u -p -d -o`
+
+* -h： host 服务器 IP 地址(不写默认本机)
+* -port： 端口(默认 27017)
+* -u：账号 --- **备份全局可用 admin 超级管理员，备份指定数据库使用数据库的用户**
+* -p：密码
+* -d：database 数据库(不写默认导出全局)
+* -o：备份到指定目录下
+
+### 7.2 还原
+
+`mongorestore -h -port -u -p -d --drop 备份数据目录`
+
+* -d：指定数据库(不写则还原全部数据库)
+* --drop：先删除数据库再导入
+
+
+
 
 
 参考文档：
 
-* [MongoDB常用数据库命令大全](https://www.jb51.net/article/179844.htm)
-* [MongoDB快速入门，掌握这些刚刚好！](https://juejin.cn/post/6844904150635921422#heading-7)
-* [菜鸟教程](https://www.runoob.com/mongodb/mongodb-remove.html)
+* [b 站教程](https://www.bilibili.com/video/BV1xz4y1X7cE?p=18&spm_id_from=pageDriver)
 
