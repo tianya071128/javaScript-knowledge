@@ -29,3 +29,10 @@ console.log(path.join('./test', 'test2')); // test\test2
 // 如果在处理完所有给定的 path 片段之后，还没有生成绝对路径，则使用当前工作目录。
 console.log(path.resolve('bar', 'foo')); // C:\Users\Administrator\Desktop\javaScript-knowledge\node\基础模块\03_path模块\bar\foo
 console.log(path.resolve('/bar', 'foo')); // C:\bar\foo
+
+/**
+ * path.sep: 提供特定于平台的路径片段分隔符
+ *  * Windows 上是 \
+ *  * POSIX 上是 /
+ */
+console.log(__dirname.split(path.sep));

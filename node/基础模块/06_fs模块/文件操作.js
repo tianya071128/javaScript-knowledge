@@ -84,6 +84,11 @@ async function xiugai(...args) {
 }
 // xiugai('file/03.js', 'file/03.txt');
 
+
+/**
+ * 不建议在调用 fs.open()、 fs.readFile() 或 fs.writeFile() 之前使用 fs.stat() 检查文件是否存在。而是应该直接打开、读取或写入文件，如果文件不可用则处理引发的错误。
+ * 要检查文件是否存在但随后并不对其进行操作，则建议使用 fs.access()。
+ */
 /**
  * 查看文件信息 - 返回 fs.Stats 类
  * fsPromise.stat(path[, options])

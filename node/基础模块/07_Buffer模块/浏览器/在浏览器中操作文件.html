@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <input type="file" id="file">
+</body>
+</html>
+
+<script>
+  // 在目前为止, 在浏览器端想要操作文件, 我们还是需要通过 file 控件来操作
+  const fileDOM = document.getElementById('file');
+  fileDOM.addEventListener('change', () => {
+    /** 
+     * 以下是对 File 实例的简单操作, 单独操作 File 操作意义不打的, 需要配合其他方法对 File 实例进行操作
+     */
+
+    window.selfFile = fileDOM.files[0];
+    console.log(fileDOM.files); // 是一个数组, 数组项是选择的文件对象
+    /** File 类是基于 Blob 的, 本身只包括一些只读属性, 表示这个文件的状态.
+     *   但是继承了 Blob 的一些方法
+     * {
+     *    lastModified: 1550516116000
+     *    lastModifiedDate: Tue Feb 19 2019 02:55:16 GMT+0800 (中国标准时间) {}
+     *    name: "AcroRd32.exe"
+     *    size: 2525680
+     *    type: "application/x-msdownload"
+     *    webkitRelativePath: ""
+     *    [[Prototype]]: File 类
+     *      ...
+     *      [[Prototype]] Blob 类
+     * }
+     */
+    console.log(fileDOM.files[0]); // 是一个 File 实例, 而 File 实例又是基于 Bolb 的. File 一般是内部构造的(也可以手动 new)
+    console.log(Object.prototype.toString.call(fileDOM.files[0])); // [object File]
+    fileDOM.files[0].arrayBuffer().then(data => {console.log(data)}); //  文件对象的 ArrayBuffer 表现
+    // 可以借助 Blob 的 slice 方法对 File 文件拆分, 实现分片上传
+    console.log(fileDOM.files[0].slice(0, 2*1024*1024)); // Blob {size: 2097152, type: ''}
+
+    
+  })
+</script>
