@@ -1,0 +1,21 @@
+{
+  // 对所有语言设置为默认格式化工具
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // 可以对特定语言进行设置, 如下是针对 vue 文件
+  // "[vue]": {
+  //   "editor.defaultFormatter": null
+  // },
+  "eslint.alwaysShowStatus": true,
+  "eslint.format.enable": true,
+  "eslint.run": "onSave",
+  "eslint.validate": ["vue", "javascript", "javascriptreact"],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "vetur.validation.template": false,
+  "editor.formatOnPaste": true,
+  "editor.formatOnType": true,
+  // 保存时自动格式化
+  "editor.formatOnSave": true,
+  "files.eol": "\n"
+}
