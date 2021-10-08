@@ -1,0 +1,52 @@
+<!--
+ * @Descripttion: 浏览器环境下的 File 接口
+ * @Author: 温祖彪
+ * @Date: 2021-10-08 16:00:43
+ * @LastEditors: sueRimn
+ * @LastEditTime: 2021-10-08 16:12:50
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body></body>
+</html>
+<script>
+  /**
+   * File 接口:
+   * 1. 一般而言, File 对象来自 <input:file> 控件创建的 FileList, 或文件拖放, 或者 自 HTMLCanvasElement 上的 mozGetAsFile() API。
+   * 2. 虽然可以 new File 创建, 但是 File 构造器兼容性较差, 仅供了解即可
+   * 3. FiLe 对象本身没有什么方法, 但是继承值 Blob, 具体操作可见 Blob
+   */
+
+  /**
+   * new File(bits, name[, options])
+   *  bits: 一个包含ArrayBuffer，ArrayBufferView，Blob，或者 DOMString 对象的 Array — 或者任何这些对象的组合。这是 UTF-8 编码的文件内容。
+   *  name: 表示文件名称
+   *  options: 配置项
+   *    type: DOMString，表示将要放到文件中的内容的 MIME 类型。默认值为 "" 。
+   *    lastModified: 数值，表示文件最后修改时间的 Unix 时间戳（毫秒）。默认值为 Date.now()。
+   */
+  const file = new File(["测试一下"], "foo.txt", {
+    type: "text/plain",
+  });
+  // file.size: 12, 表示 foo 字符串的大小(一个中文 3 个字节)
+  console.log(file); // File 对象 -- 与用户选择文件后生成的 FileList 中 File 对象一致
+
+  /**
+   * 属性: 只读属性
+   *  lastModified: 返回当前 File 对象所引用文件最后修改时间
+   *  name: 返回当前 File 对象所引用文件的名字。
+   *  ...
+   */
+   /**
+   * 方法: File 接口没有定义任何方法，但是它从 Blob 接口继承了以下方法：
+   *  Blob.slice([start[, end[, contentType]]]): 返回一个新的 Blob 对象，它包含有源 Blob 对象中指定范围内的数据。
+   */
+
+   /** 如何运用 File 对象, 请参考 在浏览器中操作文件.html 文件 */
+</script>
