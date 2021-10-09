@@ -1,0 +1,73 @@
+<!--
+ * @Descripttion: FormData 通常用来表示表单数据的 key/value 键值对, 如果送出时的编码类型被设为 "multipart/form-data"，它会使用和表单一样的格式。
+ *                         也可以用来传递给 URLSearchParams 接口来创建 get 请求的查询参数
+ * @Author: 温祖彪
+ * @Date: 2021-10-09 15:58:47
+ * @LastEditors: sueRimn
+ * @LastEditTime: 2021-10-09 16:27:50
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <form id="myForm" name="myForm">
+      <div>
+        <label for="username">Enter name:</label>
+        <input type="text" id="username" name="username" value="111" />
+      </div>
+      <div>
+        <label for="useracc">Enter account number:</label>
+        <input type="text" id="useracc" name="useracc" value="222" />
+      </div>
+      <div>
+        <label for="userfile">Upload file:</label>
+        <input type="file" id="userfile" name="userfile" />
+      </div>
+      <input type="submit" value="Submit!" />
+    </form>
+  </body>
+</html>
+<script>
+  /**
+   * 创建 key/value 键值对
+   * 在 post 的 multipart/form-data 请求中, 使用表单一样的格式传递数据
+   * 在 get 请求中, 可以通过 URLSearchParams 来创建请求的查询参数
+   * new FormData(form)
+   *  form: 一个HTML 上的<form>表单元素——当指定了，这种方式创建的 FormData 对象会自动将form中的表单值也包含进去，包括文件内容也会被编码之后包含进去。
+   */
+  const formDOM = document.getElementById("myForm");
+  formDOM.onsubmit = (e) => {
+    e.preventDefault();
+    // 通过表单元素创建 formData
+    const formData = new FormData(formDOM);
+
+    // 不会打印出 formData 中的数据, 可以使用其方法显示
+    console.log(formData);
+    
+    /**
+     * formData 对象可以直接通过 for...of 迭代
+     * 方法: 
+     *  FormData.append(): 向 FormData 中添加新的属性值，FormData 对应的属性值存在也不会覆盖原值，而是新增一个值，如果属性不存在则新增一项属性值。
+     *  FormData.delete(): 从 FormData 对象里面删除一个键值对。
+     *  FormData.get(): 返回在 FormData 对象中与给定键关联的第一个值。
+     *  FormData.getAll(): 返回一个包含 FormData 对象中与给定键关联的所有值的数组。
+     *  FormData.has(): 返回一个布尔值表明 FormData 对象是否包含某些键。
+     *  FormData.keys(): 返回一个包含所有键的iterator对象。
+     *  FormData.set(): 给 FormData 设置属性值，如果FormData 对应的属性值存在则覆盖原值，否则新增一项属性值。
+     *  FormData.values(): 返回一个包含所有值的iterator对象。
+     */
+    console.log([...formData.keys()]); // ['username', 'useracc', 'userfile']
+    // 注意点: FormData 中 key 是可以同名的, 例如
+    formData.append('test', 'test1');
+    formData.append('test', 'test2');
+    console.log(formData.getAll('test')); // ['test1', 'test2'] =>　返回两次添加的值
+
+    // 例子: 通过 URLSearchParams 接口来创建查询参数 =>　File 对象会调用 toString() 方法转为 [object File] (复杂类型会调用 toString() 方法转化) 
+    console.log(new URLSearchParams(formData).toString()); // username=111&useracc=222&userfile=%5Bobject+File%5D&test=test1&test=test2
+  };
+</script>
