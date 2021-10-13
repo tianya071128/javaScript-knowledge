@@ -1,0 +1,47 @@
+<!--
+ * @Descripttion: 如果说其他类型都是数据容器的话, 那么 ArrayBuffer 则表示原始二进制数据
+ * @Author: 温祖彪
+ * @Date: 2021-10-13 10:42:19
+ * @LastEditors: sueRimn
+ * @LastEditTime: 2021-10-13 11:04:16
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body></body>
+</html>
+<script>
+  /** ========== ArrayBuffer =================== */
+  /**
+   * ArrayBuffer 对象表示通用的、固定长度的原始二进制数据缓存区。
+   * 不能直接操作 ArrayBuffer，需要通过 TypedArray 或 DataView 对象来操作, 它们会将缓冲区中的数据表示为特定的格式，并通过这些格式来读写缓冲区的内容。
+   * new ArrayBuffer(length): 分配一段可以存放数据的连续内存区域, 其内容被初始化为 0。 => 如果分配的内存很大, 可能会分配失败(连续内存不足)
+   */
+  const buf = new ArrayBuffer(8);
+  console.log(buf); // ArrayBuffer(8) 对象
+  /**
+   * 属性:
+   *  ArrayBuffer.prototype.byteLength: 只读属性，表示 ArrayBuffer 的byte的大小，在ArrayBuffer构造完成时生成，不可改变。
+   */
+  console.log(buf.byteLength); // 8
+  /**
+   * 方法:
+   *  ArrayBuffer.prototype.slice(begin[, end]): 允许将内存区域的一部分，拷贝生成一个新的ArrayBuffer对象。
+   *    begin: 拷贝开始的字节序号（含该字节）
+   *    end: 拷贝截止的字节序号（不含该字节）
+   *  静态方法:   
+   *   ArrayBuffer.isView(value): 检测 value 是否为 ArrayBuffer 的视图实例 => TypedArray实例  或 DataView实例
+   */
+  console.log(buf.slice(0)); // ArrayBuffer(8) => 相当于复制一份 buf
+  console.log(ArrayBuffer.isView(new Uint8Array())); // true
+
+
+
+  /** =========== TypedArray 视图 ============== */
+  // TypeArray 用来描述一段底层的二进制数据缓存区, 数组成员都是同一个数据类型. => DataView 视图则数组成员可以是不同的数据类型
+</script>
