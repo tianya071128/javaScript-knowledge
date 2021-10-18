@@ -3,7 +3,7 @@
  * @Author: 温祖彪
  * @Date: 2021-09-09 16:35:08
  * @LastEditors: sueRimn
- * @LastEditTime: 2021-09-12 22:58:33
+ * @LastEditTime: 2021-10-18 09:00:02
  */
 const path = require('path');
 const cors = require('@koa/cors'); // 跨域
@@ -34,7 +34,7 @@ const mdFormidable = formidable();
 // 这里有一个问题是不能处理 multipart 文件类型, 可使用 formidable 处理文件
 const mdKoaBody = koaBody({
   /**
-   * json: application/json
+   * json: application/json 
    * form: application/x-www-form-urlencoded
    */
   enableTypes: ['json', 'form', 'text', 'xml'], // 解析类型
