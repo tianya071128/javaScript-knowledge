@@ -1,0 +1,64 @@
+<!--
+ * @Descripttion: 浏览器中的 URL 接口, 类似于 Node 中的 url 模块
+ * @Author: 温祖彪
+ * @Date: 2021-10-09 10:18:34
+ * @LastEditors: sueRimn
+ * @LastEditTime: 2021-10-09 10:35:59
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <input type="file" id="file" />
+  </body>
+</html>
+<script>
+  const URL = window.URL || window.webkitURL; // 兼容性解决
+  /**
+   * URL 接口主要用于解析, 构造, 规范化和编码 URLs, 注意兼容性问题
+   * new URL(url [, base]):
+   *  url: 绝对路径或相对路径, 如果是绝对路径, base参数将会被忽略, 如果url 是相对 URL，则会将 base 用作基准 URL。
+   *  base: 是一个表示基准 URL 的 DOMString，在 url 是相对 URL 时，它才会起效。如果未指定，则默认为 ''。
+   */
+  const u = new URL("//foo.com", "https://example.com");
+  /**
+   * 属性:
+   *  hash: "" => 包含'#'的USVString，后跟URL的片段标识符。
+   *  host: "foo.com" => 一个USVString，其中包含域（即主机名），后跟（如果指定了端口）“：”和URL的端口。
+   *  hostname: "foo.com" => 包含 URL 域名的 USVString。
+   *  href: "https://foo.com/" => 包含完整 URL 的 USVString。
+   *  origin: "https://foo.com" => 返回一个包含协议名、域名和端口号的 USVString。
+   *  password: "" => 包含在域名前面指定的密码的  USVString 。
+   *  pathname: "/" => 以 '/' 起头紧跟着 URL 文件路径的 DOMString。
+   *  port: "" => 包含 URL 端口号的 USVString。
+   *  protocol: "https:" => 包含 URL 协议名的 USVString，末尾带 ':'。
+   *  search: "" =>　一个USVString ，指示URL的参数字符串； 如果提供了任何参数，则此字符串包括所有参数，并以开头的“？”开头 字符。
+   *  searchParams: URLSearchParams {} => URLSearchParams对象，可用于访问search中找到的各个查询参数。
+   *  username: "" => 包含在域名前面指定的用户名的 USVString。
+   * 方法:
+   *  toString(): 返回包含整个URL的USVString。 它是URL.href的同义词，尽管它不能用于修改值。
+   *  toJSON(): 返回包含整个URL的USVString。 它返回与href属性相同的字符串。
+   */
+  console.log(u); // 'https://foo.com' (see relative URLs)
+
+  /**
+   * 两个静态方法, 可以用来生成指向 File 或 Blob 资源的唯一的 Blob 链接(该链接协议为以blob:，后跟唯一标识浏览器中的对象的掩码)
+   * 注意浏览器在 document 卸载的时候，会自动释放它们，但是为了获得最佳性能和内存使用状况，你应该在安全的时机主动释放掉它们。
+   *    createObjectURL(object): 会创建一个 DOMString，其中包含一个表示参数中给出的对象的URL。这个 URL 的生命周期和创建它的窗口中的 document 绑定。这个新的URL 对象表示指定的 File 对象或 Blob 对象。
+   *      object: 用于创建 URL 的 File 对象、Blob 对象或者 MediaSource 对象。​
+   *    revokeObjectURL(objectURL): 销毁之前使用URL.createObjectURL()方法创建的URL实例。
+   *      objectURL: 表示通过调用 URL.createObjectURL() 方法产生的 URL 对象。
+   */
+  const fileDOM = document.getElementById("file");
+  fileDOM.addEventListener("change", () => {
+    const file = fileDOM.files[0];
+    const url = URL.createObjectURL(file); // 创建 url
+    console.log(url); // blob:http://127.0.0.1:5500/bc573a5d-8ff0-4c62-b8dc-acda833d598e
+    URL.revokeObjectURL(url); // 销毁 url
+  });
+</script>

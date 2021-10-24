@@ -1,0 +1,7 @@
+nvm list -- 列出可使用的 node 版本
+
+nvm list available -- 查看所有 node 版本
+
+nvm install <version> -- 安装版本
+
+nvm use <version> -- 使用该版本

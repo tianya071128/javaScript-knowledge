@@ -1,0 +1,60 @@
+<!--
+ * @Descripttion: Bolb 表示不可变, 原始数据的类文件对象
+ * @Author: 温祖彪
+ * @Date: 2021-10-12 10:41:27
+ * @LastEditors: sueRimn
+ * @LastEditTime: 2021-10-12 15:33:56
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body></body>
+</html>
+<script>
+  // 注意: 可以把 Bolb 表示为一个数据容器, 并且是不可变的
+  // 它的数据可以按文本或二进制的格式进行读取，也可以转换成 ReadableStream 来用于数据操作。
+
+  /**
+   * 构造函数:
+   *  new Bolb(array[,options])
+   *    array: 由ArrayBuffer, ArrayBufferView, Blob, DOMString 等对象构成的 Array ，或者其他类似对象的混合体，它将会被放进 Blob。DOMStrings会被编码为UTF-8。
+   *    options:
+   *      type: MIME类型。
+   */
+  const aFileParts = ['<a id="a"><b id="b">hey!</b></a>']; // 一个包含DOMString的数组
+  const oMyBlob = new Blob(aFileParts, { type: "text/html" }); // 得到 blob
+  console.log(oMyBlob);
+  /**
+   * 属性:
+   *  Blob.size 只读 => Blob 对象中所包含数据的大小（字节）。
+   *  Blob.type 只读 => 一个字符串，表明该 Blob 对象所包含数据的 MIME 类型。如果类型未知，则该值为空字符串。
+   */
+  console.log(oMyBlob.size); // 32
+  console.log(oMyBlob.type); // text/html
+  /**
+   * 方法:
+   *  Blob.slice([start[, end[, contentType]]]): 返回一个新的 Blob 对象，包含了源 Blob 对象中指定范围内的数据。
+   *  Blob.stream(): 返回一个能读取blob内容的 ReadableStream。
+   *  Blob.text() 返回一个promise且包含blob所有内容的UTF-8格式的 USVString。
+   *  Blob.arrayBuffer(): 返回一个promise且包含blob所有内容的二进制格式的 ArrayBuffer
+   */
+  // 示例1: 通过 FileReader 接口从 Blob 中提取数据
+  const reader = new FileReader();
+  reader.addEventListener("loadend", function () {
+    // reader.result 包含被转化为类型数组 typed array 的 blob
+    console.log(reader.result);
+  });
+  reader.readAsArrayBuffer(oMyBlob);
+  // 示例2: 使用 text() 或 arrayBuffer() 方法
+  (async () => {
+    const text = await oMyBlob.text();
+    console.log(text); // <a id="a"><b id="b">hey!</b></a>
+    const arrayBuffer = await oMyBlob.arrayBuffer();
+    console.log(arrayBuffer);
+  })();
+</script>
