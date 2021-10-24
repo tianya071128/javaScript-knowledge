@@ -3,7 +3,7 @@
  * @Author: 温祖彪
  * @Date: 2021-09-25 16:23:11
  * @LastEditors: sueRimn
- * @LastEditTime: 2021-09-26 22:46:19
+ * @LastEditTime: 2021-09-26 23:24:44
  */
 
 /**
@@ -63,8 +63,8 @@ const testModel = mongoose.model('api', {
 // Model.updateMany(条件, 更新数据, 配置项)：更新匹配的文档 -- 参数作用与 MongoDB 更新命令差不多
 // Model.updateOne(): 更新匹配的第一条
 // 第二个参数可以使用操作符
-testModel.updateOne({ name: '彪1' }, { $inc: { age: 45 } }).then(data => console.log('更新成功', data)) //  deletedCount: 0 }: 没有匹配结果没有删除文档
-  .catch(err => console.log('更新失败', err));
+// testModel.updateOne({ name: '彪1' }, { $inc: { age: 45 } }).then(data => console.log('更新成功', data)) //  deletedCount: 0 }: 没有匹配结果没有删除文档
+//   .catch(err => console.log('更新失败', err));
 
 /** 查 */
 /**

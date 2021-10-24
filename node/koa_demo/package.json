@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --harmony ./src/app"
+    "dev": "nodemon --harmony ./src/app",
+    "start": "node ./src/app"
   },
   "keywords": [],
   "author": "",

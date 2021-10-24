@@ -3,7 +3,7 @@
  * @Author: 温祖彪
  * @Date: 2021-09-09 16:35:08
  * @LastEditors: sueRimn
- * @LastEditTime: 2021-09-12 22:58:33
+ * @LastEditTime: 2021-10-24 11:21:24
  */
 const path = require('path');
 const cors = require('@koa/cors'); // 跨域
@@ -74,4 +74,4 @@ const mdRoute = routers.routes();
 const mdRouterAllowed = routers.allowedMethods();
 
 // 注意这些中间件的顺序问题
-module.exports = [mdCors, mdFormidable, mdKoaBody, mdLogger, mdResHandler, mdErrorHandler, mdRoute, mdRouterAllowed, mdStatic];
+module.exports = [mdCors, mdStatic, mdFormidable, mdKoaBody, mdLogger, mdResHandler, mdErrorHandler, mdRoute, mdRouterAllowed];
