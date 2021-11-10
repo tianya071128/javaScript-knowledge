@@ -26,8 +26,11 @@
 </html>
 
 <script type="text/babel"> /** 使用 babel 转译 jsx */
+  // 1. 创建虚拟 DOM
+  const VDOM = <h1>Hello, React</h1> // 此处不要写引号,因为不是字符串
+  // 2. 渲染虚拟 DOM 到页面
   ReactDOM.render(
-    <h1>Hello, world!</h1>,
+    VDOM,
     document.getElementById('root')
   );
 
