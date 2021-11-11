@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hello world</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@16/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+
+  <body>
+    <!-- 容器, 与 vue 概念类似 -->
+    <div id="root"></div>
+  </body>
+</html>
+
+<script type="text/babel">
+  const id = 'myH1';
+
+  /** 使用 babel 转译 jsx */
+  // 1. 创建虚拟 DOM
+  const VDOM = (
+    <h1 className="title" id={id.toLocaleLowerCase()}>
+      <span style={{ color: 'white', fontSize: '29px' }}>hello, react</span>
+      <input type="text" />
+    </h1>
+  );
+  // 2. 渲染虚拟 DOM 到页面
+  ReactDOM.render(VDOM, document.getElementById('root'));
+
+  /**
+   * jsx 语法规则:
+   *  1. 定义虚拟 DOM 时,不要写引号
+   *  2. 使用 js 表达式时, 使用 { } 花括号
+   *  3. 样式的类名不要用 class, 要用 className => 因为 class 是一个关键字
+   *  4. 内联样式, style 要使用 object 对象 => style={ { 属性: 值 } }
+   *  5. 只有一个根标签
+   *  6. 标签必须闭合 => 无法像 html一样有容错机制
+   *  7. 标签首字母:
+   *     (1) 首字母小写, 则匹配 html 中同名元素,若 html 中无该元素则报错
+   *     (2) 首字母大写, 则匹配组件
+   */
+</script>
