@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hello world</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@16/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/prop-types@15.6/prop-types.js"></script>
+  </head>
+
+  <body>
+    <!-- 容器, 与 vue 概念类似 -->
+    <div id="root"></div>
+  </body>
+</html>
+
+<script type="text/babel">
+  // 1. 创建类组件 - 需要继承 React.Component 类
+  class Person extends React.Component {
+    // props 类型检查
+    static propTypes = {
+      name: PropTypes.string.isRequired, // name 为字符串类型 并且为必填项
+      sex: PropTypes.string,
+      age: PropTypes.number,
+    };
+    // 设置默认值
+    static defaultProps = {
+      sex: 'no',
+      age: 18,
+    };
+
+    // 最终返回描述组件内容的元素
+    render() {
+      const { name, sex, age } = this.props;
+      return (
+        <ul>
+          <li>姓名:{name}</li>
+          <li>性别:{sex}</li>
+          <li>年龄:{age}</li>
+        </ul>
+      );
+    }
+  }
+
+  // 2. 渲染组件到页面
+  const obj = { name: 'tom', sex: '女', age: 18 };
+  // ReactDOM.render(<Person name="tom" sex="女" age="18" />, document.getElementById('root'));
+  // 等作用于上述语法, 使用扩展运算符
+  ReactDOM.render(<Person {...obj} />, document.getElementById('root'));
+
+  // 注意永远不要去修改 props 的值
+</script>

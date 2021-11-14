@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hello world</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@16/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+
+  <body>
+    <!-- 容器, 与 vue 概念类似 -->
+    <div id="root"></div>
+  </body>
+</html>
+
+<script type="text/babel">
+  // 1. 创建函数式组件 -- 通过传递 props 参数使用 props
+  function MyComponent(props) {
+    console.log(props);
+  }
+
+  // 类型限制
+  MyComponent.propTypes = {};
+  // 设置默认值
+  MyComponent.defaultProps = {};
+
+  // 2. 渲染组件到页面
+  ReactDOM.render(<MyComponent />, document.getElementById('root'));
+</script>

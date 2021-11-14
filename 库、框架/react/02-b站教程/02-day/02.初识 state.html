@@ -60,9 +60,10 @@
   ReactDOM.render(<MyComponent />, document.getElementById('root'));
 
   /**
-   * 执行 ReactDOM.render:
-   * 1. React 解析组件标签, 找到 MyComponent 组件.
-   * 2. 发现组件是使用类定义的, 随后 new 出来该类的实例. 并通过该实例调用 render 方法
-   * 3. 将 render 返回的 VDOM 转为真实 DOM.
+   * State 注意点:
+   * 1. 不要直接修改 state 的值, 应该使用 setState()
+   * 2. State 的更新会被合并. 也就是说如果有几个独立的变量, 调用 setState 时可以单独更新某个变量. 内部应该会进行浅合并
+   * 3. State 的更新可能是异步的
+   * 4. 数据是向下流动的
    */
 </script>
