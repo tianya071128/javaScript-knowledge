@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hello world</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@16/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+
+  <body>
+    <!-- 容器, 与 vue 概念类似 -->
+    <div id="root"></div>
+  </body>
+</html>
+
+<script type="text/babel">
+  // 1. 创建函数式组件 -- 通过传递 props 参数使用 props
+  class Demo extends React.Component {
+    state = {
+      isRender: true,
+    };
+    input3 = React.createRef();
+    render() {
+      const { isRender } = this.state;
+      return (
+        <div>
+          {/**
+           * ref 的三种形式之一: string。注意已经过时，未来可能会被移除
+           * 通过 this.refs[refName] 访问 DOM
+           * 主要是效率问题
+           */}
+          <input ref="input1" type="text" placeholder="string 形式" />
+          <br />
+          <button
+            type="button"
+            onClick={() => {
+              console.log(this.refs.input1);
+            }}
+          >
+            打印出引用的 ref
+          </button>
+          <br />
+          <br />
+          {/**
+           * ref 的三种形式之一: 回调函数
+           * React 将在组件挂载时，会调用 ref 回调函数并传入 DOM 元素，当卸载时调用它并传入 null。
+           * 通过回调函数的参数 DOM，我们可以传递到任何地方，通用规范是挂载在实例上即可。
+           */}
+          {/**
+           * 回调形式问题:
+           * 如果注册回调函数是内联形式, 那么会在更新过程中执行两次, 第一次传入参数 null, 第二次为 DOM 元素
+           * 如果注册的是一个引用函数的, 那么在更新过程中不会执行
+           * why? 因为在重新渲染的时候, 如果是内联函数形式, 会重新封装创建一个新的函数实例, 也就是说渲染前的内联函数和渲染后的内联函数指针不相同, 所以在调用旧的回调并传入 null
+           *      而注册为引用函数的话, 在渲染过程中会直接引用这个函数, 渲染前后的函数指针是一致的, 就不会存在调用多次的问题
+           *
+           * 官方文档中指出, 这个在大多数情况是无关紧要的, 而且目前推荐使用 createRefs 形式
+           */}
+          <input
+            ref={(c) => {
+              this.input2 = c;
+              console.log('测试', c);
+            }}
+            type="text"
+            placeholder="回调形式"
+          />
+          <br />
+          <button
+            type="button"
+            onClick={() => {
+              console.log(this.input2);
+            }}
+          >
+            打印出引用的 ref
+          </button>
+          <br />
+          <br />
+          {/**
+           * ref 的三种形式之一: React.createRef()
+           * 通过调用 createRef() 方法来创建 ref 的容器, 这样就可以接收 DOM 元素或 React 组件
+           * 通过 this[ref容器].current 访问其 DOM 元素
+           */}
+          <input ref={this.input3} type="text" placeholder="createRef 形式" />
+          <br />
+          <button
+            type="button"
+            onClick={() => {
+              console.log(this.input3);
+            }}
+          >
+            打印出引用的 ref
+          </button>
+        </div>
+      );
+    }
+  }
+
+  // 2. 渲染组件到页面
+  ReactDOM.render(<Demo />, document.getElementById('root'));
+</script>
