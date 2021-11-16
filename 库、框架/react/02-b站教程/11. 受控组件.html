@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hello world</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@16/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+
+  <body>
+    <!-- 容器, 与 vue 概念类似 -->
+    <div id="root"></div>
+  </body>
+</html>
+
+<script type="text/babel">
+  class Demo extends React.Component {
+    state = {
+      value: new Set(),
+    };
+    handleChange = (event) => {
+      const { value } = this.state;
+      const _value = event.target.value;
+      if (value.has(_value)) {
+        value.delete(_value);
+      } else {
+        value.add(_value);
+      }
+      this.setState({
+        value,
+      });
+    };
+    render() {
+      return (
+        <form>
+          <label>
+            选择你喜欢的风味:
+            <select
+              multiple={true}
+              value={[...this.state.value]}
+              onChange={this.handleChange}
+            >
+              <option value="grapefruit">葡萄柚</option>
+              <option value="lime">酸橙</option>
+              <option value="coconut">椰子</option>
+              <option value="mango">芒果</option>
+            </select>
+          </label>
+        </form>
+      );
+    }
+  }
+
+  ReactDOM.render(<Demo />, document.getElementById('root'));
+</script>

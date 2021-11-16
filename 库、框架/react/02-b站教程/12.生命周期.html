@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hello world</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@16/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+
+  <body>
+    <!-- 容器, 与 vue 概念类似 -->
+    <div id="root"></div>
+  </body>
+</html>
+
+<script type="text/babel">
+  // 1. 创建类组件 - 需要继承 React.Component 类
+  class MyComponent extends React.Component {
+    state = {
+      isTest: false,
+    };
+    constructor(props) {
+      super(props);
+      console.log('构造器执行（执行一次）：constructor');
+    }
+
+    componentWillMount() {
+      console.log('组件挂载前（执行一次）：componentWillMount');
+    }
+
+    componentDidMount() {
+      console.log('组件挂载后（执行一次）：componentDidMount');
+    }
+
+    // 最终返回描述组件内容的元素
+    render() {
+      console.log('组件重新渲染：render');
+      return <h2>类组件</h2>;
+    }
+  }
+  // 2. 渲染组件到页面
+  ReactDOM.render(<MyComponent />, document.getElementById('root'));
+</script>
