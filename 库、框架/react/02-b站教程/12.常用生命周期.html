@@ -27,23 +27,42 @@
     state = {
       isTest: false,
     };
-    constructor(props) {
-      super(props);
-      console.log('构造器执行（执行一次）：constructor');
-    }
-
-    componentWillMount() {
-      console.log('组件挂载前（执行一次）：componentWillMount');
-    }
 
     componentDidMount() {
-      console.log('组件挂载后（执行一次）：componentDidMount');
+      console.log('在 DOM 渲染后调用');
     }
 
-    // 最终返回描述组件内容的元素
+    // 组件唯一必须的, 在 render 函数应该为纯函数, 纯属于返回 VNode
     render() {
       console.log('组件重新渲染：render');
-      return <h2>类组件</h2>;
+      return (
+        <h2
+          onClick={() => {
+            this.setState({ isTest: !this.state.isTest });
+          }}
+        >
+          点击更新数据
+        </h2>
+      );
+    }
+
+    componentWillUnmount() {
+      console.log('销毁之后调用');
+    }
+
+    // 这个其实也不会太常用, 更新阶段会重复调用
+    // 但是可以实现类似于 vue 的 watch
+    componentDidUpdate(prevProps, prevState) {
+      /**
+       * prevProps：上一次的 props
+       * prevState：上一次的 state 数据快照
+       * this.state：已经更新的数据
+       */
+      console.log(
+        prevProps,
+        JSON.stringify(prevState),
+        JSON.stringify(this.state)
+      );
     }
   }
   // 2. 渲染组件到页面
