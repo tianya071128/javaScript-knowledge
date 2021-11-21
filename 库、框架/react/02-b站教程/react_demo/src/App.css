@@ -1,37 +1,24 @@
-* {
-  box-sizing: border-box;
-}
-.todo-container {
-  width: 300px;
-  margin: 30px auto;
-  border: 1px solid rgb(99, 88, 88, 0.3);
-  border-radius: 3px;
-  padding: 10px 5px;
+.album {
+  min-height: 50rem; /* Can be removed; just added for demo purposes */
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  background-color: #f7f7f7;
 }
 
-.header_input {
-  width: 100%;
-  border: 1px solid rgb(99, 88, 88, 0.3);
-  border-radius: 3px;
+.card {
+  float: left;
+  width: 33.333%;
+  padding: 0.75rem;
+  margin-bottom: 2rem;
+  border: 1px solid #efefef;
+  text-align: center;
 }
 
-.header_input:focus-visible {
-  outline: rgb(17, 13, 235) 1px solid;
+.card > img {
+  margin-bottom: 0.75rem;
+  border-radius: 100px;
 }
 
-.todo-main {
-  padding: 0;
-  border: 1px solid rgb(99, 88, 88, 0.3);
-  border-radius: 3px;
-}
-
-.item_li {
-  list-style: none;
-  display: flex;
-  justify-content: space-between;
-  padding: 5px 3px;
-  border-bottom: 1px solid rgb(99, 88, 88, 0.3);
-}
-.item_li:last-of-type {
-  border: none;
+.card-text {
+  font-size: 85%;
 }

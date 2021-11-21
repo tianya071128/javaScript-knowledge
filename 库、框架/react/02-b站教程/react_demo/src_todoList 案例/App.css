@@ -1,0 +1,54 @@
+* {
+  box-sizing: border-box;
+}
+.todo-container {
+  width: 300px;
+  margin: 30px auto;
+  border: 1px solid rgb(99, 88, 88, 0.3);
+  border-radius: 3px;
+  padding: 10px 5px;
+}
+
+.header_input {
+  width: 100%;
+  border: 1px solid rgb(99, 88, 88, 0.3);
+  border-radius: 3px;
+}
+
+.header_input:focus-visible {
+  outline: rgb(17, 13, 235) 1px solid;
+}
+
+.todo-main {
+  padding: 0;
+  border: 1px solid rgb(99, 88, 88, 0.3);
+  border-radius: 3px;
+}
+
+.item_li {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 3px;
+  border-bottom: 1px solid rgb(99, 88, 88, 0.3);
+}
+.item_li:last-of-type {
+  border: none;
+}
+
+.item_li:hover {
+  background-color: rgba(99, 88, 88, 0.1);
+}
+
+.item_li:hover .item_btn {
+  display: block;
+}
+
+.item_btn {
+  display: none;
+}
+
+.todo-footer {
+  display: flex;
+  justify-content: space-between;
+}

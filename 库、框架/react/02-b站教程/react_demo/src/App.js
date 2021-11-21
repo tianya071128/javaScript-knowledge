@@ -1,32 +1,15 @@
 import React, { Component } from 'react';
-import Header from './components/Header';
+import Search from './components/Search';
 import List from './components/List';
 import './App.css';
 
-let id = 0;
-
-export class App extends Component {
-  state = {
-    todos: [],
-  };
-
-  addTodo = (value) => {
-    this.setState({
-      todos: [{ id: id++, name: value, done: false }, ...this.state.todos],
-    });
-  };
-
+export default class App extends Component {
   render() {
-    const { todos } = this.state;
     return (
-      <div className="todo-container">
-        <div className="todo-wrap">
-          <Header addTodo={this.addTodo} />
-          <List todos={todos} />
-        </div>
+      <div className="container">
+        <Search />
+        <List />
       </div>
     );
   }
 }
-
-export default App;
