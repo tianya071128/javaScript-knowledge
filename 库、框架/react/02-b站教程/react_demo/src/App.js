@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { NavLink, Route } from 'react-router-dom';
+import { NavLink, Redirect, Route, Switch } from 'react-router-dom';
 import About from './pages/About';
 import Home from './pages/Home';
 import MySlot from './components/MySlot';
@@ -34,9 +34,13 @@ export default class App extends Component {
           <div className="col-xs-6">
             <div className="panel">
               <div className="panel-body">
-                {/* 注册路由 */}
-                <Route path="/about" component={About} />
-                <Route path="/home" component={Home} />
+                <Switch>
+                  {/* 注册路由 */}
+                  <Route path="/about" component={About} />
+                  <Route path="/home" component={Home} />
+                  {/* 使导航到一个新的地址 */}
+                  <Redirect to="/about"></Redirect>
+                </Switch>
               </div>
             </div>
           </div>

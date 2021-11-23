@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hello world</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@16/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+
+  <body>
+    <!-- 容器, 与 vue 概念类似 -->
+    <div id="root"></div>
+  </body>
+</html>
+
+<script type="text/babel">
+  class SonComponent extends React.Component {
+    state = {
+      value: 123,
+    };
+    render() {
+      // 不管有无传入 props 以及 props 是否改变, 只要父组件重新调用了 render 方法, 子孙组件也会去调用 render 方法
+      console.log('子组件是否重新渲染了?');
+      return (
+        <div>
+          <input
+            type="text"
+            value={this.state.value}
+            onChange={(event) => this.setState({ value: event.target.value })}
+          />
+        </div>
+      );
+    }
+  }
+  console.log(new SonComponent().render());
+
+  // 1. 创建类组件 - 需要继承 React.Component 类
+  class MyComponent extends React.Component {
+    state = {
+      test: '1',
+    };
+
+    handerClick = () => {
+      // 只要调用了 setState 函数并且传了参数进去, 都会尝试调用 render 方法
+      this.setState({
+        test: this.state.test,
+      });
+    };
+
+    // 最终返回描述组件内容的元素
+    render() {
+      return (
+        <h1 onClick={this.handerClick}>
+          <SonComponent />
+        </h1>
+      );
+    }
+  }
+  // 2. 渲染组件到页面
+  ReactDOM.render(<MyComponent />, document.getElementById('root'));
+  setTimeout(() => {
+    console.dir(MyComponent);
+  }, 100);
+</script>
