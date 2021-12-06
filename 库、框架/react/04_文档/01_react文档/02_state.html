@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>state</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@17/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+
+<script type="text/babel">
+  class MyComponets extends React.Component {
+    render() {
+      console.log('是否重新渲染了？');
+      return '111';
+    }
+  }
+  class Test extends React.Component {
+    // state 是组建的内部数据源，不能直接修改 state，需要通过 setState 方法
+    state = {
+      date: new Date(),
+    };
+    componentDidMount() {
+      this.timerID = setInterval(() => {
+        this.setState({
+          date: new Date(),
+        });
+      }, 1000);
+    }
+    render() {
+      /**
+       * react 跟 vue 的渲染有一个很大的区别：
+       *   vue 内部会响应式数据变化，当依赖的数据变化才会重新渲染，并且只有当修改了子组件的 props、slot 等才会重新渲染子组件
+       *   react 则会在组件调用 setState 的时候就会重新渲染，并且会递归渲染所有的子组件，虽然可以通过 shouldComponentUpdate 钩子中比较 state 或 props 来阻止渲染，但更加繁琐
+       */
+      return (
+        <div>
+          {this.state.date.toLocaleTimeString()}
+          <MyComponets />
+        </div>
+      );
+    }
+  }
+
+  ReactDOM.render(<Test />, document.getElementById('root'));
+</script>

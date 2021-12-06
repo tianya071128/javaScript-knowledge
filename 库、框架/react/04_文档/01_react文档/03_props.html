@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>props</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@17/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+
+<script type="text/babel">
+  /**
+   * props 是 react 的特别重要的属性，对于 vue 来说，props 只是简单的给子组件的数据
+   * 对于 react 来说，props 可以承载非常多的内容，插槽内容之类的都可以通过 props 实现
+   * 我们可以把 react 组件当成一个黑盒子看待，不关注 react 组件的使用位置，react 组件可以将所有与外界的通信都通过 props 表示，父组件传递进来
+   */
+  class MyComponet extends React.Component {
+    render() {
+      console.log('子组件接收到的 props', this.props, this);
+      return (
+        <div>
+          {this.props.children}
+          {this.props.left}
+        </div>
+      );
+    }
+  }
+
+  class Test extends React.Component {
+    render() {
+      const VDOM = (
+        <div>
+          下面使用子组件
+          <MyComponet left={<div>通过 props 来传递 React 元素</div>}>
+            <div data-slot='left' id='left'>
+              这是插槽1
+            </div>
+            <div data-slot='right' id='right'>
+              这是插槽2
+            </div>
+          </MyComponet>
+        </div>
+      );
+      console.log('生成的 VDOM', VDOM, this);
+      return VDOM;
+    }
+  }
+
+  ReactDOM.render(<Test />, document.getElementById('root'));
+</script>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSX</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@17/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+
+<script type="text/babel">
+  let name = 'JSX';
+  let id = 'JSX_demo';
+  const Label = 'div'; // 可以是一个组件
+
+  let VDOM = (
+    <div>
+      {/** 属性使用驼峰命名，注意与 HTML 属性名的区别 */}
+      <span id={id} tabIndex='0'>
+        {/** JSX 中使用 {} 插入变量或表达式， 支持表达式，{  } 需要一个值 */}
+        {name}
+      </span>
+
+      {/** 首字母大写 React 会被看成是组件，就会去尝试渲染组件 */}
+      {/** <Span></Span> => 这样就会报错 */}
+      {/** 首字母小写 React 会被看成是 HTML 标签，但 React 会给出警告 */}
+      {/** <myComponents /> => 这样就会有警告 */}
+
+      {/** 在运行时确定元素类型，不能在 JSX 中使用表达式，可以通过将类型赋值给一个变量 */}
+      <Label>类似于 veu 的 is 指令，可以动态确定标签 name</Label>
+    </div>
+  );
+  ReactDOM.render(VDOM, document.getElementById('root'));
+</script>
