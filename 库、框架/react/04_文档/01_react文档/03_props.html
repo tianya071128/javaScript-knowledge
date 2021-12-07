@@ -26,15 +26,34 @@
    * 对于 react 来说，props 可以承载非常多的内容，插槽内容之类的都可以通过 props 实现
    * 我们可以把 react 组件当成一个黑盒子看待，不关注 react 组件的使用位置，react 组件可以将所有与外界的通信都通过 props 表示，父组件传递进来
    */
+  /**
+   * props 是只读的，react 会将 props 的对象通过 Object.freeze 冻结，这个 API 只能浅冻结，但 react 通过深度递归实现深度冻结 props 对象，
+   * 而 vue 是通过 Object.definePropertie 不实现 setting 方法从而不能更改 props，但没有深度去限制，所以 vue 还是可以修改 props 复杂类型的数据
+   */
   class MyComponet extends React.Component {
     render() {
-      console.log('子组件接收到的 props', this.props, this);
+      console.log(
+        '子组件接收到的 props',
+        this.props,
+        this,
+        Object.isFrozen(this.props.left.props)
+      );
+      const SlotComponet = this.props.right;
       return (
         <div>
           {this.props.children}
           {this.props.left}
+          <this.props.right id='slot' />
+          {this.props.scopeSlot('测试')}
         </div>
       );
+    }
+  }
+
+  class MySlot extends React.Component {
+    render() {
+      console.log('插槽组件接收到的 props', this.props, this);
+      return <div>插槽组件</div>;
     }
   }
 
@@ -43,7 +62,14 @@
       const VDOM = (
         <div>
           下面使用子组件
-          <MyComponet left={<div>通过 props 来传递 React 元素</div>}>
+          {/** right={MySlot} 我们这样就相当将组件函数(类)传递进去给子组件，至于子组件如何去生成这个组件就是子组件内部的问题 */}
+          <MyComponet
+            left={<div>通过 props 来传递 React 元素</div>}
+            right={MySlot}
+            scopeSlot={(data) => {
+              console.log('作用域插槽', data);
+              return <div>data</div>;
+            }}>
             <div data-slot='left' id='left'>
               这是插槽1
             </div>

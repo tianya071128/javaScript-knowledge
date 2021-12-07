@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ref</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@17/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+<script type="text/babel">
+  /**
+   * ref 形式：
+   * 1. React.createRef() 创建一个 ref 容器，注意在组件卸载的值为 null，此时无法访问到 DOM 的
+   */
+  class Test extends React.Component {
+    ref2 = React.createRef();
+    render() {
+      setTimeout(() => {
+        console.log(this.ref1, this.ref2);
+      }, 0);
+      return (
+        <div id='test'>
+          <div>字符串 ref 已经过时</div>
+          <div
+            ref={(element) => {
+              this.ref1 = element;
+            }}>
+            回调 ref
+          </div>
+          <div ref={this.ref2}>React.createRef 创建 ref 容器</div>
+        </div>
+      );
+    }
+    componentWillUnmount() {
+      console.log('卸载了吗？', this.ref1);
+    }
+  }
+  ReactDOM.render(<Test />, document.getElementById('root'));
+  setTimeout(() => {
+    // ReactDOM.unmountComponentAtNode(document.getElementById('root'));
+  }, 1000);
+</script>
