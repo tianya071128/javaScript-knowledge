@@ -20,24 +20,74 @@
   </body>
 </html>
 <script type="text/babel">
-  function Example() {
-    console.log('重新渲染了', document.title);
-    // 声明一个新的叫做 “count” 的 state 变量
-    const [count, setCount] = React.useState(0);
+  // refs 转发
+  const Child = React.forwardRef((props, ref) => {
+    return <input ref={ref} />;
+  });
+
+  function useScroll() {
+    const [isScroll, setIsScroll] = React.useState(false);
+
+    React.useDebugValue(isScroll ? 'Online' : 'Offline');
 
     React.useEffect(() => {
-      console.log('Effect hook');
+      if (isScroll) {
+        document.body.classList.add('isScoll');
+      } else {
+        document.body.classList.remove('isScoll');
+      }
+      return () => {
+        document.body.classList.remove('isScoll');
+      };
+    }, [isScroll]);
+
+    return [isScroll, setIsScroll];
+  }
+
+  function Example() {
+    // 声明一个新的叫做 “count” 的 state 变量
+    const [count, setCount] = React.useState(0);
+    const [isScroll, setIsScroll] = useScroll();
+    const ref1 = React.useRef(null);
+    // 类似于 vue 的计算属性
+    const memoizedValue = React.useMemo(() => count + 1, [count]);
+
+    React.useEffect(() => {
       // Update the document title using the browser API
       document.title = `You clicked ${count} times`;
-      return () => {
-        console.log('清除副作用');
-      };
+      return () => {};
     });
+
+    React.useEffect(() => {
+      console.log(count, isScroll, ref1);
+    }, [count]);
+
+    React.useEffect(() => {
+      console.log('memoizedValue 依赖变化', memoizedValue);
+    }, [memoizedValue]);
 
     return (
       <div>
         <p>You clicked {count} times</p>
-        <button onClick={() => setCount(count + 1)}>Click me</button>
+        <button
+          onClick={() => {
+            setCount(count + 1);
+          }}>
+          改变 count
+        </button>
+        <button
+          onClick={() => {
+            setIsScroll(!isScroll);
+          }}>
+          改变 isScroll
+        </button>
+        <button
+          onClick={() => {
+            ReactDOM.unmountComponentAtNode(document.getElementById('root'));
+          }}>
+          销毁
+        </button>
+        <Child ref={ref1} />
       </div>
     );
   }
