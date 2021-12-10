@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>content</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@17/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+<script type="text/babel">
+  // 类似于 vue 的 provide/inject，但是会在值变化的时候重新渲染
+  // 创建一个 content，初始值为 light
+  const ThemeContext = React.createContext('light');
+  class Test extends React.Component {
+    state = {
+      value: 'dark',
+    };
+
+    render() {
+      console.log(this);
+      return (
+        <ThemeContext.Provider value={this.state.value}>
+          {/** 使用一个 Provider 来将当前的 theme 传递给以下的组件树。这里 value 就是将要传递进去的值 */}
+          <Toolbar />
+        </ThemeContext.Provider>
+      );
+    }
+  }
+  // 中间的组件再也不必指明往下传递 theme 了。
+  const Toolbar = React.memo(function Toolbar() {
+    return (
+      <div>
+        <ThemedButton />
+        {/** 函数式组件消费 Content，或者在类组件中可以用来消费多个 Content */}
+      </div>
+    );
+  });
+
+  class ThemedButton extends React.Component {
+    // 指定 contextType 读取当前的 theme context。
+    // React 会往上找到最近的 theme Provider，然后使用它的值。
+    // 在这个例子中，当前的 theme 值为 “dark”。
+    static contextType = ThemeContext;
+    render() {
+      return <div>{this.context}</div>;
+    }
+  }
+
+  ReactDOM.render(<Test />, document.getElementById('root'));
+</script>
