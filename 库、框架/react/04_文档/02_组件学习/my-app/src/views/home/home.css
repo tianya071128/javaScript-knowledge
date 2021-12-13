@@ -1,0 +1,36 @@
+.data_section {
+  padding: 20px;
+  margin-bottom: 40px;
+}
+.section_title {
+  text-align: center;
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+.same_day {
+  display: flex;
+}
+.data_list {
+  width: 16%;
+  margin-right: 20px;
+  text-align: center;
+  line-height: 37px;
+  font-size: 14px;
+  color: #666;
+  border-radius: 6px;
+  background: #e5e9f2;
+}
+.data_num {
+  color: #333;
+  font-size: 26px;
+}
+.today_head {
+  background: #ff9800;
+}
+.all_head {
+  background: #20a0ff;
+}
+.data_head {
+  color: #fff;
+  font-size: 22px;
+}

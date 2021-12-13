@@ -3,6 +3,8 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import { useMemo } from 'react';
 import Home from '../home';
 import HeadTop from './HeadTop';
+import UserList from '../userList';
+import FoodList from '../foodList';
 import './manage.css';
 
 export default function Manage(props) {
@@ -28,7 +30,6 @@ export default function Manage(props) {
           <Menu.Item index='home'>首页</Menu.Item>
           <Menu.SubMenu index='1' title='数据管理'>
             <Menu.Item index='userList'>用户列表</Menu.Item>
-            <Menu.Item index='shopList'>商家列表</Menu.Item>
             <Menu.Item index='foodList'>食品列表</Menu.Item>
           </Menu.SubMenu>
           {/* <Menu.Item index='2'>导航二</Menu.Item>
@@ -40,8 +41,8 @@ export default function Manage(props) {
         <Switch>
           {/* 注册路由 */}
           <Route path='/home' component={Home} />
-          <Route path='/userList' test='etst' component={Home} />
-          <Route path='/shopList' component={Home} />
+          <Route path='/userList' component={UserList} />
+          <Route path='/foodList' component={FoodList} />
           {/* <Route path='/manage' component={Manage} /> */}
           {/* <Route path='/home' component={Home} /> */}
           {/* 使导航到一个新的地址 */}
