@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hook</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@17/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/react-transition-group/dist/react-transition-group.js"></script>
+    <style>
+      .fade-enter-active,
+      .fade-leave-active {
+        transition: opacity 0.5s;
+      }
+      .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+<script type="text/babel">
+  // function Test() {
+  //   return <div>
+  //     <Transition name="label-fade">
+  //       {}
+  //       </Transition>
+  //     </div>
+  // }
+  class Test extends React.Component {
+    state = {
+      show: true,
+    };
+    render() {
+      return (
+        <div>
+          <button onClick={() => this.setState({ show: !this.state.show })}>
+            点击
+          </button>
+        </div>
+      );
+    }
+  }
+
+  ReactDOM.render(<Test />, document.getElementById('root'));
+</script>

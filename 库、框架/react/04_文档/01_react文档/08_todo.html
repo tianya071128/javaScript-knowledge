@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>content</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@17/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://unpkg.com/todomvc-app-css@2.2.0/index.css"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+<script type="text/babel">
+  class TestD extends React.Component {
+    render() {
+      console.log(this.el);
+      return <div>111</div>;
+    }
+  }
+  let uid = 0;
+
+  function TodoList({
+    todos,
+    visibility,
+    onAllChecked,
+    onCheck,
+    delectTodo,
+    children,
+  }) {
+    if (!Array.isArray(todos) || !todos.length) return null;
+
+    const filteredTodos = React.useMemo(() => {
+      switch (visibility) {
+        case 'all':
+          return todos;
+        case 'active': // 未完成
+          return todos.filter((item) => !item.completed);
+        case 'completed':
+          return todos.filter((item) => item.completed);
+        default:
+          break;
+      }
+    }, [todos, visibility]);
+    const [editedTodo, setEditedTodo] = React.useState(false);
+
+    return (
+      <section className='main'>
+        <TestD />
+        <input
+          id='toggle-all'
+          className='toggle-all'
+          type='checkbox'
+          checked={todos.every((todo) => todo.completed)}
+          onChange={onAllChecked}
+        />
+        <label htmlFor='toggle-all'></label>
+        <ul className='todo-list'>
+          {filteredTodos.map((todo) => {
+            return (
+              <li
+                className={`todo${todo.completed ? ' completed' : ''}${
+                  editedTodo ? ' editing' : ''
+                }`}
+                key={todo.id}>
+                <div className='view'>
+                  <input
+                    className='toggle'
+                    type='checkbox'
+                    checked={todo.completed}
+                    onChange={onCheck.bind(this, todo.id)}
+                  />
+                  <label>{todo.title}</label>
+                  <button
+                    className='destroy'
+                    onClick={delectTodo.bind(this, todo.id)}></button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    );
+  }
+
+  function TodoFooter({ todos, visibility, clearCompleted }) {
+    if (!Array.isArray(todos) || !todos.length) return null;
+
+    const remaining = React.useMemo(() => {
+      return todos.filter((todo) => !todo.completed).length;
+    }, [todos]);
+
+    return (
+      <section className='footer'>
+        <span className='todo-count'>
+          <strong>{remaining}</strong> {remaining === 1 ? 'item' : 'items'} left
+        </span>
+        <ul className='filters'>
+          <li>
+            <a href='#/all' className={visibility == 'all' ? 'selected' : ''}>
+              All
+            </a>
+          </li>
+          <li>
+            <a
+              href='#/active'
+              className={visibility == 'active' ? 'selected' : ''}>
+              Active
+            </a>
+          </li>
+          <li>
+            <a
+              href='#/completed'
+              className={visibility == 'completed' ? 'selected' : ''}>
+              Completed
+            </a>
+          </li>
+        </ul>
+        {todos.length > remaining && (
+          <button className='clear-completed' onClick={clearCompleted}>
+            Clear completed
+          </button>
+        )}
+      </section>
+    );
+  }
+
+  function Todo() {
+    const [newTodo, setNewTodo] = React.useState('');
+    const [todos, setTodos] = React.useState([]);
+    const [visibility, setVisibility] = React.useState('all');
+
+    React.useEffect(() => {
+      const onHashChange = () => {
+        const visibility = window.location.hash.replace(/#\/?/, '');
+        if (['all', 'completed', 'active'].includes(visibility)) {
+          setVisibility(visibility);
+        } else {
+          window.location.hash = '';
+          setVisibility('all');
+        }
+      };
+      window.addEventListener('hashchange', onHashChange);
+      onHashChange();
+      return () => {
+        window.removeEventListener('hashchange', onHashChange);
+      };
+    }, []);
+
+    const onChange = (e) => {
+      setNewTodo(e.target.value);
+    };
+    const onKeyUp = (e) => {
+      if (e.keyCode === 13 && newTodo && newTodo.trim()) {
+        // 此时存在待办事项
+        const newTodos = [...todos];
+        newTodos.push({
+          id: uid++,
+          title: newTodo,
+          completed: false, // 是否已完成
+        });
+        setTodos(newTodos);
+        setNewTodo('');
+      }
+    };
+    const onAllChecked = (e) => {
+      const newTodos = todos.map((todo) => ({
+        ...todo,
+        completed: e.target.checked,
+      }));
+      setTodos(newTodos);
+    };
+    const onCheck = (id, e) => {
+      const newTodos = todos.map((todo) => {
+        if (todo.id === id) {
+          todo.completed = e.target.checked;
+        }
+        return todo;
+      });
+      setTodos(newTodos);
+    };
+    const delectTodo = (id) => {
+      const newTodos = [...todos];
+      const i = todos.findIndex((todo) => todo.id === id);
+      newTodos.splice(i, 1);
+
+      setTodos(newTodos);
+    };
+    const clearCompleted = () => {
+      const newTodos = todos.filter((todo) => !todo.completed);
+
+      setTodos(newTodos);
+    };
+    return (
+      <section className='todoapp'>
+        <header className='header'>
+          <h1>todos</h1>
+          <input
+            className='new-todo'
+            autoFocus
+            autoComplete='off'
+            placeholder='What needs to be done?'
+            value={newTodo}
+            onChange={onChange}
+            onKeyUp={onKeyUp}
+          />
+        </header>
+
+        <TodoList
+          todos={todos}
+          visibility={visibility}
+          onAllChecked={onAllChecked}
+          onCheck={onCheck}
+          delectTodo={delectTodo}></TodoList>
+
+        <TodoFooter
+          todos={todos}
+          visibility={visibility}
+          clearCompleted={clearCompleted}
+        />
+      </section>
+    );
+  }
+  ReactDOM.render(<Todo />, document.getElementById('root'));
+</script>
