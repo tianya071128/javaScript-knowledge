@@ -19,24 +19,28 @@ export default function Home() {
   const [allOrderCount, setAllOrderCountm] = useState(0);
   const [allAdminCount, setAllAdminCount] = useState(0);
 
-  useEffect(async () => {
-    const today = dtime().format('YYYY-MM-DD');
-    const promiseAll = [
-      userCount(today),
-      orderCount(today),
-      adminDayCount(today),
-      getUserCount(),
-      getOrderCount(),
-      adminCount(),
-    ];
-    const dataList = await Promise.all(promiseAll);
+  useEffect(() => {
+    async function getData() {
+      const today = dtime().format('YYYY-MM-DD');
+      const promiseAll = [
+        userCount(today),
+        orderCount(today),
+        adminDayCount(today),
+        getUserCount(),
+        getOrderCount(),
+        adminCount(),
+      ];
+      const dataList = await Promise.all(promiseAll);
 
-    setUserCount(dataList[0].count);
-    setOrderCountNum(dataList[1].count);
-    setAdminCountNum(dataList[2].count);
-    setAllUserCount(dataList[3].count);
-    setAllOrderCountm(dataList[4].count);
-    setAllAdminCount(dataList[5].count);
+      setUserCount(dataList[0].count);
+      setOrderCountNum(dataList[1].count);
+      setAdminCountNum(dataList[2].count);
+      setAllUserCount(dataList[3].count);
+      setAllOrderCountm(dataList[4].count);
+      setAllAdminCount(dataList[5].count);
+    }
+
+    getData();
   }, []);
 
   return (

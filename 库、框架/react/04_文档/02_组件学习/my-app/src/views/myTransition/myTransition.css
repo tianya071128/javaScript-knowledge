@@ -1,0 +1,32 @@
+.my-node-enter {
+  transform: translateX(100px);
+}
+.my-node-enter-active {
+  transform: translateX(0);
+  transition: transform 2000ms;
+}
+.my-node-exit {
+  transform: translateX(0);
+}
+.my-node-exit-active {
+  transform: translateX(100px);
+  transition: transform 2000ms;
+}
+
+/* .my-node-enter-active {
+  animation: bounce-in 2s;
+}
+.my-node-exit-active {
+  animation: bounce-in 2s reverse;
+} */
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

@@ -1,20 +1,19 @@
 import { Menu, Layout } from 'element-react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useMemo } from 'react';
-import Home from '../home';
+
 import HeadTop from './HeadTop';
-import UserList from '../userList';
-import FoodList from '../foodList';
 import './manage.css';
 
-export default function Manage(props) {
+export default function Manage() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const defaultActive = useMemo(() => {
-    console.log(props);
-    return props.location.pathname.split('/').reverse()[0];
-  }, [props.location.pathname]);
+    return location.pathname.split('/').reverse()[0];
+  }, [location.pathname]);
 
   const onSelect = (index) => {
-    props.history.push('/' + index);
+    navigate('/' + index);
   };
 
   return (
@@ -27,10 +26,15 @@ export default function Manage(props) {
           theme='dark'
           defaultActive={defaultActive}
           onSelect={onSelect}>
-          <Menu.Item index='home'>首页</Menu.Item>
+          <Menu.Item index=''>首页</Menu.Item>
           <Menu.SubMenu index='1' title='数据管理'>
             <Menu.Item index='userList'>用户列表</Menu.Item>
             <Menu.Item index='foodList'>食品列表</Menu.Item>
+            <Menu.Item index='orderList'>订单列表</Menu.Item>
+            <Menu.Item index='adminList'>管理员列表</Menu.Item>
+          </Menu.SubMenu>
+          <Menu.SubMenu index='2' title='demo'>
+            <Menu.Item index='transition'>动画</Menu.Item>
           </Menu.SubMenu>
           {/* <Menu.Item index='2'>导航二</Menu.Item>
           <Menu.Item index='3'>导航三</Menu.Item> */}
@@ -38,16 +42,7 @@ export default function Manage(props) {
       </Layout.Col>
       <Layout.Col span={20} style={{ height: '100%', overflow: 'auto' }}>
         <HeadTop />
-        <Switch>
-          {/* 注册路由 */}
-          <Route path='/home' component={Home} />
-          <Route path='/userList' component={UserList} />
-          <Route path='/foodList' component={FoodList} />
-          {/* <Route path='/manage' component={Manage} /> */}
-          {/* <Route path='/home' component={Home} /> */}
-          {/* 使导航到一个新的地址 */}
-          {/* <Redirect to='/home' /> */}
-        </Switch>
+        <Outlet />
       </Layout.Col>
     </div>
   );

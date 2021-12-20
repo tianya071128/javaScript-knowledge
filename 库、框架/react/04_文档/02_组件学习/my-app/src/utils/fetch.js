@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-anonymous-default-export
 export default async (url = '', data = {}, type = 'GET', method = 'fetch') => {
   type = type.toUpperCase();
   url = '/api' + url;
@@ -37,7 +38,9 @@ export default async (url = '', data = {}, type = 'GET', method = 'fetch') => {
       const responseJson = await response.json();
       return responseJson;
     } catch (error) {
-      throw new Error(error);
+      // return {};
+      return Promise.reject('失败');
+      // throw new Error(error);
     }
   } else {
     return new Promise((resolve, reject) => {

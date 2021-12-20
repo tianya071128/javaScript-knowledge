@@ -14,7 +14,7 @@ function usePagination() {
     if (countData.status == 1) {
       setCount(countData.count);
     } else {
-      throw new Error('获取数据失败');
+      setCount(0);
     }
   }, []);
 
@@ -53,12 +53,14 @@ export default function UserList() {
     });
 
     setData(
-      data.map((item, index) => ({
-        index: index + 1,
-        username: item.username,
-        registe_time: item.registe_time,
-        city: item.city,
-      }))
+      Array.isArray(data)
+        ? data.map((item, index) => ({
+            index: index + 1,
+            username: item.username,
+            registe_time: item.registe_time,
+            city: item.city,
+          }))
+        : []
     );
   }, [currentPage]);
 
