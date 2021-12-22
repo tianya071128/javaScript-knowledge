@@ -9,7 +9,7 @@ export default function Manage() {
   const location = useLocation();
   const navigate = useNavigate();
   const defaultActive = useMemo(() => {
-    return location.pathname.split('/').reverse()[0];
+    return location.pathname.substring(1).split('/')[0];
   }, [location.pathname]);
 
   const onSelect = (index) => {
@@ -36,8 +36,9 @@ export default function Manage() {
           <Menu.SubMenu index='2' title='demo'>
             <Menu.Item index='transition'>动画</Menu.Item>
           </Menu.SubMenu>
-          {/* <Menu.Item index='2'>导航二</Menu.Item>
-          <Menu.Item index='3'>导航三</Menu.Item> */}
+          <Menu.SubMenu index='3' title='嵌套路由'>
+            <Menu.Item index='nestedRoute'>二级路由</Menu.Item>
+          </Menu.SubMenu>
         </Menu>
       </Layout.Col>
       <Layout.Col span={20} style={{ height: '100%', overflow: 'auto' }}>

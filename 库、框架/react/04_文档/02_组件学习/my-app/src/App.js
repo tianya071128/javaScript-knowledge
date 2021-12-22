@@ -2,16 +2,23 @@ import { Routes, Route } from 'react-router-dom';
 import router from './router';
 import './index.css';
 
+function routeComponentHot(Component, route) {
+  return function (props) {
+    return <Component {...props} />;
+  };
+}
+
 // 渲染路由
 function renderRoute(routes) {
   return routes.map((route) => {
+    const Component = routeComponentHot(route.element, route);
     return (
       <Route
         key={route.path || 'index'}
         index={route.index}
         path={route.path}
-        element={<route.component />}>
-        {Array.isArray(route.routes) && renderRoute(route.routes)}
+        element={<Component />}>
+        {Array.isArray(route.children) && renderRoute(route.children)}
       </Route>
     );
   });
@@ -23,14 +30,6 @@ function App() {
       <Routes>
         {Array.isArray(router?.routes) && renderRoute(router.routes)}
       </Routes>
-      {/* <Switch> */}
-      {/* 注册路由 */}
-      {/* <Route path='/login' component={Login} /> */}
-      {/* <Route path='/' component={Manage} /> */}
-      {/* <Route path='/home' component={Home} /> */}
-      {/* 使导航到一个新的地址 */}
-      {/* <Redirect to='/login' /> */}
-      {/* </Switch> */}
     </div>
   );
 }
