@@ -25,3 +25,14 @@ let arr2: Array<string> = ['1', '2', '3'];
  */
 let any1: any = [1, false, '1']; // 显示指定为 any 类型
 let any2 = [1, false, '1']; // ts 会类型推断出该类型
+
+// undefined or null
+let u: undefined = undefined;
+let n: null = null;
+
+// 不太常用的原语: bigint(es2020) - 非常大的整数、symbol(es6)
+let oneHundred: bigint = BigInt(100);
+let twoHundred: bigint = 100n; // 语法与 BigInt 等同
+
+let firstName = Symbol('name');
+let secondName = Symbol('name');
