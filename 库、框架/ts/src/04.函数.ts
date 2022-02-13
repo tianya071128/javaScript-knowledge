@@ -30,6 +30,14 @@ function ceshi(this: { ceshi: number }, x: number) {
 ceshi.bind({ ceshi: 123 })(1);
 ceshi.call({ ceshi: 456 }, 2);
 
+// 实参展开运算符 - demo
+const args = [8, 5];
+// 因为 Math.atan2 定义为接收两个参数, 而 args 类型定义为 number[], 可能会存在多个参数
+const angle = Math.atan2(...args); // error -- 扩张参数必须具有元组类型或传递给 rest 参数。
+
+const args2 = [8, 5] as const; // 类型断言一下, 此时类型为 readonly [8, 5], 只存在两个项就可以解决这个问题 -- 这种情况的最佳解决方案取决于您的代码, 不限于这一种方式
+const angle2 = Math.atan2(...args2);
+
 /**
  * 函数类型表达式: 用于表示函数类型, 语法类似于箭头函数形式, 为:  (parameter: type, ...)  => type(没有返回值为 void)
  */

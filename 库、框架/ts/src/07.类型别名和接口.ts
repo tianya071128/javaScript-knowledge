@@ -29,16 +29,19 @@ let obj2: Point2 = {
 interface Point3 {
   name: string;
 }
-interface Point4 extends Point3 {
+// 以 , 分隔, 从多种类型扩展
+interface Point4 extends Point3, Point2 {
   age: number;
 }
 
 let obj4: Point4 = {
   name: 'shuli',
   age: 1.4,
+  x: 1,
+  y: 2,
 };
 
-// --> 1.2 扩展类型: 通过 & 扩展
+// --> 1.2 扩展类型: 通过 & 运算符定义交叉类型 - 详见 ./07.交叉类型.ts
 type Point5 = {
   name: string;
 };

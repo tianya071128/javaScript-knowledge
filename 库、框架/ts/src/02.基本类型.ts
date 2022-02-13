@@ -42,17 +42,28 @@ function liveDangerously(x?: number | null) {
  *   当不指定类型时, 并且 ts 无法进行类型推断时, 会默认为 any 类型. 使用 noImplicitAny 配置可以当发生这中行为时标识为错误
  */
 let any1: any = [1, false, '1']; // 显示指定为 any 类型
-let 3 = [1, false, '1']; // ts 会类型推断出该类型
+let any2 = [1, false, '1']; // ts 会类型推断出该类型
 
 /**
  * 特殊类型: 在函数上下文中经常出现, 在其他地方也可以使用
  */
-// 1. void: 不返回值的函数的返回值
+
+// 1. void: 不返回值的函数的返回值 -- 注意: 在 js 中, 不返回任何值的函数将隐式返回 undefined. 但是在 ts 中, void 和 undefined 并不是一回事
 function noop() {
   return; // 只要函数没有任何 return 语句，或者没有从这些返回语句返回任何显式值，就会被推断为 void 类型
 }
-function noop2(): void {} // 也可以显式的注释为 void
-// 注意: 在 js 中, 不返回任何值的函数将隐式返回 undefined. 但是在 ts 中, void 和 undefined 并不是一回事
+// 一个具有 void 返回类型的上下文函数类型(type vf = () => void), 在实现时, 可以返回其他的值, 但会被忽略
+// 而一个字面的函数定义有一个 void 的返回类型时, 该函数必须不返回任何东西.
+// 定义类型形式:
+type vf = () => void;
+const noop3: vf = () => {
+  return true; // 这样就可以了
+};
+const v1 = noop3(); // const v1: void -- 类型推断为 void 类型, 做其他操作就会报错了
+// 这样就是字面的函数定义: 此时函数必须不返回任何东西
+function noop2(): void {
+  return true; // error - 不能将类型“boolean”分配给类型“void”。
+}
 
 // 2. object: 是指上任何不是原始值（string、number、bigint、boolean、symbol、null或undefined）的值
 const objTest: object = {}; // 最好不要使用 object 类型, 不明确
@@ -66,7 +77,7 @@ any3.b(); // OK --  any 类型任何操作都是合法的
 function safeParse(s: string): unknown {
   return JSON.parse(s);
 }
- 
+
 const obj222 = safeParse('123') as string; // 可以通过类型断言来断言该类型
 
 // 4. never: 表示永远不会被观察到的值 -- 在返回类型中，这意味着函数抛出异常或终止程序的执行。
@@ -75,9 +86,9 @@ function fail(msg: string): never {
 }
 // never 也在缩小联合类型时表示不可能到达的地方
 function fn222(x: string | number) {
-  if (typeof x === "string") {
+  if (typeof x === 'string') {
     // do something
-  } else if (typeof x === "number") {
+  } else if (typeof x === 'number') {
     // do something else
   } else {
     x; // has type 'never'! 这里, 不会被到达
