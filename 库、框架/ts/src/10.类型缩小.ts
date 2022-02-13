@@ -94,3 +94,9 @@ function example() {
 
   return x; // let x: string | number; -- 在这里, 根据上面 if 语句, x 只有两种可能, 就是 string 或者 number, 所以此时类型为 string | number
 }
+
+// 8. 类型谓词: 上述都是使用 JS 现有的结构来缩小类型, ... https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates
+
+// 9. 受歧视的 unions(联合类型) ...
+
+// 10. never 类型 和 穷尽性检查 ...
