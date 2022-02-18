@@ -79,7 +79,7 @@
     // "strictNullChecks": true /* When type checking, take into account `null` and `undefined`. 在进行类型检查时，请考虑“null”和“undefined”` */,
     // "strictFunctionTypes": true,                      /* When assigning functions, check to ensure parameters and the return values are subtype-compatible. */
     // "strictBindCallApply": true,                      /* Check that the arguments for `bind`, `call`, and `apply` methods match the original function. */
-    // "strictPropertyInitialization": true,             /* Check for class properties that are declared but not set in the constructor. */
+    // "strictPropertyInitialization": true /* Check for class properties that are declared but not set in the constructor. 检查已声明但未在构造函数中设置的类属性 */,
     // "noImplicitThis": true,                           /* Enable error reporting when `this` is given the type `any`. */
     // "useUnknownInCatchVariables": true,               /* Type catch clause variables as 'unknown' instead of 'any'. */
     // "alwaysStrict": true,                             /* Ensure 'use strict' is always emitted. */
