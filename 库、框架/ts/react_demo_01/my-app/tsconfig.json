@@ -22,7 +22,8 @@
       "@/*": ["src/*"]
     },
     // 开启装饰器功能
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "types": ["node"]
   },
   "include": ["src"],
   "exclude": ["node_modules"]
