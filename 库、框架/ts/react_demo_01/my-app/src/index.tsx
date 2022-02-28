@@ -1,13 +1,17 @@
 import ReactDOM from 'react-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
 import RecoilNexus from 'recoil-nexus';
-import 'antd/dist/antd.css';
 import App from './App';
+
+import '@/style/index.scss';
 
 ReactDOM.render(
   <RecoilRoot>
     <RecoilNexus />
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </RecoilRoot>,
   document.getElementById('root')
 );

@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { getRecoil } from 'recoil-nexus';
+import { message } from 'antd';
 import { user_token } from '@/store/user';
 
 /** ============  类型声明 start ========= */
@@ -18,8 +19,19 @@ const service = axios.create({
 /**
  * 统一处理错误返回信息
  */
-function resolveReuqestError(errorObj: ErrorObj, config?: AxiosRequestConfig) {
-  console.log(config!.hideBusinessError);
+function resolveReuqestError(
+  { msg, code }: ErrorObj,
+  config?: AxiosRequestConfig
+) {
+  switch (code) {
+    // case value:
+    //   break;
+
+    default:
+      // 其余情况下，抛出错误
+      message.error(msg);
+      break;
+  }
 }
 
 // 请求拦截器
@@ -47,12 +59,13 @@ service.interceptors.response.use(
       return response.data;
     } else {
       let errorObj: ErrorObj = {
-        msg: response.data?.message,
-        code: response.data?.code,
+        msg: response.data?.msg || '请求异常，请稍后重试',
+        code: response.data?.code ?? -4,
       };
 
-      // 登出以及其他情况
-      return resolveReuqestError(errorObj, response.config);
+      // 登出以及其他情况 -- 错误处理
+      resolveReuqestError(errorObj, response.config);
+      return Promise.reject(errorObj);
     }
   },
   (error) => {
@@ -87,11 +100,12 @@ service.interceptors.response.use(
         errorObj.code = -3;
         break;
       default:
-        errorObj.msg = error?.message ?? '请求异常，请稍后重试';
+        errorObj.msg = error?.msg ?? '请求异常，请稍后重试';
         errorObj.code = errorObj.code ?? -4;
         break;
     }
-    return resolveReuqestError(errorObj, error?.config);
+    resolveReuqestError(errorObj, error?.config);
+    return Promise.reject(errorObj);
   }
 );
 
