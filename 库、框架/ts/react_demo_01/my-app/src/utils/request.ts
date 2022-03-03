@@ -1,7 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { getRecoil } from 'recoil-nexus';
 import { message } from 'antd';
-import { user_token } from '@/store/user';
+import { getLocalStore } from '@/utils/localStore';
 
 /** ============  类型声明 start ========= */
 interface ErrorObj {
@@ -37,8 +36,7 @@ function resolveReuqestError(
 // 请求拦截器
 service.interceptors.request.use(
   (config: AxiosRequestConfig) => {
-    // 从 Recoil 状态库中读取 token
-    const token = getRecoil(user_token);
+    const token = getLocalStore('token');
     if (token) {
       config.headers!['X-Token'] = token;
     }

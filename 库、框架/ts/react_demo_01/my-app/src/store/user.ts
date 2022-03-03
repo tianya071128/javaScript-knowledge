@@ -1,7 +1,8 @@
 import { atom } from 'recoil';
-import { getToken } from '@/utils/cookies';
+import { getLocalStore } from '@/utils/localStore';
 
-export const user_token = atom<string>({
-  key: 'user_token',
-  default: getToken() || '123',
+// 登录 token
+export const user_info = atom<string>({
+  key: 'user_info',
+  default: getLocalStore('user_info') || '',
 });

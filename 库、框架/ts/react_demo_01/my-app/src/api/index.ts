@@ -1,11 +1,19 @@
 import request from '@/utils/request';
 
-export const login = (params: { user_id: string; user_pwd: string }) => {
-  // return request.post('/public/login', params, { hideBusinessError: true });
-  return request<number>({
+interface LoginParams {
+  user_id: string;
+  user_pwd: string;
+}
+interface LoginResult {
+  token: string;
+  userInfo: Object;
+}
+
+export const login = (params: LoginParams) => {
+  return request<LoginResult>({
     url: '/public/login',
     method: 'POST',
-    params,
+    data: params,
     // hideBusinessError: true,
   });
 };
