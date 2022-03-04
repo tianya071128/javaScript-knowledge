@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import { message } from 'antd';
 import { getLocalStore } from '@/utils/localStore';
 

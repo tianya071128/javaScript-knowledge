@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import router, { type _Routes } from '@/router';
 
 function routeComponentHot(Component: _Routes['element'], route: _Routes) {
-  return function (props: Object) {
+  return function (props: object) {
     return <Component {...props} />;
   };
 }

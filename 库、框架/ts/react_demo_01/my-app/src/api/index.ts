@@ -6,7 +6,7 @@ interface LoginParams {
 }
 interface LoginResult {
   token: string;
-  userInfo: Object;
+  userInfo: object;
 }
 
 export const login = (params: LoginParams) => {
@@ -14,6 +14,6 @@ export const login = (params: LoginParams) => {
     url: '/public/login',
     method: 'POST',
     data: params,
-    // hideBusinessError: true,
+    hideBusinessError: true,
   });
 };
