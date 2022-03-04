@@ -1,0 +1,11 @@
+.my_menu {
+  height: 100vh;
+  background: #001529;
+  transition: all 0.2s;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1001;
+  overflow: auto;
+}

@@ -1,4 +1,5 @@
 import Login from '@/views/login';
+import Layout from '@/views/layout';
 
 /** 类型声明 */
 interface RouteConfig {
@@ -19,6 +20,10 @@ const routeConfig: RouteConfig = {
     {
       path: '/login',
       element: Login,
+    },
+    {
+      path: '/',
+      element: Layout,
     },
   ],
 };

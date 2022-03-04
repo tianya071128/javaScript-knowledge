@@ -14,6 +14,5 @@ export const login = (params: LoginParams) => {
     url: '/public/login',
     method: 'POST',
     data: params,
-    hideBusinessError: true,
   });
 };

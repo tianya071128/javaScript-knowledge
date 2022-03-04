@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 
 import { login } from '@/api';
-import { setLocalStore } from '@/utils/localStore';
+import { setToken } from '@/utils/localStore';
 
 import './index.scss';
 
@@ -22,7 +22,7 @@ const rules: Rules = {
 };
 /** 静态方法和属性 end */
 
-export default function Login(props: any) {
+export default function Login() {
   const [isSubmit, setIsSubmit] = useState<boolean>(false); // 是否在提交状态标识
   const [form] = Form.useForm();
 
@@ -36,7 +36,7 @@ export default function Login(props: any) {
       const data = await login(params);
 
       // 将 token 本地存储
-      setLocalStore('token', data.token);
+      setToken(data.token);
 
       // 将登录信息存入到 recoil 中
     } finally {

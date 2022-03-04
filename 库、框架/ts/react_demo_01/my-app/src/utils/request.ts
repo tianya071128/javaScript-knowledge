@@ -1,6 +1,6 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import { message } from 'antd';
-import { getLocalStore } from '@/utils/localStore';
+import { getToken } from '@/utils/localStore';
 
 /** ============  类型声明 start ========= */
 interface ErrorObj {
@@ -20,8 +20,17 @@ const service = axios.create({
  */
 function resolveReuqestError(
   { msg, code }: ErrorObj,
-  config?: AxiosRequestConfig
-) {
+  { hideError, customCode }: AxiosRequestConfig = {}
+): Promise<never> {
+  // 隐藏接口报错，但是还是要阻断后续执行 - tip：隐藏业务层面报错在下面就已经处理了
+  if (hideError) return Promise.reject({ msg, code });
+
+  // 自行处理的 code 列表，具体处理逻辑在外部
+  if (customCode) {
+    if (!Array.isArray(customCode)) customCode = [customCode];
+    if (customCode.includes(String(code))) return Promise.reject({ msg, code });
+  }
+  // 根据 code 不同来执行不同的策略
   switch (code) {
     // case value:
     //   break;
@@ -31,12 +40,14 @@ function resolveReuqestError(
       message.error(msg);
       break;
   }
+
+  return Promise.reject({ msg, code });
 }
 
 // 请求拦截器
 service.interceptors.request.use(
   (config: AxiosRequestConfig) => {
-    const token = getLocalStore('token');
+    const token = getToken();
     if (token) {
       config.headers!['X-Token'] = token;
     }
@@ -54,16 +65,18 @@ service.interceptors.response.use(
     // code: 100000 -- 未登录
     if (response.data?.code === 200) {
       // 此时业务成功
-      return response.data;
+      return response.data.data;
     } else {
       let errorObj: ErrorObj = {
         msg: response.data?.msg || '请求异常，请稍后重试',
         code: response.data?.code ?? -4,
       };
 
+      // 隐藏业务层面报错
+      if (response.config.hideBusinessError) return Promise.reject(errorObj);
+
       // 登出以及其他情况 -- 错误处理
-      resolveReuqestError(errorObj, response.config);
-      return Promise.reject(errorObj);
+      return resolveReuqestError(errorObj, response.config);
     }
   },
   (error) => {
@@ -102,8 +115,7 @@ service.interceptors.response.use(
         errorObj.code = errorObj.code ?? -4;
         break;
     }
-    resolveReuqestError(errorObj, error?.config);
-    return Promise.reject(errorObj);
+    return resolveReuqestError(errorObj, error?.config);
   }
 );
 
