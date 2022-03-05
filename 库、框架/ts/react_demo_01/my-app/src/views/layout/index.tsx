@@ -1,3 +1,4 @@
+import { Outlet } from 'react-router-dom';
 import MyMenu from './components/MyMenu';
 import './index.scss';
 
@@ -6,7 +7,10 @@ export default function Layout() {
     <div className='_layout'>
       {/* 左侧菜单区 */}
       <MyMenu />
-      <div>右侧内容区</div>
+      <div style={{ marginLeft: '200px' }}>
+        <div>右侧内容区</div>
+        <Outlet />
+      </div>
     </div>
   );
 }
