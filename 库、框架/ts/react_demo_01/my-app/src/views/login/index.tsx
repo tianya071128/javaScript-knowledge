@@ -1,13 +1,13 @@
 import { Form, Input, Button } from 'antd';
 import { useState } from 'react';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-
 import { login } from '@/api';
-import { setToken } from '@/utils/localStore';
-
-import './index.scss';
-
+import { setToken, setUserInfo } from '@/utils/localStore';
 import { type Rule } from 'antd/lib/form';
+import { useSetRecoilState } from 'recoil';
+import './index.scss';
+import { user_info_recoil } from '@/store/user';
+import { useNavigate } from 'react-router-dom';
 
 /** 类型声明 start */
 interface Rules {
@@ -25,6 +25,8 @@ const rules: Rules = {
 export default function Login() {
   const [isSubmit, setIsSubmit] = useState<boolean>(false); // 是否在提交状态标识
   const [form] = Form.useForm();
+  const setUserInfoRecoil = useSetRecoilState(user_info_recoil);
+  const navigate = useNavigate();
 
   // 点击按钮提交
   const onSubmit = async function () {
@@ -38,8 +40,13 @@ export default function Login() {
       // 将 token 本地存储
       setToken(data.token);
 
-      // 将登录信息存入到 recoil 中
-    } finally {
+      // 将登录信息存入到 recoil 中和 localStorage 中
+      setUserInfo(data.userInfo);
+      setUserInfoRecoil(data.userInfo);
+      navigate('/test2');
+    } catch (e) {
+      // error -- Warning: Can't perform a React state update on an unmounted component. This is a no-op, but it indicates a memory leak in your application. To fix, cancel all subscriptions and asynchronous tasks in a useEffect cleanup function.
+      // 路由已经跳转，但是还是在这里更改了状态
       setIsSubmit(false);
     }
   };
@@ -56,7 +63,7 @@ export default function Login() {
         /** 需要为输入控件设置布局样式时，使用该属性，用法同 labelCol	 */
         // wrapperCol={{ span: 16 }}
         /** 表单默认值，只有初始化以及重置时生效	 */
-        // initialValues={{ remember: true }}
+        initialValues={{ username: 'admin', password: '123456' }}
         /** 原生 autocomplete 属性，禁用自动完成功能 */
         autoComplete='off'
         /** 经 Form.useForm() 创建的 form 控制实例，不提供时会自动创建 */

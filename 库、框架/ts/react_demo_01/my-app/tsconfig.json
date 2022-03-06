@@ -23,7 +23,8 @@
     },
     // 开启装饰器功能
     "experimentalDecorators": true,
-    "types": ["node"]
+    "types": ["node"],
+    "downlevelIteration": true
   },
   "include": ["src", "declarations"],
   "exclude": ["node_modules"]

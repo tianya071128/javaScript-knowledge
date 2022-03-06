@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import router, { type _Routes } from '@/router';
+import { type _Route, useRouteConfig } from '@/router';
 
 /** 类型声明 */
 interface RouteProp {
@@ -10,14 +10,14 @@ interface RouteProp {
 }
 /** 类型声明 end */
 
-function routeComponentHot(Component: _Routes['element'], route: _Routes) {
+function routeComponentHot(Component: _Route['element'], route: _Route) {
   return function (props: object) {
     return <Component {...props} />;
   };
 }
 
 // 渲染路由
-function renderRoute(routes: _Routes[]) {
+function renderRoute(routes: _Route[]) {
   return routes.map((route) => {
     // 对路由组件进行封装
     const Component = routeComponentHot(route.element, route);
@@ -42,6 +42,9 @@ function renderRoute(routes: _Routes[]) {
 }
 
 function App() {
+  const router = useRouteConfig();
+  console.log(router);
+
   return (
     <>
       <Routes>{renderRoute(router.routes)}</Routes>

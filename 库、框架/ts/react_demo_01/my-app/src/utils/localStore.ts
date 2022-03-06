@@ -1,3 +1,5 @@
+import { LoginResult } from '@/api';
+
 function getLocalStore(key: string) {
   const data = localStorage.getItem(key);
 
@@ -19,11 +21,9 @@ export function getToken(): string | null {
 }
 
 /** 封装存入 userInfo 信息 */
-export function setUserInfo(token: string): void {
-  setLocalStore('userInfo', token);
+export function setUserInfo(userInfo: LoginResult['userInfo']): void {
+  setLocalStore('userInfo', userInfo);
 }
-type _UserInfo = {};
-export type UserInfo = _UserInfo | null;
-export function getUserInfo(): UserInfo {
+export function getUserInfo(): LoginResult['userInfo'] | null {
   return getLocalStore('userInfo');
 }
