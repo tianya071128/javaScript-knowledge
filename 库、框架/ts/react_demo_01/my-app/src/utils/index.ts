@@ -3,17 +3,17 @@
  * @param fn {Function} 缓存函数
  * @returns Function 封装后的函数
  */
-export function cache<T>(fn: (...args: any[]) => T) {
-  let cacheResult = new Map();
+export function cache<T extends (...args: any) => any>(fn: T) {
+  let cacheResult = new Map<string, any>();
   // 封装缓存函数
-  const f = function (...args: any[]): T {
-    const id = args.join('_'); // 缓存标识符
-    if (cacheResult.has(id)) {
+  const f = function (...args: Parameters<T>): ReturnType<T> {
+    const identifier = [...args].join('_'); // 缓存标识符 -- 简单标识
+    if (cacheResult.has(identifier)) {
       // 存在缓存结果
-      return cacheResult.get(id);
+      return cacheResult.get(identifier);
     } else {
       const result = fn(...args);
-      result !== undefined && cacheResult.set(id, result); // 存在结果才缓存
+      result !== undefined && cacheResult.set(identifier, result); // 存在结果才缓存
       return result;
     }
   };

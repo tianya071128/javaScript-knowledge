@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
-import { matchRoutes, useLocation } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import { matchRoutes, useLocation, Navigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { dynamic_routes_recoil } from '@/store/user';
 import Login from '@/views/login';
-
+import Layout from '@/views/layout';
+import { getToken } from '@/utils/localStore';
 /** 类型声明 */
 interface RouteConfig {
   routes: _Route[];
@@ -24,8 +25,10 @@ export interface _Route {
   /** 路径 */
   path?: string;
   /** 路由组件 */
-  // element: (...args: any) => JSX.Element;
-  element: any;
+  element: React.ReactNode;
+  beforeEnter?: (
+    element: _Route['element']
+  ) => _Route['element'] | ((...args: any) => JSX.Element);
   /** 索引路由 */
   index?: boolean;
   /** 嵌套路由(子路由) */
@@ -40,13 +43,9 @@ export interface _Route {
 const staticRoutes: _Route[] = [
   {
     path: '/login',
-    element: Login,
+    element: <Login />,
   },
 ];
-
-// const routeConfig: RouteConfig = {
-//   routes: ,
-// };
 
 /**
  * 获取当前路由信息
@@ -63,7 +62,23 @@ export const useCustomRoutes = function () {
 export const useRouteConfig = function () {
   const dynamicRoutes = useRecoilValue(dynamic_routes_recoil);
   const route: RouteConfig = {
-    routes: [...staticRoutes, ...dynamicRoutes],
+    routes: [
+      ...staticRoutes,
+      {
+        path: '/',
+        element: <Layout />,
+        children: [...dynamicRoutes],
+        beforeEnter(element) {
+          if (getToken()) {
+            // 已登录，展示组件
+            return element;
+          } else {
+            // 未登录, 跳转页面
+            return <Navigate to='/login' />;
+          }
+        },
+      },
+    ],
   };
   return route;
 };
