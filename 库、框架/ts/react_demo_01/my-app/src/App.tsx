@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { type _Route, useRouteConfig } from '@/router';
 
 /** 类型声明 */
@@ -14,6 +14,7 @@ function routeComponentHot(
   Component: _Route['element'],
   { beforeEnter }: _Route
 ) {
+  console.log('123');
   return !!beforeEnter ? beforeEnter(Component) : Component;
 }
 
@@ -44,7 +45,6 @@ function renderRoute(routes: _Route[]) {
 
 function App() {
   const router = useRouteConfig();
-  console.log(router);
 
   return (
     <>

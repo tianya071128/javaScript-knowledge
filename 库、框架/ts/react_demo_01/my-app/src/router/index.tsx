@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
-import { matchRoutes, useLocation, Navigate } from 'react-router-dom';
+import { matchRoutes, useLocation } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { dynamic_routes_recoil } from '@/store/user';
 import Login from '@/views/login';
 import Layout from '@/views/layout';
 import { getToken } from '@/utils/localStore';
+import JumpLogin from '@/components/jumpLogin';
 /** 类型声明 */
 interface RouteConfig {
   routes: _Route[];
@@ -38,12 +39,25 @@ export interface _Route {
 }
 
 /** 类型声明 end */
+const isLoginBefore: _Route['beforeEnter'] = function (element) {
+  if (getToken()) {
+    // 已登录，并且路由同样没有定义，展示 404 页面
+    return element;
+  } else {
+    return <JumpLogin />;
+  }
+};
 
 // 静态路由
 const staticRoutes: _Route[] = [
   {
     path: '/login',
     element: <Login />,
+  },
+  {
+    path: '*',
+    element: <div>404</div>,
+    beforeEnter: isLoginBefore,
   },
 ];
 
@@ -68,15 +82,7 @@ export const useRouteConfig = function () {
         path: '/',
         element: <Layout />,
         children: [...dynamicRoutes],
-        beforeEnter(element) {
-          if (getToken()) {
-            // 已登录，展示组件
-            return element;
-          } else {
-            // 未登录, 跳转页面
-            return <Navigate to='/login' />;
-          }
-        },
+        beforeEnter: isLoginBefore,
       },
     ],
   };

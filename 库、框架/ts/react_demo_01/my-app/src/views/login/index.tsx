@@ -1,5 +1,5 @@
 import { Form, Input, Button } from 'antd';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { login } from '@/api';
 import { setToken, setUserInfo } from '@/utils/localStore';
@@ -7,7 +7,7 @@ import { type Rule } from 'antd/lib/form';
 import { useSetRecoilState } from 'recoil';
 import './index.scss';
 import { user_info_recoil } from '@/store/user';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 /** 类型声明 start */
 interface Rules {
@@ -27,6 +27,18 @@ export default function Login() {
   const [form] = Form.useForm();
   const setUserInfoRecoil = useSetRecoilState(user_info_recoil);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  // 登录完成后跳转路由
+  const toRouteParams = useMemo(() => {
+    let path = searchParams.get('form') || '/';
+    let state = location.state;
+
+    return {
+      path,
+      state,
+    };
+  }, [searchParams, location]);
 
   // 点击按钮提交
   const onSubmit = async function () {
@@ -43,7 +55,12 @@ export default function Login() {
       // 将登录信息存入到 recoil 中和 localStorage 中
       setUserInfo(data.userInfo);
       setUserInfoRecoil(data.userInfo);
-      navigate('/test2');
+
+      // 跳转逻辑
+      navigate(toRouteParams.path, {
+        state: toRouteParams.state,
+        replace: true,
+      });
     } catch (e) {
       // error -- Warning: Can't perform a React state update on an unmounted component. This is a no-op, but it indicates a memory leak in your application. To fix, cancel all subscriptions and asynchronous tasks in a useEffect cleanup function.
       // 路由已经跳转，但是还是在这里更改了状态
