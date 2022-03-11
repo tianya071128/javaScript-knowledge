@@ -1,41 +1,22 @@
+export type module = number; // 使其变成模块，独立作用域
 /**
- * 字符串
+ * 原始数据类型：对应 JS 的基本类型 -- 布尔值、数值、字符串、null、undefined 以及 ES6 中的新类型 Symbol 和 ES10 中的新类型 BigInt。
  */
+
+// 字符串
 let str: string = 'hello ts';
-
-/**
- * 数字
- */
+// 数字
 let num: number = 20;
-
-/**
- * 布尔
- */
+// 布尔
 let bool = true;
-
-/**
- * 数组:
- *  1. type[]
- *  2. Array<type>: 泛型, 后续详细介绍
- *  type: 表示一种类型
- */
-let arr: number[] = [
-  1, 2, 3 /** '4' -- 这样会报错(不能将类型“string”分配给类型“number”。) */,
-];
-
-let arr2: Array<string> = ['1', '2', '3'];
-
-/**
- * undefined or null
- */
+// undefined 和 null
 let u: undefined = undefined;
 let n: null = null;
-// 非空断言运算符（后缀!） -- 在任何表达式之后写!实际上是一个类型断言(注意这是 ts 的特性)
-function liveDangerously(x?: number | null) {
-  // No error
-  console.log(x!.toFixed()); // x! -- 表示 x 变量不会是一个 undefined 或 null, 这种判断是基于用户提供给 ts 的,而不是 ts 推断出的
-  // Math.PI * shape.radius! ** 2; -- 只需要在表达式后加 ! 表示这个表达式的结果不是 undefined 或 null 即可
-}
+// Symbol
+let s: symbol = Symbol('name');
+// BigInt
+let b: bigint = BigInt(100);
+let b2: bigint = 100n;
 
 /**
  * 特殊类型: any -- 不进行类型检查的特殊机制 -- 最好少使用
@@ -43,6 +24,16 @@ function liveDangerously(x?: number | null) {
  */
 let any1: any = [1, false, '1']; // 显示指定为 any 类型
 let any2 = [1, false, '1']; // ts 会类型推断出该类型
+
+/**
+ * undefined or null
+ */
+// 非空断言运算符（后缀!） -- 在任何表达式之后写!实际上是一个类型断言(注意这是 ts 的特性)
+function liveDangerously(x?: number | null) {
+  // No error
+  console.log(x!.toFixed()); // x! -- 表示 x 变量不会是一个 undefined 或 null, 这种判断是基于用户提供给 ts 的,而不是 ts 推断出的
+  // Math.PI * shape.radius! ** 2; -- 只需要在表达式后加 ! 表示这个表达式的结果不是 undefined 或 null 即可
+}
 
 /**
  * 特殊类型: 在函数上下文中经常出现, 在其他地方也可以使用
@@ -100,12 +91,3 @@ function fn222(x: string | number) {
 function doSomething22(f: Function) {
   return f(1, 2, 3);
 }
-
-/**
- * 不太常用的原语: bigint(es2020) - 非常大的整数、symbol(es6)
- */
-let oneHundred: bigint = BigInt(100);
-let twoHundred: bigint = 100n; // 语法与 BigInt 等同
-
-let firstName = Symbol('name');
-let secondName = Symbol('name');
