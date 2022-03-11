@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons';
 
 import './App.css';
-import Expenses from './views/expenses';
+import AutoExample from './views/autoExample';
 import Invoices from './views/invoices';
 import Invoice from './views/invoice';
 
@@ -29,10 +29,10 @@ function App() {
           style={{ height: '100vh' }}
           onSelect={onSelectMenu}>
           <Menu.Item key='invoices' icon={<PieChartOutlined />}>
-            <Link to='/invoices'>发票</Link>
+            <Link to='/invoices'>发票-官方教程</Link>
           </Menu.Item>
-          <Menu.Item key='expenses' icon={<DesktopOutlined />}>
-            <Link to='/expenses'>费用</Link>
+          <Menu.Item key='autoExample' icon={<DesktopOutlined />}>
+            <Link to='/autoExample'>登录验证</Link>
           </Menu.Item>
           <Menu.Item key='3' icon={<ContainerOutlined />}>
             Option 3
@@ -58,7 +58,6 @@ function App() {
       </div>
       <div>
         <Routes>
-          <Route path='/expenses' element={<Expenses />} />
           <Route path='/invoices' element={<Invoices />}>
             <Route path=':invoiceId' element={<Invoice />} />
             {/* 类似于 path: ""， 当没有匹配路由的时候会渲染这个 */}
@@ -71,6 +70,7 @@ function App() {
               }
             />
           </Route>
+          <Route path='/autoExample' element={<AutoExample />} />
           <Route
             path='*'
             element={

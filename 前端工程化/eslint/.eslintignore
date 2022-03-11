@@ -3,6 +3,8 @@
 # 解决方案：
 # eslint 配置项 eslint.workingDirectories - 指定 eslint 使用的工作目录
 
+# 新版本应该不存在上述问题
+
 
 # 在这里备注一下，vscode
 
