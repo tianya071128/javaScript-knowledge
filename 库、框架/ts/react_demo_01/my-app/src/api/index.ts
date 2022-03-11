@@ -14,9 +14,11 @@ export interface RouteInfo {
   /** 嵌套菜单 */
   children?: RouteInfo[];
   /** 是否不显示在菜单中 */
-  hidden: Boolean;
+  hidden?: Boolean;
   /** 当不显示在菜单中，引用的菜单 id */
-  activeMenu: string;
+  activeMenu?: string;
+  /** 组件 */
+  element?: string;
   /** 可扩展属性 */
   [prop: string]: any;
 }

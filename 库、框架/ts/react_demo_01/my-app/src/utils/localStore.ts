@@ -12,12 +12,19 @@ function setLocalStore(key: string, data: any): void {
   localStorage.setItem(key, JSON.stringify(data));
 }
 
+function removeLocalStore(key: string) {
+  localStorage.removeItem(key);
+}
+
 /** 封装存入 token 方法 */
 export function setToken(token: string): void {
   setLocalStore('token', token);
 }
 export function getToken(): string | null {
   return getLocalStore('token');
+}
+export function removeToken(): void {
+  removeLocalStore('token');
 }
 
 /** 封装存入 userInfo 信息 */
@@ -26,4 +33,7 @@ export function setUserInfo(userInfo: LoginResult['userInfo']): void {
 }
 export function getUserInfo(): LoginResult['userInfo'] | null {
   return getLocalStore('userInfo');
+}
+export function removeUserInfo(): void {
+  removeLocalStore('userInfo');
 }

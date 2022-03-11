@@ -6,78 +6,15 @@ import { useCustomRoutes } from '@/router';
 import './index.scss';
 import { cache } from '@/utils';
 import { useNavigate } from 'react-router-dom';
-
-/** 类型声明 start */
-interface MenuTS {
-  /** 唯一标识 */
-  id: string;
-  /** 菜单名 */
-  title: string;
-  /** 菜单跳转路径 */
-  path?: string;
-  /** 嵌套菜单 */
-  children?: MenuTS[];
-}
-/** 类型声明 end */
-
-const menus: MenuTS[] = [
-  {
-    path: '/',
-    id: '1',
-    title: '首页',
-  },
-  {
-    title: '嵌套路由',
-    id: '6',
-    children: [
-      {
-        id: '2',
-        path: '/test1',
-        title: '嵌套路由1',
-      },
-      {
-        id: '3',
-        path: '/test2',
-        title: '嵌套路由2',
-      },
-      {
-        id: '4',
-        title: '深度嵌套',
-        children: [
-          {
-            id: '5',
-            path: '/test3',
-            title: '深度嵌套2',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    title: '嵌套路由',
-    id: '7',
-    children: [
-      {
-        id: '8',
-        title: '深度嵌套',
-        children: [
-          {
-            id: '9',
-            path: '/test4',
-            title: '深度嵌套2',
-          },
-        ],
-      },
-    ],
-  },
-];
+import { useRecoilValue } from 'recoil';
+import { menus_recoil, type Menus } from '@/store/user';
 
 /**
  * 根据 id 查找菜单列表
  */
-const getMenuRouteInfo = cache(function (id: string) {
-  let result: MenuTS[] | undefined;
-  const recursion = function (menus: MenuTS[], routes: MenuTS[]) {
+const getMenuRouteInfo = cache(function (id: string, menus: Menus[]) {
+  let result: Menus[] | undefined;
+  const recursion = function (menus: Menus[], routes: Menus[]) {
     for (const menu of menus) {
       let copyRoutes = routes.slice(0);
       copyRoutes.push(menu);
@@ -105,7 +42,7 @@ const getMenuRouteInfo = cache(function (id: string) {
  * 递归渲染子菜单
  * tip：还可以考虑下循环引用的问题
  */
-function ChildMenu(menus: MenuTS[]) {
+function ChildMenu(menus: Menus[]) {
   return (
     <>
       {menus.map(({ title, children, id }) => {
@@ -132,11 +69,9 @@ function ChildMenu(menus: MenuTS[]) {
 /**
  * 加载菜单选中项
  */
-function useSesolveMenuSelected(): [
-  string[],
-  string[],
-  Dispatch<SetStateAction<string[]>>
-] {
+function useSesolveMenuSelected(
+  menus: Menus[]
+): [string[], string[], Dispatch<SetStateAction<string[]>>] {
   // 当前选中的菜单项 key 数组
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   // 当前展开的 SubMenu 菜单项 key 数组
@@ -155,7 +90,7 @@ function useSesolveMenuSelected(): [
       id !== selectedKeys[0] // 只有当路由变化时才需要重新计算，似乎可以使用 useEffect 更好的完成
     ) {
       // 根据 id 查找出选中的菜单项和展开的菜单项
-      const menuRoutes = getMenuRouteInfo(id) || [];
+      const menuRoutes = getMenuRouteInfo(id, menus) || [];
       _selectedKeys.push(id);
       menuRoutes.forEach(({ id: childId }) => {
         if (childId !== id) {
@@ -171,12 +106,14 @@ function useSesolveMenuSelected(): [
 
 export default function MyMenu() {
   const [collapsed, setCollapsed] = useState<boolean>(false);
-  const [selectedKeys, openKeys, setOpenKeys] = useSesolveMenuSelected();
+  const menus = useRecoilValue(menus_recoil);
+  const [selectedKeys, openKeys, setOpenKeys] = useSesolveMenuSelected(menus);
+
   const navigate = useNavigate();
 
   // 点击菜单进行跳转
   const handlerRoute = ({ key, keyPath }: MenuInfo) => {
-    const menuRoutes = getMenuRouteInfo(key);
+    const menuRoutes = getMenuRouteInfo(key, menus);
 
     if (Array.isArray(menuRoutes)) {
       const path = menuRoutes[menuRoutes.length - 1].path;
