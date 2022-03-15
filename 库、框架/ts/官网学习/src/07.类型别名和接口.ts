@@ -1,15 +1,20 @@
-/** === 类型别名: 多次使用同一个类型并用一个名称引用它 -- 任何类型的名称 === */
-type Point = {
-  x: number;
-  y: number;
-};
-let point: Point = {
-  x: 1,
-  y: 2,
-};
-// 可以使用类型别名来为任何类型命名，而不仅仅是对象类型。
-type ID = number | string;
-let id: ID = 1;
+export type module = number; // 使其变成模块，独立作用域
+/**
+ * 类型别名：用来给一个类型起个新名字 -- 仅仅是给类型取了一个新的名字，并不是创建了一个新的类型
+ */
+{
+  type Point = {
+    x: number;
+    y: number;
+  };
+  let point: Point = {
+    x: 1,
+    y: 2,
+  };
+  // 可以使用类型别名来为任何类型命名，而不仅仅是对象类型。
+  type ID = number | string;
+  let id: ID = 1;
+}
 
 /** === 接口(interface): 是命名对象类型的另一种方式 === */
 interface Point2 {

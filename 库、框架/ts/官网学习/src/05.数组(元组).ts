@@ -46,3 +46,5 @@ type StringBooleansNumber = [string, ...boolean[], number];
 // 3. 只读元祖类型
 const tuple3: readonly [string, number] = ['1', 2];
 tuple3[0] = '2'; // 无法分配到 "0" ，因为它是只读属性。
+
+$('#test');
