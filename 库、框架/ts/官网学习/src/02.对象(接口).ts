@@ -4,22 +4,24 @@
  * 2. 只读属性: 可以使用 readonly 标识为只读属性(ts 特性) -- 它不会在运行时更改任何行为，但在类型检查(ts 编译)期间无法修改属性
  *             注意: readonly 标识与 es 中的 const 类似, 它只会意味着属性不能重写, 而属性值是一个引用类型的话, 改变属性值的属性是可以的
  */
-interface Person {
-  name: string; // 常规属性, 必须要包含这个属性
-  age?: number; // 可选参数
-  readonly sex: string; // 只读属性
-  readonly resident: { name: string; age: number }; // 只读属性, 改变 resident 内部属性的话是可以的
-}
-const obj: Person = {
-  name: 'shuli',
-  sex: '男',
-  resident: {
+{
+  interface Person {
+    name: string; // 常规属性, 必须要包含这个属性
+    age?: number; // 可选参数
+    readonly sex: string; // 只读属性
+    readonly resident: { name: string; age: number }; // 只读属性, 改变 resident 内部属性的话是可以的
+  }
+  const obj: Person = {
     name: 'shuli',
-    age: 18,
-  },
-};
-obj.resident.age++; // 改变只读属性内部属性是合法的 -- 但不推荐
-// obj.sex = '女'; // error -- 无法分配到 "sex" ，因为它是只读属性。
+    sex: '男',
+    resident: {
+      name: 'shuli',
+      age: 18,
+    },
+  };
+  obj.resident.age++; // 改变只读属性内部属性是合法的 -- 但不推荐
+  obj.sex = '女'; // error -- 无法分配到 "sex" ，因为它是只读属性。
+}
 
 /**
  * 索引签名: 有时您并不提前知道类型属性的所有名称，但您确实知道值的形状。在这些情况下，您可以使用索引签名来描述可能值的类型, 格式为: [propName: number(string)]: type
@@ -38,7 +40,7 @@ interface TestString {
   readonly [prop: string]: number;
   length: number; // ok
   // 因为定义了字符串索引签名, 那么属性类型应该与索引签名类型兼容, 此时可以将索引签名设置为联合类型或any: [prop: string]: number | string;
-  // name: string; // error - 类型“string”的属性“name”不能赋给“string”索引类型“number”。
+  name: string; // error - 类型“string”的属性“name”不能赋给“string”索引类型“number”。
 }
 const testString: TestString = {
   x: 100,

@@ -37,6 +37,11 @@ export type module = number; // 使其变成模块，独立作用域
     console.log(x!.toFixed()); // x! -- 表示 x 变量不会是一个 undefined 或 null
     // Math.PI * shape.radius! ** 2; -- 只需要在表达式后加 ! 表示这个表达式的结果不是 undefined 或 null 即可
   }
+  // 非空断言还可以用来解决[Error-在赋值前使用了变量]
+  let num: number;
+  let Num: Number;
+  Num = num; // Error -- 在赋值前使用了变量“num”。ts(2454)
+  Num = num!; // OK
 }
 
 /**
@@ -113,46 +118,95 @@ export type module = number; // 使其变成模块，独立作用域
 }
 
 /**
- * 特殊类型: 在函数上下文中经常出现, 在其他地方也可以使用
+ * void：从某种程度上说，void 类型像与 any 类型相反，表示没有任何类型
  */
+{
+  // 通常在一个函数没有返回值时，定义为 void：
+  function noop(): void {}
+  // 声明一个 void 类型的变量没有作用，只能为其赋予 undefined 和 null（只在--strictNullChecks未指定时）
+  let a: void = undefined;
 
-// 1. void: 不返回值的函数的返回值 -- 注意: 在 js 中, 不返回任何值的函数将隐式返回 undefined. 但是在 ts 中, void 和 undefined 并不是一回事
-function noop() {
-  return; // 只要函数没有任何 return 语句，或者没有从这些返回语句返回任何显式值，就会被推断为 void 类型
-}
-// 一个具有 void 返回类型的上下文函数类型(type vf = () => void), 在实现时, 可以返回其他的值, 但会被忽略
-// 而一个字面的函数定义有一个 void 的返回类型时, 该函数必须不返回任何东西.
-// 定义类型形式:
-type vf = () => void;
-const noop3: vf = () => {
-  return true; // 这样就可以了
-};
-const v1 = noop3(); // const v1: void -- 类型推断为 void 类型, 做其他操作就会报错了
-// 这样就是字面的函数定义: 此时函数必须不返回任何东西
-function noop2(): void {
-  return true; // error - 不能将类型“boolean”分配给类型“void”。
-}
-
-// 2. object: 是指上任何不是原始值（string、number、bigint、boolean、symbol、null或undefined）的值
-const objTest: object = {}; // 最好不要使用 object 类型, 不明确
-
-// 4. never: 表示永远不会被观察到的值 -- 在返回类型中，这意味着函数抛出异常或终止程序的执行。
-function fail(msg: string): never {
-  throw new Error(msg);
-}
-// never 也在缩小联合类型时表示不可能到达的地方
-function fn222(x: string | number) {
-  if (typeof x === 'string') {
-    // do something
-  } else if (typeof x === 'number') {
-    // do something else
-  } else {
-    x; // has type 'never'! 这里, 不会被到达
+  /**
+   * 一个具有 void 返回类型的上下文函数类型(type vf = () => void), 在实现时, 可以返回其他的值, 但会被忽略
+   * 而一个字面的函数定义有一个 void 的返回类型时, 该函数必须不返回任何东西
+   */
+  // 定义类型形式:
+  type vf = () => void;
+  const noop3: vf = () => {
+    return true; // 返回 true，但是会被忽略类型
+  };
+  const v1 = noop3(); // 即使返回了 true，但是 v1 的类型还是 void，此时无法对 v1 做其他操作
+  // 这样就是字面的函数定义: 此时函数必须不返回任何东西
+  function noop2(): void {
+    return true; // error - 不能将类型“boolean”分配给类型“void”。
   }
 }
 
-// 5. Function: 描述了诸如 bind、call、apply和其他存在于 JS 中所有函数值的属性。它还有一个特殊的属性，即 Function 类型的值总是可以被调用,这些调用返回 any
-//              注意: 通常不要使用这一类型, 如果您需要接受任意函数但不打算调用它，则该类型() => void通常更安全。
+/**
+ * never：表示的是哪些永不存在的值的类型
+ */
+{
+  /**
+   * 值永不存在的两种情况：
+   *    1. 函数执行抛出了 [异常]，那么这个函数永远不存在返回值（因为抛出异常会直接中断程序运行，这使得程序运行不到返回值那一步，即具有不可达的终点，也就永不存在返回了）；
+   *    2. 函数中执行无限循环的代码（死循环），使得程序永远无法运行到函数返回值那一步，永不存在返回。
+   */
+  // 异常
+  function err(msg: string): never {
+    throw new Error(msg); // OK
+  }
+  // 死循环
+  function loopForever(): never {
+    while (true) {} // OK
+  }
+
+  // never 类型同 null(只在--strictNullChecks未指定时) 和 undefined(只在--strictNullChecks未指定时) 一样，也是任何类型的子类型，也可以赋值给任何类型
+  try {
+    let ne: never = (() => {
+      throw new Error('异常');
+    })();
+    let n: number = ne; // never 类型的值可以赋值给 number 类型
+  } catch {}
+
+  // 注意：使用 never 可以避免出现新增了联合类型没有对应的实现，目的就是写出类型绝对安全的代码。
+  type Foo = string | number | boolean;
+
+  function controlFlowAnalysisWithNever(foo: Foo) {
+    if (typeof foo === 'string') {
+      // 这里 foo 被收窄为 string 类型
+    } else if (typeof foo === 'number') {
+      // 这里 foo 被收窄为 number 类型
+    } else {
+      // foo 在这里是 never -- 穷举所有可能性，当 Foo 新增了类型后，就会抛出错误
+      const check: never = foo;
+    }
+  }
+}
+
+/**
+ * Number、String、Boolean、Symbol：原始类型的包装对象，原始类型(number、string...)兼容你对应的对象类型，反过来包装对象不兼容原始类型
+ */
+{
+  let num: number;
+  let Num: Number;
+  Num = num!; // ok
+  num = Num; // ts(2322)报错
+}
+
+/**
+ * Function: 描述了诸如 bind、call、apply和其他存在于 JS 中所有函数值的属性。它还有一个特殊的属性，即 Function 类型的值总是可以被调用,这些调用返回 any
+ */
+// 注意: 通常不要使用这一类型, 如果您需要接受任意函数但不打算调用它，则该类型() => void通常更安全。
 function doSomething22(f: Function) {
   return f(1, 2, 3);
 }
+
+/**
+ * object、Object、{}
+ *  - Object：代表所有拥有 toString、hasOwnProperty 方法的类型，所以所有原始类型、非原始类型都可以赋给 Object。在严格模式下，null 和 undefined 类型也不能赋给 Object。
+ *  - object：代表的是所有非原始类型，不能把 number、string、boolean、symbol等 原始类型赋值给 object。在严格模式下，null 和 undefined 类型也不能赋给 object。
+ *  - {}：和大 Object 一样，也是表示原始类型和非原始类型的集合，并且在严格模式下，null 和 undefined 也不能赋给 {}
+ *
+ * 综上结论：{}、大 Object 是比小 object 更宽泛的类型（least specific），{} 和大 Object 可以互相代替，用来表示原始类型（null、undefined 除外）和非原始类型；而小 object 则表示非原始类型。
+ * 参考：https://juejin.cn/post/7018805943710253086#heading-36
+ */
