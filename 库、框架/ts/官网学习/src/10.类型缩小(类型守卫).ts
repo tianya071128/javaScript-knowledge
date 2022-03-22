@@ -1,5 +1,5 @@
 /**
- * 类型缩小: TypeScript 遵循我们的程序可以采用的可能执行路径来分析给定位置的值的最具体的可能类型。它着眼于这些特殊检查（称为类型保护）和分配，将类型精炼为比声明的更具体的类型的过程称为缩小。
+ * 类型缩小(类型守卫): TypeScript 遵循我们的程序可以采用的可能执行路径来分析给定位置的值的最具体的可能类型。它着眼于这些特殊检查（称为类型保护）和分配，将类型精炼为比声明的更具体的类型的过程称为缩小。
  *          简单理解, 也就是当变量类型为声明类型(具有多个类型可能性), 此时可以通过一些方式来缩小这个变量的类型范围, 用来给定位置的值更具体的可能类型
  *          记住, 就是通过一些检测手段, 将类型缩小为更具体的类型
  *
@@ -97,6 +97,19 @@ function example() {
 
 // 8. 类型谓词: 上述都是使用 JS 现有的结构来缩小类型, ... https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates
 
-// 9. 受歧视的 unions(联合类型) ...
+// 9. never 类型 和 穷尽性检查 ...
+type Shape = number | string;
 
-// 10. never 类型 和 穷尽性检查 ...
+function getArea(shape: Shape) {
+  switch (typeof shape) {
+    case 'number':
+      return Math.PI * shape ** 2;
+    case 'string':
+      return shape;
+    default:
+      // 只要联合类型还是 number | string，就不会走到这里来。
+      // 如果向联合类型中添加新成员就会导致错误
+      const _exhaustiveCheck: never = shape;
+      return _exhaustiveCheck;
+  }
+}
