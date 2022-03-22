@@ -1,6 +1,7 @@
 import { login } from '@/api';
 import { Outlet } from 'react-router-dom';
 import MyMenu from './components/MyMenu';
+import MyNav from './components/MyNav';
 import './index.scss';
 
 export default function Layout() {
@@ -14,7 +15,8 @@ export default function Layout() {
       {/* 左侧菜单区 */}
       <MyMenu />
       <div style={{ marginLeft: '200px' }}>
-        <div onClick={handlerLogin}>右侧内容区</div>
+        {/* 右侧 nav */}
+        <MyNav />
         <Outlet />
       </div>
     </div>

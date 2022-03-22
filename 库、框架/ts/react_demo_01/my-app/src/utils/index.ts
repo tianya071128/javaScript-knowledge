@@ -35,3 +35,45 @@ export function signLogin() {
   // 改变 recoil 中的值
   setRecoil(user_info_recoil, null);
 }
+
+interface ThrottleOptions {
+  /** 是否立即调用一次 */
+  immediate?: boolean;
+  /** 节流时间：ms */
+  time: number;
+}
+
+/**
+ * 节流
+ * @param fn 需要节流函数
+ * @param time 节流时间 ms
+ * @param options 配置
+ * @returns 节流处理后的函数
+ */
+export function throttle<T extends (...args: any) => any>(
+  fn: T,
+  options: number | ThrottleOptions = 300
+) {
+  if (typeof options === 'number') {
+    options = {
+      time: options,
+    };
+  }
+
+  let flag = false; // 限制执行阀门
+  let time = options.time;
+  // 立即调用一次
+  if (options.immediate) {
+    fn();
+  }
+
+  return (...args: Parameters<T>) => {
+    const params = args; // 获取最新的参数
+    if (flag) return;
+    flag = true;
+    setTimeout(() => {
+      flag = false;
+      fn(...params);
+    }, time);
+  };
+}
