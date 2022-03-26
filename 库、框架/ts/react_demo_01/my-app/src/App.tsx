@@ -14,7 +14,6 @@ function routeComponentHot(
   Component: _Route['element'],
   { beforeEnter }: _Route
 ) {
-  console.log('123');
   return !!beforeEnter ? beforeEnter(Component) : Component;
 }
 

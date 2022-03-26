@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "start",
+      "path": "react_demo_01/my-app/",
+      "problemMatcher": [],
+      "label": "npm: start - react_demo_01/my-app",
+      "detail": "ts + react"
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "path": "react_demo_01/my-app/server/",
+      "problemMatcher": [],
+      "label": "npm: dev - react_demo_01/my-app/server",
+      "detail": "node dev"
+    }
+  ]
+}

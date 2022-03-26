@@ -1,5 +1,8 @@
 ._layout {
-  width: 100vw;
   min-height: 100vh;
   position: relative;
+  .layout_content {
+    transition: margin-left 0.3s cubic-bezier(0.2, 0, 0, 1) 0s;
+    height: 200vh;
+  }
 }

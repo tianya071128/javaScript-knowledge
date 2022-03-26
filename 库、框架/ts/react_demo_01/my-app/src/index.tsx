@@ -5,6 +5,7 @@ import RecoilNexus from 'recoil-nexus';
 import App from './App';
 
 import '@/style/index.scss';
+import '@/style/animation.scss';
 
 ReactDOM.render(
   <RecoilRoot>

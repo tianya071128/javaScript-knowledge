@@ -19,8 +19,6 @@ export interface RouteInfo {
   activeMenu?: string;
   /** 组件 */
   element?: string;
-  /** 可扩展属性 */
-  [prop: string]: any;
 }
 export interface LoginResult {
   token: string;

@@ -2,6 +2,7 @@ import { atom, selector } from 'recoil';
 import { getUserInfo } from '@/utils/localStore';
 import type { LoginResult, RouteInfo } from '@/api';
 import { _Route } from '@/router';
+import React from 'react';
 
 /**
  * 登录信息的操作
@@ -13,12 +14,16 @@ export const user_info_recoil = atom<LoginResult['userInfo'] | null>({
 });
 
 // 对动态路由部分进行操作
-function getElement(elementPath?: string, path?: string) {
+function getElement(elementPath?: string) {
+  // 注意：路由组件因为是懒加载，应该存在特定其他页面的标识
+  // 因为 webpack 打包时对待动态表达式时，会加载潜在的请求的每个模块
+  const Element = React.lazy(
+    () => import(`@/views/${elementPath}/routeIndex.tsx`)
+  );
   return (
-    <div>
-      测试一下{elementPath}
-      {path}
-    </div>
+    <React.Suspense fallback={<>...</>}>
+      <Element />
+    </React.Suspense>
   );
 }
 // 根据登录信息加工动态路由部分
@@ -55,7 +60,7 @@ export const dynamic_routes_recoil = selector<_Route[]>({
           // 此时为点击子菜单
           _routes.push({
             path: route.path.replace(/^\//, ''),
-            element: getElement(route.element, route.path),
+            element: getElement(route.element),
             meta,
           });
         } else if (Array.isArray(route.children)) {

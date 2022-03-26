@@ -2,10 +2,20 @@
   height: 100vh;
   background: #001529;
   transition: all 0.2s;
-  position: absolute;
+  position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   z-index: 1001;
   overflow: auto;
+}
+.menu_mask_bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  opacity: 0.5;
+  background: #000;
 }

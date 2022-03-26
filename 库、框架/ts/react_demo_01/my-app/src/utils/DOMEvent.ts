@@ -23,7 +23,7 @@ export function onResize(fn: ResizeFn, options?: ResizeOptions): () => void {
         resizeSet.forEach((fnVal) =>
           fnVal(document.documentElement.clientWidth)
         );
-      }, 500))
+      }, 200))
     );
   }
   resizeSet.add(fn);

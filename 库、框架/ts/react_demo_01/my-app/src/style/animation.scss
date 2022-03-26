@@ -1,0 +1,15 @@
+/** 动画 - 遮罩层 */
+.mask_animation-enter {
+  opacity: 0;
+}
+.mask_animation-enter-active {
+  opacity: 0.5;
+  transition: opacity 0.3s;
+}
+.mask_animation-exit {
+  opacity: 0.5;
+}
+.mask_animation-exit-active {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
