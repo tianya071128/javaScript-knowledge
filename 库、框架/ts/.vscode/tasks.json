@@ -16,6 +16,15 @@
       "problemMatcher": [],
       "label": "npm: dev - react_demo_01/my-app/server",
       "detail": "node dev"
+    },
+    {
+      "type": "npm",
+      "script": "build",
+      "path": "react_demo_01/my-app/",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "npm: build - react_demo_01/my-app",
+      "detail": "react build"
     }
   ]
 }

@@ -5,7 +5,7 @@ import { cache } from '@/utils';
 import { MENU_WIDTH_MAP } from '@/utils/constVal';
 import { banPageScroll } from '@/utils/DOMOperation';
 import { type SidebarStatus } from '@/utils/localStore';
-import { MailOutlined, PieChartOutlined } from '@ant-design/icons';
+
 import { Menu } from 'antd';
 import type { MenuInfo } from 'rc-menu/lib/interface';
 import {
@@ -19,6 +19,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { CSSTransition } from 'react-transition-group';
 import { useRecoilState, useRecoilValue } from 'recoil';
+import ChildMenu from './ChildMenu';
 import './index.scss';
 
 /**
@@ -49,34 +50,6 @@ const getMenuRouteInfo = cache(function (id: string, menus: Menus[]) {
     }
   }
 });
-
-/**
- * 递归渲染子菜单
- * tip：还可以考虑下循环引用的问题
- */
-function ChildMenu(menus: Menus[]) {
-  return (
-    <>
-      {menus.map(({ title, children, id }) => {
-        if (Array.isArray(children)) {
-          // 嵌套菜单渲染
-          return (
-            <Menu.SubMenu key={id} icon={<MailOutlined />} title={title}>
-              {ChildMenu(children)}
-            </Menu.SubMenu>
-          );
-        } else {
-          // 单层菜单渲染
-          return (
-            <Menu.Item key={id} icon={<PieChartOutlined />}>
-              {title}
-            </Menu.Item>
-          );
-        }
-      })}
-    </>
-  );
-}
 
 /**
  * 加载菜单选中项
@@ -196,6 +169,7 @@ export default function MyMenu() {
           onOpenChange={onOpenChange}
           onClick={handlerRoute}>
           {ChildMenu(menus)}
+          {/* <ChildMenu menus={} /> */}
         </Menu>
       </div>
       {/* 嵌入式菜单 - 遮罩层 */}

@@ -21,6 +21,12 @@
   };
   obj.resident.age++; // 改变只读属性内部属性是合法的 -- 但不推荐
   obj.sex = '女'; // error -- 无法分配到 "sex" ，因为它是只读属性。
+  interface Test {
+    string: number;
+  }
+  let aa: Test = {
+    aaafd: 23,
+  };
 }
 
 /**

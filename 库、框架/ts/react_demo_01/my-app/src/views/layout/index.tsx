@@ -1,4 +1,3 @@
-import ErrorBoundary from '@/components/ErrorBoundary';
 import { sidebar_status_recoil } from '@/store';
 import { MENU_WIDTH_MAP } from '@/utils/constVal';
 import { useMemo } from 'react';
@@ -20,9 +19,7 @@ export default function Layout() {
       <div className='layout_content' style={{ marginLeft }}>
         {/* 右侧 nav */}
         <MyNav />
-        <ErrorBoundary>
-          <Outlet />
-        </ErrorBoundary>
+        <Outlet />
       </div>
     </div>
   );

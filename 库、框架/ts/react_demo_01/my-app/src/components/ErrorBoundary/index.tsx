@@ -1,7 +1,12 @@
 import React from 'react';
+import DevHandlerError from './DevHandlerError';
+import ProdHandlerError from './ProdHandlerError';
+import './index.scss';
 
 interface ComponentState {
-  error?: Error;
+  error?: Error & {
+    code?: string;
+  };
 }
 
 interface ComponentProps {
@@ -26,7 +31,12 @@ export default class ErrorBoundary extends React.Component<
 
   render() {
     if (this.state.error) {
-      return <p>{this.state.error?.message}</p>;
+      const ErrorComponent =
+        process.env.NODE_ENV === 'development'
+          ? DevHandlerError
+          : ProdHandlerError;
+
+      return <ErrorComponent error={this.state.error} />;
     }
 
     return this.props.children;
