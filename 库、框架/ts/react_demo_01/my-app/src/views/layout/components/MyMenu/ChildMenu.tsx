@@ -1,8 +1,9 @@
 import { Menus } from '@/store/user';
-import { MailOutlined, HeartTwoTone } from '@ant-design/icons';
-import * as Icons from '@ant-design/icons';
+import { HeartTwoTone } from '@ant-design/icons';
+// import * as Icons from '@ant-design/icons';
+import Icon from '@ant-design/icons';
 import { Menu } from 'antd';
-console.log(Icons.default);
+import MyIcons from '@/icons';
 
 /**
  * 递归渲染子菜单
@@ -16,7 +17,16 @@ export default function ChildMenu(menus: Menus[]) {
         if (Array.isArray(children)) {
           // 嵌套菜单渲染
           return (
-            <Menu.SubMenu key={id} icon={<MailOutlined />} title={title}>
+            <Menu.SubMenu
+              key={id}
+              icon={
+                <Icon
+                  component={() => {
+                    return MyIcons({ iconClass: 'bug' });
+                  }}
+                />
+              }
+              title={title}>
               {ChildMenu(children)}
             </Menu.SubMenu>
           );

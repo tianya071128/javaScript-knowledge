@@ -19,4 +19,5 @@ declare module 'react-router-dom' {
     meta?: RouteMeta;
   }
 }
+
 /** 扩展第三方库的类型 end */

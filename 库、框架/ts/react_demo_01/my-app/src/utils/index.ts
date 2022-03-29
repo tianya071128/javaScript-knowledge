@@ -42,7 +42,6 @@ interface ThrottleOptions {
   /** 节流时间：ms */
   time: number;
 }
-
 /**
  * 节流
  * @param fn 需要节流函数
@@ -76,4 +75,20 @@ export function throttle<T extends (...args: any) => any>(
       fn(...params);
     }, time);
   };
+}
+
+/**
+ * 删除指定的属性返回对象副本
+ * @param obj
+ * @param props
+ */
+export function omitProp<
+  T extends { [props: string]: any },
+  K extends Array<keyof T>
+>(obj: T, props: K): Omit<T, TulpType<K>> {
+  const _obj = { ...obj };
+  for (const prop of props) {
+    delete _obj[prop];
+  }
+  return _obj;
 }

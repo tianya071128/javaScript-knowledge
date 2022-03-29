@@ -23,7 +23,7 @@
     },
     // 开启装饰器功能
     "experimentalDecorators": true,
-    "types": ["node"],
+    "types": ["node", "webpack-env"],
     "downlevelIteration": true
   },
   "include": ["src", "declarations"],
