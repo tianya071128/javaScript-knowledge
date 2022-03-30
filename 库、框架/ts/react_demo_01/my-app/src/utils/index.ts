@@ -11,7 +11,7 @@ export function cache<T extends (...args: any) => any>(fn: T) {
   let cacheResult = new Map<string, any>();
   // 封装缓存函数
   const f = function (...args: Parameters<T>): ReturnType<T> {
-    const identifier = [...args].join('_'); // 缓存标识符 -- 简单标识
+    const identifier = [...args].map((item) => JSON.stringify(item)).join('_'); // 缓存标识符 -- 简单标识
     if (cacheResult.has(identifier)) {
       // 存在缓存结果
       return cacheResult.get(identifier);

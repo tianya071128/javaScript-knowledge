@@ -1,9 +1,24 @@
 import { omitProp } from '@/utils';
 import { isExternal } from '@/utils/validate';
 
+import './index.scss';
+
+export let svgNames: string[] = [];
+
+export /** 自动导入所有的 icons 图片 */
 const req = require.context('./svg', false, /\.svg$/);
-const requireAll = (requireContext: typeof req) =>
-  requireContext.keys().map(requireContext);
+const requireAll = (requireContext: typeof req) => {
+  const svgPaths = requireContext.keys();
+  svgNames = svgPaths
+    .map((path) => {
+      const result = /([^/]+)\.svg$/g.exec(path);
+      return (result && result[1]) || '';
+    })
+    .filter((path) => !!path);
+
+  return svgPaths.map(requireContext);
+};
+
 requireAll(req);
 
 type Props = {
@@ -25,13 +40,15 @@ export default function MyIcons(props: Props) {
         mask: `url(${props.iconClass}) no-repeat 50% 50%`,
         // '-webkit-mask': `url(${props.iconClass}) no-repeat 50% 50%`,
       },
-      className: 'svg-external-icon svg-icon',
+      className: 'sl_svg-external-icon sl_svg-icon',
     };
     return <div {..._props} />;
   } else {
     const _props = {
       ...omitProp(props, ['iconClass', 'className']),
-      className: props.className ? 'svg-icon ' + props.className : 'svg-icon',
+      className: props.className
+        ? 'sl_svg-icon ' + props.className
+        : 'sl_svg-icon',
     };
     return (
       <svg aria-hidden='true' {..._props}>

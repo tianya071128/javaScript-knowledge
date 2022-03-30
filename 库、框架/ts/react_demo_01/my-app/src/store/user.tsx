@@ -95,38 +95,3 @@ export const dynamic_routes_recoil = selector<_Route[]>({
     return _routes;
   },
 });
-
-export type Menus = Omit<RouteInfo, 'element'>;
-// 获取菜单数据
-export const menus_recoil = selector<Menus[]>({
-  key: 'menus_recoil',
-  get({ get }) {
-    const userInfo = get(user_info_recoil);
-    if (
-      !userInfo ||
-      !Array.isArray(userInfo.routeList) ||
-      userInfo.routeList.length === 0
-    )
-      return [];
-
-    const routeList = JSON.parse(
-      JSON.stringify(userInfo.routeList)
-    ) as RouteInfo[];
-    const _menus: Menus[] = [];
-    const resolveMenu = function (menus: RouteInfo[], parent: Menus[]) {
-      for (const menu of menus) {
-        if (!menu.hidden) {
-          delete menu.element;
-          parent.push(menu);
-          if (Array.isArray(menu.children)) {
-            resolveMenu(menu.children, (menu.children = []));
-          }
-        }
-      }
-    };
-
-    resolveMenu(routeList, _menus);
-
-    return _menus;
-  },
-});

@@ -5,4 +5,5 @@ declare module '*.svg' {
   export default src;
 }
 
+// 自定义全局工具方法 -- 获取元祖项的类型
 type TulpType<T extends Array<any>> = T extends (infer P)[] ? P : never;
