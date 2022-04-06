@@ -1,24 +1,7 @@
-import * as Icons from '@ant-design/icons';
-import Icon from '@ant-design/icons';
 import { Menu } from 'antd';
-import MyIcons, { svgNames } from '@/icons';
+import MyIcons from '@/icons';
 import { Menus } from './utils';
-
-// 获取图标方法
-function getIcon(icon?: string) {
-  let AntdIcons: typeof Icons.CloudSyncOutlined;
-  if (!icon) {
-    // 返回默认图标
-    return () => <Icons.CloudSyncOutlined />;
-  } else if ((AntdIcons = (Icons as any)[icon])) {
-    return () => <AntdIcons />;
-  } else if (svgNames.includes(icon)) {
-    return () => <MyIcons iconClass={icon} />;
-  } else {
-    // 返回默认图标
-    return () => <Icons.CloudSyncOutlined />;
-  }
-}
+import { MENU_DEFAULT_ICON } from '@/utils/constVal';
 
 /**
  * 递归渲染子菜单
@@ -28,13 +11,13 @@ function getIcon(icon?: string) {
 export default function ChildMenu(menus: Menus[]) {
   return (
     <>
-      {menus.map(({ title, children, id, icon }) => {
+      {menus.map(({ title, children, id, icon, hidden }) => {
         if (Array.isArray(children)) {
           // 嵌套菜单渲染
           return (
             <Menu.SubMenu
               key={id}
-              icon={<Icon component={getIcon(icon)} />}
+              icon={<MyIcons iconClass={icon || MENU_DEFAULT_ICON} />}
               title={title}>
               {ChildMenu(children)}
             </Menu.SubMenu>
@@ -42,9 +25,13 @@ export default function ChildMenu(menus: Menus[]) {
         } else {
           // 单层菜单渲染
           return (
-            <Menu.Item key={id} icon={<Icon component={getIcon(icon)} />}>
-              {title}
-            </Menu.Item>
+            !hidden && (
+              <Menu.Item
+                key={id}
+                icon={<MyIcons iconClass={icon || MENU_DEFAULT_ICON} />}>
+                {title}
+              </Menu.Item>
+            )
           );
         }
       })}

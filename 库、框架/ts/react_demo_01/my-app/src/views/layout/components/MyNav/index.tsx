@@ -2,6 +2,7 @@ import Amburger from './Amburger';
 import NavBreadcrumb from './NavBreadcrumb';
 
 import './index.scss';
+import SearchMenu from './SearchMenu';
 
 export default function MyNav() {
   return (
@@ -9,6 +10,9 @@ export default function MyNav() {
       <div className='nav_left'>
         <Amburger />
         <NavBreadcrumb />
+      </div>
+      <div className='nav_right'>
+        <SearchMenu />
       </div>
     </div>
   );

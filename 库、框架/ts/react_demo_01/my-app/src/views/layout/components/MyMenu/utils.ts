@@ -38,12 +38,10 @@ export const getMenus = function () {
   const _menus: Menus[] = [];
   const resolveMenu = function (menus: RouteInfo[], parent: Menus[]) {
     for (const menu of menus) {
-      if (!menu.hidden) {
-        delete menu.element;
-        parent.push(menu);
-        if (Array.isArray(menu.children)) {
-          resolveMenu(menu.children, (menu.children = []));
-        }
+      delete menu.element;
+      parent.push(menu);
+      if (Array.isArray(menu.children)) {
+        resolveMenu(menu.children, (menu.children = []));
       }
     }
   };
@@ -63,7 +61,7 @@ export const getMenuRouteInfo = cache(function (
   let result: Menus[] | undefined;
   const recursion = function (menus: Menus[], routes: Menus[]) {
     for (const menu of menus) {
-      let copyRoutes = routes.slice(0);
+      let copyRoutes = routes.slice();
       copyRoutes.push(menu);
       if (id === menu.id) {
         // 取得结果，结束递归
@@ -92,7 +90,10 @@ export function useGetRouteMenu() {
   // 当前路由对应的注册路由信息
   const match = useCustomRoutes();
   const currentRoute = match && match[match.length - 1].route.meta;
-  let id = currentRoute?.activeMenu || currentRoute?.id; // 选中菜单的 id;
+  /**
+   * 选中路由对应的菜单 id
+   */
+  let id = currentRoute?.id;
 
   return useMemo(() => {
     return id ? getMenuRouteInfo(id) || [] : [];

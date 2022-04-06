@@ -1,3 +1,5 @@
+import * as Icons from '@ant-design/icons';
+import Icon from '@ant-design/icons';
 import { omitProp } from '@/utils';
 import { isExternal } from '@/utils/validate';
 
@@ -5,7 +7,7 @@ import './index.scss';
 
 export let svgNames: string[] = [];
 
-export /** 自动导入所有的 icons 图片 */
+/** 自动导入所有的 icons 图片 */
 const req = require.context('./svg', false, /\.svg$/);
 const requireAll = (requireContext: typeof req) => {
   const svgPaths = requireContext.keys();
@@ -21,39 +23,39 @@ const requireAll = (requireContext: typeof req) => {
 
 requireAll(req);
 
-type Props = {
-  [eventName in keyof WindowEventMap]?: (
-    this: Window,
-    ev: WindowEventMap[eventName]
-  ) => any;
-} & {
+type Props = Parameters<typeof Icon>[0] & {
   iconClass: string;
-  className?: string;
 };
 
 export default function MyIcons(props: Props) {
-  const hasExternal = isExternal(props.iconClass);
+  const { iconClass } = props;
+  const hasExternal = isExternal(iconClass);
+  let getIcon: Parameters<typeof Icon>[0]['component'];
+  let AntdIcons: typeof Icons.CloudSyncOutlined;
   if (hasExternal) {
+    // 网络图片
     const _props = {
-      ...omitProp(props, ['iconClass', 'className']),
       style: {
-        mask: `url(${props.iconClass}) no-repeat 50% 50%`,
-        // '-webkit-mask': `url(${props.iconClass}) no-repeat 50% 50%`,
+        mask: `url(${iconClass}) no-repeat 50% 50%`,
+        // '-webkit-mask': `url(${iconClass}) no-repeat 50% 50%`,
       },
       className: 'sl_svg-external-icon sl_svg-icon',
     };
-    return <div {..._props} />;
+    getIcon = () => <div {..._props} />;
+  } else if ((AntdIcons = (Icons as any)[iconClass])) {
+    // 使用 antd 图标
+    getIcon = () => <AntdIcons />;
   } else {
-    const _props = {
-      ...omitProp(props, ['iconClass', 'className']),
-      className: props.className
-        ? 'sl_svg-icon ' + props.className
-        : 'sl_svg-icon',
-    };
-    return (
-      <svg aria-hidden='true' {..._props}>
-        <use xlinkHref={`#icon-${props.iconClass}`} />
+    // 自定义图标
+    getIcon = () => (
+      <svg aria-hidden='true' className='sl_svg-icon'>
+        <use xlinkHref={`#icon-${iconClass}`} />
       </svg>
     );
+    console.assert(
+      svgNames.includes(iconClass) || process.env.NODE_ENV !== 'development',
+      `没有对应的图标名“${iconClass}”，请检查`
+    );
   }
+  return <Icon component={getIcon} {...omitProp(props, ['iconClass'])} />;
 }

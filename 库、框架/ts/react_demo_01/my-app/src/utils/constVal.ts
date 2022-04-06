@@ -10,3 +10,5 @@ export const MENU_WIDTH_MAP = new Map([
   [3, 60],
   [4, 200],
 ]);
+/** 菜单默认图标 - 如果不提供的话 */
+export const MENU_DEFAULT_ICON = 'CloudSyncOutlined';

@@ -1,7 +1,7 @@
 import { Breadcrumb } from 'antd';
 import { getMenus, useGetRouteMenu } from '../MyMenu/utils';
 import { Link } from 'react-router-dom';
-import { HomeOutlined } from '@ant-design/icons';
+import MyIcons from '@/icons';
 
 export default function NavBreadcrumb() {
   const menuRoutes = useGetRouteMenu();
@@ -16,16 +16,20 @@ export default function NavBreadcrumb() {
   }
 
   return (
-    <Breadcrumb>
+    <Breadcrumb style={{ marginLeft: '10px' }}>
       {menuRoutes.map(({ title, path, id }, i) => {
         return (
           <Breadcrumb.Item key={id}>
             {path && i !== menuRoutes.length - 1 ? (
               <Link to={path}>
-                {homeMenu.id === id ? <HomeOutlined /> : title}
+                {homeMenu.id === id ? (
+                  <MyIcons iconClass='HomeOutlined' />
+                ) : (
+                  title
+                )}
               </Link>
             ) : homeMenu.id === id ? (
-              <HomeOutlined />
+              <MyIcons iconClass='HomeOutlined' />
             ) : (
               title
             )}

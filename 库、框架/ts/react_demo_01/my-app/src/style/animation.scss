@@ -13,3 +13,19 @@
   opacity: 0;
   transition: opacity 0.3s;
 }
+
+/** 动画 - 宽度 */
+.width_animation-enter {
+  width: 0;
+}
+.width_animation-enter-active {
+  width: 200px;
+  transition: width 0.3s;
+}
+.width_animation-exit {
+  width: 200px;
+}
+.width_animation-exit-active {
+  width: 0;
+  transition: width 0.3s;
+}
