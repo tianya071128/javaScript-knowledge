@@ -52,6 +52,35 @@ export const getMenus = function () {
 };
 
 /**
+ * 根据菜单信息获取到所有的路径，以供给搜索菜单时使用
+ */
+export interface MenuRoutes {
+  /** 跳转路径 */
+  path: string;
+  /** 菜单名称 */
+  title: string;
+}
+export const getMenuRoutes = function () {
+  const menuRoutes: MenuRoutes[] = [];
+  const resolveMenuRoute = function (mens: Menus[], startTitle = '') {
+    for (const men of mens) {
+      if (typeof men.path === 'string') {
+        // 此时为跳转路径
+        menuRoutes.push({
+          path: men.path,
+          title: startTitle + men.title,
+        });
+      } else if (Array.isArray(men.children)) {
+        resolveMenuRoute(men.children, `${startTitle}${men.title} > `);
+      }
+    }
+  };
+
+  resolveMenuRoute(getMenus());
+  return menuRoutes;
+};
+
+/**
  * 根据 id 查找菜单列表
  */
 export const getMenuRouteInfo = cache(function (

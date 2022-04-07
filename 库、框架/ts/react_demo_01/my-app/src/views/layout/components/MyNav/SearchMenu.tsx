@@ -2,22 +2,39 @@ import MyIcons from '@/icons';
 import { Select } from 'antd';
 import { useMemo } from 'react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CSSTransition } from 'react-transition-group';
+import { getMenuRoutes, type MenuRoutes } from '../MyMenu/utils';
 
 export default function SearchMenu() {
   const [isSearch, setIsSearch] = useState(false); // 搜索框是否显示
   const [isSearchIcon, setIsSearchIcon] = useState(true); // 搜索图标是否显示
-  const [value, setValue] = useState<string>();
+  const [notFoundContent, setNotFoundContent] = useState<boolean>(false);
+  const menuRoutes = useMemo(() => getMenuRoutes(), []);
+  const [options, setOptions] = useState<JSX.Element[]>([]);
+  const navigate = useNavigate();
 
-  const switchSearch = () => {
-    setIsSearch(true);
+  const handleSearch = (value: string) => {
+    if (value && value.trim()) {
+      const filterMenuRoutes = menuRoutes.filter(({ title }) =>
+        title.includes(value)
+      );
+      setOptions(
+        filterMenuRoutes.map(({ title, path }) => (
+          <Select.Option key={path}>{title}</Select.Option>
+        ))
+      );
+      setNotFoundContent(true);
+    } else {
+      setOptions([]);
+      setNotFoundContent(false);
+    }
   };
 
-  const options = useMemo(() => {
-    console.log(value);
-
-    return ['测试'].map((d) => <Select.Option key={d}>{d}</Select.Option>);
-  }, [value]);
+  const handleSelect = (path: string) => {
+    navigate(path);
+    setIsSearch(false);
+  };
 
   return (
     <div>
@@ -25,7 +42,7 @@ export default function SearchMenu() {
         <MyIcons
           iconClass='SearchOutlined'
           style={{ fontSize: '22px' }}
-          onClick={switchSearch}
+          onClick={() => setIsSearch(true)}
         />
       )}
       <CSSTransition
@@ -36,12 +53,12 @@ export default function SearchMenu() {
         onEnter={() => setIsSearchIcon(false)}
         onExited={() => setIsSearchIcon(true)}>
         {
-          <div>
+          <div style={{ overflowX: 'hidden' }}>
             <Select
               /** 使单选模式可搜索 */
               showSearch
               /** 指定当前选中的条目，多选时为一个数组。（value 数组引用未变化时，Select 不会更新） */
-              value={value}
+              // value={value}
               placeholder='搜索菜单'
               style={{ width: 200 }}
               /** 默认获取焦点 */
@@ -53,9 +70,13 @@ export default function SearchMenu() {
               /** 是否根据输入项进行筛选。当其为一个函数时，会接收 inputValue option 两个参数，当 option 符合筛选条件时，应返回 true，反之则返回 false */
               filterOption={false}
               /** 当下拉列表为空时显示的内容 */
-              notFoundContent='没有找到菜单'
+              notFoundContent={notFoundContent ? '没有找到菜单' : null}
               /** 失去焦点 */
-              onBlur={() => setIsSearch(false)}>
+              onBlur={() => setIsSearch(false)}
+              /** 文本框值变化时回调 */
+              onSearch={handleSearch}
+              /** 被选中时调用，参数为选中项的 value (或 key) 值 */
+              onSelect={handleSelect}>
               {options}
             </Select>
           </div>

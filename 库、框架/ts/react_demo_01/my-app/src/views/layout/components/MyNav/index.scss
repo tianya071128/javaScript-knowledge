@@ -22,5 +22,8 @@
   .nav_right {
     display: flex;
     align-items: center;
+    .full_screen {
+      margin-left: 15px;
+    }
   }
 }
