@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CSSTransition } from 'react-transition-group';
-import { getMenuRoutes, type MenuRoutes } from '../MyMenu/utils';
+import { getMenuRoutes } from '../MyMenu/utils';
 
 export default function SearchMenu() {
   const [isSearch, setIsSearch] = useState(false); // 搜索框是否显示
@@ -37,7 +37,7 @@ export default function SearchMenu() {
   };
 
   return (
-    <div>
+    <div className='nav_item'>
       {isSearchIcon && (
         <MyIcons
           iconClass='SearchOutlined'

@@ -4,6 +4,7 @@ import NavBreadcrumb from './NavBreadcrumb';
 import './index.scss';
 import SearchMenu from './SearchMenu';
 import Fullscreen from './Fullscreen';
+import Language from './Language';
 
 export default function MyNav() {
   return (
@@ -19,6 +20,8 @@ export default function MyNav() {
         <SearchMenu />
         {/* 全屏 */}
         <Fullscreen />
+        {/* 国际化 */}
+        <Language />
       </div>
     </div>
   );
