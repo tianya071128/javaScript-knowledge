@@ -1,0 +1,30 @@
+{
+  "name": "koa_demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=dev nodemon --harmony ./src/app",
+    "start": "cross-env NODE_ENV=pro node --harmony ./src/app"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "koa": "^2.13.1"
+  },
+  "dependencies": {
+    "@hapi/joi": "^17.1.1",
+    "@koa/cors": "^3.1.0",
+    "formidable": "^1.2.2",
+    "jsonwebtoken": "^8.5.1",
+    "koa-bodyparser": "^4.3.0",
+    "koa-compose": "^4.1.0",
+    "koa-router": "^10.1.1",
+    "koa-static-cache": "^5.1.4",
+    "log4js": "^6.3.0",
+    "mongoose": "^6.0.7",
+    "sha1": "^1.1.1"
+  }
+}
