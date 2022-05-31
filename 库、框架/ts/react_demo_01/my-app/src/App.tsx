@@ -1,5 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
 import { type _Route, useRouteConfig } from '@/router';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { router_list_recoil, user_info_recoil } from './store/user';
+import { useEffect } from 'react';
+import { getRouterInfo } from './api';
 
 /** 类型声明 */
 interface RouteProp {
@@ -44,7 +48,26 @@ function renderRoute(routes: _Route[]) {
 
 function App() {
   const router = useRouteConfig();
+  const [routerList, setRouterList] = useRecoilState(router_list_recoil);
+  const userInfo = useRecoilValue(user_info_recoil);
 
+  useEffect(() => {
+    const getRouterList = async () => {
+      const data = await getRouterInfo();
+      setRouterList(data);
+    };
+
+    if (userInfo && !routerList) {
+      // 此时去获取路由列表
+      getRouterList();
+    }
+  }, [userInfo, routerList, setRouterList]);
+
+  /** 在登录情况下，接口获取下路由 */
+  if (userInfo && !routerList) {
+    // 此时获取路由信息中
+    return null;
+  }
   return (
     <>
       <Routes>{renderRoute(router.routes)}</Routes>

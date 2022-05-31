@@ -31,6 +31,7 @@ function resolveReuqestError(
     if (!Array.isArray(customCode)) customCode = [customCode];
     if (customCode.includes(String(code))) return Promise.reject({ msg, code });
   }
+
   // 根据 code 不同来执行不同的策略
   switch (code) {
     case 100000:

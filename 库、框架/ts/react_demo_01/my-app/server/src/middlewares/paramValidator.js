@@ -50,7 +50,6 @@ module.exports = (paramSchema) => {
       });
 
       if (validResult.error) {
-        console.log(validResult.error);
         ctx.utils.throwError(PARAMS_CODE, getErrorInfo(validResult.error));
       }
     });

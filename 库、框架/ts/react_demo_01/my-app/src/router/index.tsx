@@ -37,8 +37,9 @@ export interface _Route {
   /** meta */
   meta?: RouteMeta;
 }
-
 /** 类型声明 end */
+
+/** 登录守卫 */
 const isLoginBefore: _Route['beforeEnter'] = function (element) {
   if (getToken()) {
     // 已登录，并且路由同样没有定义，展示 404 页面

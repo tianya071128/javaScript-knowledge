@@ -4,17 +4,24 @@ import { Link } from 'react-router-dom';
 import MyIcons from '@/icons';
 
 export default function NavBreadcrumb() {
+  // 这里需要重构一下，应该让其响应式
   const menuRoutes = useGetRouteMenu();
   const menus = getMenus();
   const homeMenu = menus[0];
 
   // 如果不是首页，那么添加一个首页
-  if (!menuRoutes.some((item) => item.id === homeMenu.id)) {
+  if (
+    menuRoutes.length &&
+    !menuRoutes.some((item) => item.id === homeMenu.id)
+  ) {
     menuRoutes.unshift({
       ...homeMenu,
     });
   }
 
+  if (!menuRoutes.length) {
+    return null;
+  }
   return (
     <Breadcrumb style={{ marginLeft: '10px' }}>
       {menuRoutes.map(({ title, path, id }, i) => {

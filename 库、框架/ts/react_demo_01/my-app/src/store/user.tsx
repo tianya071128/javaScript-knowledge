@@ -14,6 +14,12 @@ export const user_info_recoil = atom<LoginResult['userInfo'] | null>({
   default: getUserInfo(),
 });
 
+// 路由信息
+export const router_list_recoil = atom<RouteInfo[] | null>({
+  key: 'router_list',
+  default: null,
+});
+
 // 对动态路由部分进行操作
 function getElement(elementPath?: string) {
   // 注意：路由组件因为是懒加载，应该存在特定其他页面的标识
@@ -48,16 +54,7 @@ function getElement(elementPath?: string) {
 export const dynamic_routes_recoil = selector<_Route[]>({
   key: 'dynamicRoutes',
   get: ({ get }) => {
-    const userInfo = get(user_info_recoil);
-    if (
-      !userInfo ||
-      !Array.isArray(userInfo.routeList) ||
-      userInfo.routeList.length === 0
-    )
-      return [];
-    const routeList = JSON.parse(
-      JSON.stringify(userInfo.routeList)
-    ) as RouteInfo[];
+    const routeList = get(router_list_recoil) || [];
 
     // 存在有效数据
     const _routes: _Route[] = [];

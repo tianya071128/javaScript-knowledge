@@ -1,7 +1,8 @@
 import { type RouteInfo } from '@/api';
 import { useCustomRoutes } from '@/router';
+import { router_list_recoil } from '@/store/user';
 import { cache } from '@/utils';
-import { getUserInfo, type SidebarStatus } from '@/utils/localStore';
+import { type SidebarStatus } from '@/utils/localStore';
 import {
   type SetStateAction,
   type Dispatch,
@@ -9,6 +10,7 @@ import {
   useRef,
   useMemo,
 } from 'react';
+import { getRecoil } from 'recoil-nexus';
 
 /**
  * 根据登录信息获取菜单信息
@@ -17,24 +19,18 @@ export type Menus = Omit<RouteInfo, 'element'>;
 let menusResult: Menus[];
 let oldMenusStr: string;
 export const getMenus = function () {
-  const userInfo = getUserInfo();
+  const userList = getRecoil(router_list_recoil);
+
   // 存在缓存值
-  if (menusResult && JSON.stringify(userInfo?.routeList) === oldMenusStr) {
+  if (menusResult && JSON.stringify(userList) === oldMenusStr) {
     return menusResult;
   }
 
-  oldMenusStr = JSON.stringify(userInfo?.routeList);
+  oldMenusStr = JSON.stringify(userList);
 
-  if (
-    !userInfo ||
-    !Array.isArray(userInfo.routeList) ||
-    userInfo.routeList.length === 0
-  )
-    return [];
+  if (!userList || userList.length === 0) return [];
 
-  const routeList = JSON.parse(
-    JSON.stringify(userInfo.routeList)
-  ) as RouteInfo[];
+  const routeList = JSON.parse(JSON.stringify(userList)) as RouteInfo[];
   const _menus: Menus[] = [];
   const resolveMenu = function (menus: RouteInfo[], parent: Menus[]) {
     for (const menu of menus) {
@@ -84,7 +80,7 @@ export const getMenuRoutes = function () {
  * 根据 id 查找菜单列表
  */
 export const getMenuRouteInfo = cache(function (
-  menus: Menus[] /** 添加一个参数，保证缓存新鲜度 */,
+  // menus: Menus[] /** 添加一个参数，保证缓存新鲜度 */,
   id: string
 ) {
   let result: Menus[] | undefined;
@@ -104,13 +100,13 @@ export const getMenuRouteInfo = cache(function (
   };
 
   try {
-    recursion(menus, []);
+    recursion(getMenus(), []);
   } catch (e) {
     if (result) {
       return result;
     }
   }
-}).bind(undefined, getMenus());
+});
 
 /**
  * 获取路由对应的菜单展开项

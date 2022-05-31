@@ -1,6 +1,7 @@
 // const CheckCode = require('../db').CheckCode
 const jwt = require('jsonwebtoken');
 const { TOKEN_ENCODE_STR } = require('../../config'); // 加载配置文件
+const User = require('../module/user');
 const { NO_LOGIN_CODE } = require('../utils/responseCode');
 
 module.exports = {
@@ -13,7 +14,7 @@ module.exports = {
   },
   // 验证登录 token 是否正确
   async check_token(ctx, next) {
-    let token = ctx.get('Authorization'); // 返回请求 Authorization 头
+    let token = ctx.get('X-Token'); // 返回请求 X-Token 头
     if (token === '') {
       // 直接抛出错误
       ctx.utils.assert(
@@ -27,7 +28,7 @@ module.exports = {
       let { user_id = '' } = await jwt.verify(token, TOKEN_ENCODE_STR); // 从 jwt 中解析出 user_id, 表示用户账号
 
       // 获取到账号信息
-      const userInfo = {};
+      const userInfo = await User.findOne({ user_id });
       // 保存用户的_id，便于操作
       ctx.userInfo = userInfo; // 保存用户信息
     } catch (e) {

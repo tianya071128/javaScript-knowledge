@@ -2,7 +2,7 @@ import { Form, Input, Button } from 'antd';
 import { useMemo, useState } from 'react';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { login } from '@/api';
-import { setToken, setUserInfo } from '@/utils/localStore';
+import { getToken, setToken, setUserInfo } from '@/utils/localStore';
 import { type Rule } from 'antd/lib/form';
 import { useSetRecoilState } from 'recoil';
 import './index.scss';
@@ -68,6 +68,13 @@ export default function Login() {
     }
   };
 
+  if (getToken()) {
+    // 如果是已经登录的情况
+    navigate(toRouteParams.path, {
+      state: toRouteParams.state,
+      replace: true,
+    });
+  }
   return (
     <div className='_login_'>
       <h3 className='login_title'>系统登录</h3>

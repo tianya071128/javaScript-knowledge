@@ -21,20 +21,14 @@ module.exports = () => {
     await new Promise((reslove, reject) => {
       form.parse(ctx.req, (err, fields, files) => {
         if (err) {
-          // console.log(err);
           reject(err);
         } else {
           // 如果需要进行上传文件的筛选， 可以在这里实现，如果在这里筛选不合格，则删除这个文件即可
-          // console.log(fields, files);
           ctx.request.body = fields; // 其他额外字段
           ctx.request.files = files; // 上传文件的信息
           reslove();
         }
       });
-      // 当每次接受到文件时触发
-      // form.on('fileBegin', async (name, file) => {
-      //   console.log(file);
-      // });
     });
 
     await next();

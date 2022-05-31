@@ -25,15 +25,22 @@ export interface RouteInfo {
 export interface LoginResult {
   token: string;
   userInfo: {
-    routeList: RouteInfo[];
+    // routeList: RouteInfo[];
     [prop: string]: any;
   };
 }
 
 export const login = (params: LoginParams) => {
   return request<LoginResult>({
-    url: '/public/login',
+    url: '/login',
     method: 'POST',
     data: params,
+  });
+};
+
+export const getRouterInfo = () => {
+  return request<RouteInfo[]>({
+    url: '/v1/routerInfo',
+    method: 'GET',
   });
 };
