@@ -7,10 +7,11 @@ import type { MenuInfo } from 'rc-menu/lib/interface';
 import { useEffect, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CSSTransition } from 'react-transition-group';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import ChildMenu from './ChildMenu';
-import { getMenuRouteInfo, getMenus, useSesolveMenuSelected } from './utils';
+import { getMenuRouteInfo, useSesolveMenuSelected } from './utils';
 import './index.scss';
+import { menus_recoil } from '@/store/user';
 
 export default function MyMenu() {
   /** hook 区域 */
@@ -29,6 +30,7 @@ export default function MyMenu() {
   const oldSidebarStatus = useRef<SidebarStatus>();
   const resetScroll = useRef<() => void>();
   const location = useLocation();
+  const menus = useRecoilValue(menus_recoil);
 
   useEffect(() => {
     if (sidebarStatus === 2 && oldSidebarStatus.current !== 2) {
@@ -81,7 +83,7 @@ export default function MyMenu() {
           /** SubMenu 展开/关闭的回调	 */
           onOpenChange={onOpenChange}
           onClick={handlerRoute}>
-          {ChildMenu(getMenus())}
+          {ChildMenu(menus)}
         </Menu>
       </div>
       {/* 嵌入式菜单 - 遮罩层 */}

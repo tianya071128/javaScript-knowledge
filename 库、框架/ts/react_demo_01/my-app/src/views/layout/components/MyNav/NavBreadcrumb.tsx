@@ -1,12 +1,13 @@
 import { Breadcrumb } from 'antd';
-import { getMenus, useGetRouteMenu } from '../MyMenu/utils';
+import { useGetRouteMenu } from '../MyMenu/utils';
 import { Link } from 'react-router-dom';
 import MyIcons from '@/icons';
+import { useRecoilValue } from 'recoil';
+import { menus_recoil } from '@/store/user';
 
 export default function NavBreadcrumb() {
-  // 这里需要重构一下，应该让其响应式
   const menuRoutes = useGetRouteMenu();
-  const menus = getMenus();
+  const menus = useRecoilValue(menus_recoil);
   const homeMenu = menus[0];
 
   // 如果不是首页，那么添加一个首页
@@ -23,7 +24,7 @@ export default function NavBreadcrumb() {
     return null;
   }
   return (
-    <Breadcrumb style={{ marginLeft: '10px' }}>
+    <Breadcrumb className='shuli_breadcrumb' style={{ marginLeft: '10px' }}>
       {menuRoutes.map(({ title, path, id }, i) => {
         return (
           <Breadcrumb.Item key={id}>

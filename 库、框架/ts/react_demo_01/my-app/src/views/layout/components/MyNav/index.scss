@@ -31,6 +31,14 @@ $navH: 50px;
         background: rgba(0, 0, 0, 0.025);
       }
     }
+    .shuli_breadcrumb {
+      display: flex;
+      align-items: center;
+      ol {
+        padding: 0;
+        margin-bottom: 0;
+      }
+    }
   }
   .nav_right {
     display: flex;

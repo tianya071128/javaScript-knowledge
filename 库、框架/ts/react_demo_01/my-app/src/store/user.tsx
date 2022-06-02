@@ -20,6 +20,35 @@ export const router_list_recoil = atom<RouteInfo[] | null>({
   default: null,
 });
 
+/**
+ * 根据登录信息获取菜单信息
+ */
+export type Menus = Omit<RouteInfo, 'element'>;
+export const menus_recoil = selector<Menus[]>({
+  key: 'menus_recoil',
+  get({ get }) {
+    const userList = get(router_list_recoil) || [];
+
+    if (!userList || userList.length === 0) return [];
+
+    const routeList = JSON.parse(JSON.stringify(userList)) as RouteInfo[];
+    const _menus: Menus[] = [];
+    const resolveMenu = function (menus: RouteInfo[], parent: Menus[]) {
+      for (const menu of menus) {
+        delete menu.element;
+        parent.push(menu);
+        if (Array.isArray(menu.children)) {
+          resolveMenu(menu.children, (menu.children = []));
+        }
+      }
+    };
+
+    resolveMenu(routeList, _menus);
+
+    return _menus;
+  },
+});
+
 // 对动态路由部分进行操作
 function getElement(elementPath?: string) {
   // 注意：路由组件因为是懒加载，应该存在特定其他页面的标识

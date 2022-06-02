@@ -1,7 +1,7 @@
 import { Menu } from 'antd';
 import MyIcons from '@/icons';
-import { Menus } from './utils';
 import { MENU_DEFAULT_ICON } from '@/utils/constVal';
+import { type Menus } from '@/store/user';
 
 /**
  * 递归渲染子菜单

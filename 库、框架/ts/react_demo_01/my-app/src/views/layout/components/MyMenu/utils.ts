@@ -1,6 +1,5 @@
-import { type RouteInfo } from '@/api';
 import { useCustomRoutes } from '@/router';
-import { router_list_recoil } from '@/store/user';
+import { menus_recoil, type Menus } from '@/store/user';
 import { cache } from '@/utils';
 import { type SidebarStatus } from '@/utils/localStore';
 import {
@@ -11,41 +10,6 @@ import {
   useMemo,
 } from 'react';
 import { getRecoil } from 'recoil-nexus';
-
-/**
- * 根据登录信息获取菜单信息
- */
-export type Menus = Omit<RouteInfo, 'element'>;
-let menusResult: Menus[];
-let oldMenusStr: string;
-export const getMenus = function () {
-  const userList = getRecoil(router_list_recoil);
-
-  // 存在缓存值
-  if (menusResult && JSON.stringify(userList) === oldMenusStr) {
-    return menusResult;
-  }
-
-  oldMenusStr = JSON.stringify(userList);
-
-  if (!userList || userList.length === 0) return [];
-
-  const routeList = JSON.parse(JSON.stringify(userList)) as RouteInfo[];
-  const _menus: Menus[] = [];
-  const resolveMenu = function (menus: RouteInfo[], parent: Menus[]) {
-    for (const menu of menus) {
-      delete menu.element;
-      parent.push(menu);
-      if (Array.isArray(menu.children)) {
-        resolveMenu(menu.children, (menu.children = []));
-      }
-    }
-  };
-
-  resolveMenu(routeList, _menus);
-
-  return _menus;
-};
 
 /**
  * 根据菜单信息获取到所有的路径，以供给搜索菜单时使用
@@ -72,7 +36,7 @@ export const getMenuRoutes = function () {
     }
   };
 
-  resolveMenuRoute(getMenus());
+  resolveMenuRoute(getRecoil(menus_recoil));
   return menuRoutes;
 };
 
@@ -100,7 +64,7 @@ export const getMenuRouteInfo = cache(function (
   };
 
   try {
-    recursion(getMenus(), []);
+    recursion(getRecoil(menus_recoil), []);
   } catch (e) {
     if (result) {
       return result;
@@ -120,9 +84,7 @@ export function useGetRouteMenu() {
    */
   let id = currentRoute?.id;
 
-  return useMemo(() => {
-    return id ? getMenuRouteInfo(id) || [] : [];
-  }, [id]);
+  return id ? getMenuRouteInfo(id) || [] : [];
 }
 
 /**
