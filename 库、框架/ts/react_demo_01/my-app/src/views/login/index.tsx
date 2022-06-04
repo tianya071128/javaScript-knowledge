@@ -8,6 +8,7 @@ import { useSetRecoilState } from 'recoil';
 import './index.scss';
 import { user_info_recoil } from '@/store/user';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 /** 类型声明 start */
 interface Rules {
@@ -39,6 +40,7 @@ export default function Login() {
       state,
     };
   }, [searchParams, location]);
+  const { t } = useTranslation();
 
   // 点击按钮提交
   const onSubmit = async function () {
@@ -77,7 +79,7 @@ export default function Login() {
   }
   return (
     <div className='_login_'>
-      <h3 className='login_title'>系统登录</h3>
+      <h3 className='login_title'>{t('main.系统登录')}</h3>
       <Form
         /** 表单名称，会作为表单字段 id 前缀使用	 */
         name='login_form'
@@ -107,7 +109,7 @@ export default function Login() {
             type='primary'
             htmlType='button'
             onClick={onSubmit}>
-            登录
+            {t('main.登录')}
           </Button>
         </Form.Item>
       </Form>

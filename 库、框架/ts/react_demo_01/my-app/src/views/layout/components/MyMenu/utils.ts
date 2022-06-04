@@ -9,6 +9,7 @@ import {
   useRef,
   useMemo,
 } from 'react';
+import { useRecoilValue } from 'recoil';
 import { getRecoil } from 'recoil-nexus';
 
 /**
@@ -44,8 +45,8 @@ export const getMenuRoutes = function () {
  * 根据 id 查找菜单列表
  */
 export const getMenuRouteInfo = cache(function (
-  // menus: Menus[] /** 添加一个参数，保证缓存新鲜度 */,
-  id: string
+  id: string,
+  menus?: Menus[] /** 添加一个参数，保证缓存新鲜度 */
 ) {
   let result: Menus[] | undefined;
   const recursion = function (menus: Menus[], routes: Menus[]) {
@@ -64,7 +65,7 @@ export const getMenuRouteInfo = cache(function (
   };
 
   try {
-    recursion(getRecoil(menus_recoil), []);
+    recursion(menus || getRecoil(menus_recoil), []);
   } catch (e) {
     if (result) {
       return result;
@@ -79,12 +80,13 @@ export function useGetRouteMenu() {
   // 当前路由对应的注册路由信息
   const match = useCustomRoutes();
   const currentRoute = match && match[match.length - 1].route.meta;
+  const menus = useRecoilValue(menus_recoil);
   /**
    * 选中路由对应的菜单 id
    */
   let id = currentRoute?.id;
 
-  return id ? getMenuRouteInfo(id) || [] : [];
+  return id ? getMenuRouteInfo(id, menus) || [] : [];
 }
 
 /**

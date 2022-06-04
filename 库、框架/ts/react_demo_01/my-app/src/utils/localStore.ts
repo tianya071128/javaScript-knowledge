@@ -1,10 +1,14 @@
 import { LoginResult } from '@/api';
 
-function getLocalStore(key: string) {
+export function getLocalStore(key: string) {
   const data = localStorage.getItem(key);
 
   if (data === null) return null;
-  return JSON.parse(data);
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    return data;
+  }
 }
 
 function setLocalStore(key: string, data: any): void {

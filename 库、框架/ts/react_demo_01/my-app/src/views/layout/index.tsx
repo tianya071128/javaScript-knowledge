@@ -19,7 +19,9 @@ export default function Layout() {
       <div className='layout_content' style={{ marginLeft }}>
         {/* 右侧 nav */}
         <MyNav />
-        <Outlet />
+        <div className='layout_main'>
+          <Outlet />
+        </div>
       </div>
     </div>
   );

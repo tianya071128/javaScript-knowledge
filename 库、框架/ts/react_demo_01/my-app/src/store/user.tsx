@@ -4,6 +4,7 @@ import type { LoginResult, RouteInfo } from '@/api';
 import { _Route } from '@/router';
 import React from 'react';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import i18n from '@/i18n';
 
 /**
  * 登录信息的操作
@@ -20,6 +21,30 @@ export const router_list_recoil = atom<RouteInfo[] | null>({
   default: null,
 });
 
+// 路由信息
+export const _router_list_recoil = selector<RouteInfo[]>({
+  key: '_router_list',
+  get({ get }) {
+    const userList = get(router_list_recoil) || [];
+    const _userList = JSON.parse(JSON.stringify(userList)) as RouteInfo[];
+    const translationMenu = function (menus: RouteInfo[]) {
+      for (const menu of menus) {
+        if (menu.title) {
+          // 翻译
+          menu.title = i18n.t(`menu.${menu.title}`);
+        }
+        if (Array.isArray(menu.children)) {
+          translationMenu(menu.children);
+        }
+      }
+    };
+
+    translationMenu(_userList);
+
+    return _userList;
+  },
+});
+
 /**
  * 根据登录信息获取菜单信息
  */
@@ -27,9 +52,7 @@ export type Menus = Omit<RouteInfo, 'element'>;
 export const menus_recoil = selector<Menus[]>({
   key: 'menus_recoil',
   get({ get }) {
-    const userList = get(router_list_recoil) || [];
-
-    if (!userList || userList.length === 0) return [];
+    const userList = get(_router_list_recoil);
 
     const routeList = JSON.parse(JSON.stringify(userList)) as RouteInfo[];
     const _menus: Menus[] = [];
@@ -83,7 +106,7 @@ function getElement(elementPath?: string) {
 export const dynamic_routes_recoil = selector<_Route[]>({
   key: 'dynamicRoutes',
   get: ({ get }) => {
-    const routeList = get(router_list_recoil) || [];
+    const routeList = get(_router_list_recoil);
 
     // 存在有效数据
     const _routes: _Route[] = [];
