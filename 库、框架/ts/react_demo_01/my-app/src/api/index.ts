@@ -1,4 +1,5 @@
 import request from '@/utils/request';
+import { type FormDataType } from '@/views/test/EditRouter';
 
 interface LoginParams {
   user_id: string;
@@ -25,7 +26,6 @@ export interface RouteInfo {
 export interface LoginResult {
   token: string;
   userInfo: {
-    // routeList: RouteInfo[];
     [prop: string]: any;
   };
 }
@@ -42,5 +42,13 @@ export const getRouterInfo = () => {
   return request<RouteInfo[]>({
     url: '/v1/routerInfo',
     method: 'GET',
+  });
+};
+
+export const editRouterInfo = (params: FormDataType) => {
+  return request<void>({
+    url: '/v1/routerInfo',
+    method: 'POST',
+    data: params,
   });
 };

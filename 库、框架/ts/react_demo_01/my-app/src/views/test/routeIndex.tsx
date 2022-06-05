@@ -1,100 +1,84 @@
-import React, { useState } from 'react';
-import { Table, Switch, Space } from 'antd';
+import { type RouteInfo } from '@/api';
+import { router_list_recoil } from '@/store/user';
+import { Button, Table } from 'antd';
+import { type ColumnsType } from 'antd/lib/table';
+import { useState } from 'react';
+import { useRecoilState } from 'recoil';
+import EditRouter, { type FormDataType } from './EditRouter';
+
 // 表格列配置
-const columns = [
+const columns: ColumnsType<RouteInfo> = [
   {
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
+    title: '菜单名',
+    dataIndex: 'title',
+    key: 'title',
   },
   {
-    title: 'Age',
-    dataIndex: 'age',
-    key: 'age',
-    width: '12%',
+    title: '文件路径',
+    dataIndex: 'element',
+    key: 'element',
+    width: '20%',
   },
   {
-    title: 'Address',
-    dataIndex: 'address',
-    width: '30%',
-    key: 'address',
-  },
-];
-// 表格数据
-const data = [
-  {
-    key: 1,
-    name: 'John Brown sr.',
-    age: 60,
-    address: 'New York No. 1 Lake Park',
-    children: [
-      {
-        key: 11,
-        name: 'John Brown',
-        age: 42,
-        address: 'New York No. 2 Lake Park',
-      },
-      {
-        key: 12,
-        name: 'John Brown jr.',
-        age: 30,
-        address: 'New York No. 3 Lake Park',
-        children: [
-          {
-            key: 121,
-            name: 'Jimmy Brown',
-            age: 16,
-            address: 'New York No. 3 Lake Park',
-          },
-        ],
-      },
-      {
-        key: 13,
-        name: 'Jim Green sr.',
-        age: 72,
-        address: 'London No. 1 Lake Park',
-        children: [
-          {
-            key: 131,
-            name: 'Jim Green',
-            age: 42,
-            address: 'London No. 2 Lake Park',
-            children: [
-              {
-                key: 1311,
-                name: 'Jim Green jr.',
-                age: 25,
-                address: 'London No. 3 Lake Park',
-              },
-              {
-                key: 1312,
-                name: 'Jimmy Green sr.',
-                age: 18,
-                address: 'London No. 4 Lake Park',
-              },
-            ],
-          },
-        ],
-      },
-    ],
+    title: '路径',
+    dataIndex: 'path',
+    width: '20%',
+    key: 'path',
   },
   {
-    key: 2,
-    name: 'Joe Black',
-    age: 32,
-    address: 'Sidney No. 1 Lake Park',
+    title: '',
+    dataIndex: 'operation',
+    width: '25%',
+    render(_: any, record: RouteInfo) {
+      return (
+        <>
+          <Button type='primary' size='small'>
+            编辑
+          </Button>
+          <Button
+            type='primary'
+            size='small'
+            danger
+            style={{ marginLeft: '10px' }}>
+            删除
+          </Button>
+        </>
+      );
+    },
   },
 ];
 
 const App = () => {
+  const [routerList, setRouterList] = useRecoilState(router_list_recoil);
+  const [visible, setVisible] = useState<boolean>(false);
+  const [formData, setFormData] = useState<FormDataType>({});
+
+  // 新增顶级菜单
+  const addRouter = () => {
+    setVisible(true);
+    setFormData({});
+  };
+  // 关闭遮罩回调
+  const onClose = () => {
+    setVisible(false);
+  };
+
   return (
     <>
       <Table
+        title={() => (
+          <Button type='primary' onClick={addRouter}>
+            新增菜单
+          </Button>
+        )}
+        /** 主键 */
+        rowKey='id'
         /** 表格列的配置描述 */
         columns={columns}
         /** 数据数组 */
-        dataSource={data}
+        dataSource={routerList || []}
       />
+      <EditRouter visible={visible} onClose={onClose} initFormData={formData} />
     </>
   );
 };

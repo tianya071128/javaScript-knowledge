@@ -11,15 +11,15 @@ import { type Menus } from '@/store/user';
 export default function ChildMenu(menus: Menus[]) {
   return (
     <>
-      {menus.map(({ title, children, id, icon, hidden }) => {
-        if (Array.isArray(children)) {
+      {menus.map(({ title, children, id, icon, hidden, path }) => {
+        if (!path) {
           // 嵌套菜单渲染
           return (
             <Menu.SubMenu
               key={id}
               icon={<MyIcons iconClass={icon || MENU_DEFAULT_ICON} />}
               title={title}>
-              {ChildMenu(children)}
+              {children && ChildMenu(children)}
             </Menu.SubMenu>
           );
         } else {

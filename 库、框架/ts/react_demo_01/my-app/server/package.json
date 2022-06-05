@@ -25,6 +25,7 @@
     "koa-static-cache": "^5.1.4",
     "log4js": "^6.3.0",
     "mongoose": "^6.0.7",
+    "node-uuid": "^1.4.8",
     "sha1": "^1.1.1"
   }
 }

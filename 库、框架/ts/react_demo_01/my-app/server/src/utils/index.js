@@ -1,3 +1,5 @@
+const uuid = require('node-uuid');
+
 module.exports = {
   omitProp(obj, props) {
     const _obj = { ...obj };
@@ -5,5 +7,8 @@ module.exports = {
       delete _obj[prop];
     }
     return _obj;
+  },
+  getuuid() {
+    return uuid.v1();
   },
 };

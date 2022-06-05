@@ -7,7 +7,10 @@
  */
 const router = require('koa-router')(); // 创建一个容器
 const { check_token } = require('../utils/token'); // 验证 token 是否过期
-const { getRouterInfoController } = require('../controllers/v1');
+const {
+  getRouterInfoController,
+  resolveRouterInfoController,
+} = require('../controllers/v1');
 
 // 统一中间件, 需要登录验证
 router.use(check_token);
@@ -16,6 +19,8 @@ router.use(check_token);
 //   const { method, path, controller, valid } = item;
 //   router[method](path, paramValidator(valid), controller);
 // });
-router.get('/routerInfo', getRouterInfoController);
+router
+  .get('/routerInfo', getRouterInfoController)
+  .post('/routerInfo', resolveRouterInfoController);
 
 module.exports = router;
