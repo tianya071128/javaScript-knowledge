@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 export type FormDataType = Partial<RouteInfo> & {
   menuType?: 'A' | 'B';
+  parent?: RouteInfo;
 };
 
 interface EditRouterProps {
@@ -49,19 +50,32 @@ export default function EditRouter({
     // 表单重置化
     if (initFormData.id) {
       // 编辑菜单
+    } else if (initFormData.parent) {
+      // 新增次级菜单
+      setTitle('新增菜单');
+      setInitiaValues({ ..._initialValues, menuType: 'B', ...initFormData });
     } else {
       // 新增顶级菜单
       setTitle('新增菜单');
-      setInitiaValues({ ..._initialValues, menuType: 'A' });
+      setInitiaValues({ ..._initialValues, menuType: 'A', ...initFormData });
     }
+  }, [initFormData, form]);
+  useEffect(() => {
     // 表单重置一下
     form && form.resetFields();
-  }, [initFormData, form]);
+  }, [initialValues, form]);
 
   // 提交按钮回调
   const handleOk = async () => {
     // 1. 验证表单
     const formData = await form.validateFields();
+    console.log(formData);
+
+    // 新增次级菜单
+    if (initFormData.parent) {
+      formData.parent = initFormData.parent;
+    }
+
     // 2. 发送交易
     await editRouterInfo(formData);
   };
@@ -97,6 +111,11 @@ export default function EditRouter({
         form={form}
         labelCol={{ span: 4 }}
         className='login_form'>
+        {initFormData.parent && (
+          <Form.Item label='父级菜单' name={['parent', 'title']}>
+            <Input disabled={true} />
+          </Form.Item>
+        )}
         <Form.Item name='menuType' label='菜单类型' rules={rules.type}>
           <Select placeholder='请选择菜单类型' disabled={typeDisabled}>
             {menuTypes.map(({ label, value }) => (

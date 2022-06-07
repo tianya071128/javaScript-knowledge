@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { type FormDataType } from '@/views/test/EditRouter';
+import { type FormDataType } from '@/views/routerConfig/EditRouter';
 
 interface LoginParams {
   user_id: string;
@@ -10,6 +10,8 @@ export interface RouteInfo {
   id: string;
   /** 菜单名 */
   title: string;
+  /** 菜单类型：A(子菜单) | B(路由菜单) */
+  menuType: 'A' | 'B';
   /** 菜单跳转路径 */
   path?: string;
   /** 嵌套菜单 */
