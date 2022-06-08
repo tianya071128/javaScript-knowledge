@@ -1,5 +1,5 @@
 import { editRouterInfo, RouteInfo } from '@/api';
-import { Form, Input, Modal, Select } from 'antd';
+import { Form, Input, Modal, Select, message } from 'antd';
 import { useEffect, useState } from 'react';
 
 export type FormDataType = Partial<RouteInfo> & {
@@ -50,6 +50,8 @@ export default function EditRouter({
     // 表单重置化
     if (initFormData.id) {
       // 编辑菜单
+      setTitle('编辑菜单');
+      setInitiaValues({ ...initFormData });
     } else if (initFormData.parent) {
       // 新增次级菜单
       setTitle('新增菜单');
@@ -60,6 +62,7 @@ export default function EditRouter({
       setInitiaValues({ ..._initialValues, menuType: 'A', ...initFormData });
     }
   }, [initFormData, form]);
+
   useEffect(() => {
     // 表单重置一下
     form && form.resetFields();
@@ -67,21 +70,23 @@ export default function EditRouter({
 
   // 提交按钮回调
   const handleOk = async () => {
-    // 1. 验证表单
-    const formData = await form.validateFields();
-    console.log(formData);
+    try {
+      setConfirmLoading(true);
+      // 1. 验证表单
+      const formData = await form.validateFields();
 
-    // 新增次级菜单
-    if (initFormData.parent) {
-      formData.parent = initFormData.parent;
+      // 2. 发送交易
+      const data = await editRouterInfo({ ...initFormData, ...formData });
+
+      // 关闭弹框并且将其保存
+      onClose(data.router_info);
+    } finally {
+      setConfirmLoading(false);
     }
-
-    // 2. 发送交易
-    await editRouterInfo(formData);
   };
   // 关闭对话框回调
   const handleCancel = () => {
-    onClose();
+    confirmLoading ? message.warning('正在提交中...') : onClose();
   };
 
   return (

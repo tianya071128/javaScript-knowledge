@@ -48,9 +48,17 @@ export const getRouterInfo = () => {
 };
 
 export const editRouterInfo = (params: FormDataType) => {
-  return request<void>({
+  return request<{ router_info: RouteInfo[] }>({
     url: '/v1/routerInfo',
     method: 'POST',
+    data: params,
+  });
+};
+
+export const deleteMenu = (params: { id: string }) => {
+  return request<{ router_info: RouteInfo[] }>({
+    url: '/v1/routerInfo',
+    method: 'DELETE',
     data: params,
   });
 };

@@ -6,6 +6,8 @@ const en = {
   menu: {
     首页: 'home',
     测试: 'test',
+    配置: 'config',
+    路由配置: 'router config',
   },
 };
 

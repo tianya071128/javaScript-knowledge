@@ -1,4 +1,4 @@
-import { type RouteInfo } from '@/api';
+import { type RouteInfo, deleteMenu as deleteMenuApi } from '@/api';
 import { router_list_recoil } from '@/store/user';
 import { Button, Popconfirm, Table } from 'antd';
 import { type ColumnsType } from 'antd/lib/table';
@@ -39,7 +39,10 @@ const RouterConfig = () => {
       render(_: any, record: RouteInfo) {
         return (
           <>
-            <Button type='primary' size='small'>
+            <Button
+              type='primary'
+              size='small'
+              onClick={editMenu.bind(null, record)}>
               编辑
             </Button>
             {record.menuType === 'A' && (
@@ -77,7 +80,10 @@ const RouterConfig = () => {
     setFormData({});
   };
   // 关闭遮罩回调
-  const onClose = () => {
+  const onClose = (routerList?: RouteInfo[]) => {
+    if (routerList) {
+      setRouterList(routerList);
+    }
     setVisible(false);
   };
   // 新增二级菜单
@@ -86,16 +92,21 @@ const RouterConfig = () => {
     setFormData({ parent });
   };
   // 删除菜单
-  const deleteMenu = async (id: string) => {
+  const deleteMenu = (id: string) => {
     if (deleteMenuSet.has(id)) return; // 不要重复删除
     setDeleteMenuSet(new Set(deleteMenuSet.add(id)));
 
-    // 调用接口，删除
-
-    // setTimeout(() => {
-    //   deleteMenuSet.delete(id);
-    //   setDeleteMenuSet(new Set(deleteMenuSet));
-    // }, 10000);
+    // 调用接口，删除 - 不使用 async/await 语法，因为 antd 的 Popconfirm 组件返回了 Promise 的话，那么就会等待 Promise 结束才关闭气泡
+    deleteMenuApi({ id }).then((data) => {
+      deleteMenuSet.delete(id);
+      setDeleteMenuSet(new Set(deleteMenuSet));
+      setRouterList(data.router_info);
+    });
+  };
+  // 编辑菜单
+  const editMenu = (routerInfo: RouteInfo) => {
+    setVisible(true);
+    setFormData({ ...routerInfo });
   };
 
   return (

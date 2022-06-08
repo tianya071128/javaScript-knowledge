@@ -13,23 +13,25 @@ const { getuuid, omitProp } = require('../utils');
 /**
  * 根据 id 查找菜单列表
  */
-const getMenuRouteInfo = function (id, menus) {
+const getMenuRouteInfo = function (id, menus, flag) {
   let result;
-  const recursion = function () {
+  const recursion = function (menus, parentMenu) {
+    let i = 0;
     for (const menu of menus) {
       if (id === menu.id) {
         // 取得结果，结束递归
-        result = menu;
+        result = flag ? { index: i, parentMenu, menu } : menu;
         throw new Error('抛出错误，提前结束递归，取巧');
       } else if (Array.isArray(menu.children)) {
         // 存在子菜单，继续递归
-        recursion(menu.children);
+        recursion(menu.children, menu);
       }
+      i++;
     }
   };
 
   try {
-    recursion();
+    recursion(menus, menus);
   } catch (e) {
     if (result) {
       return result;
@@ -66,15 +68,59 @@ module.exports = {
           ...omitProp(ctx.request.body, ['parent']),
           id: getuuid(),
         });
-        parentMenu.title = '配置测试';
       }
+      await RouterInfo.updateOne(
+        { id: res._id },
+        { router_info: res.router_info }
+      );
+    } else if (id) {
+      // 编辑菜单
+      // console.log(ctx.request.body);
+      const { index, parentMenu, menu } =
+        getMenuRouteInfo(id, res.router_info, true) || {};
+
+      if (parentMenu) {
+        (Array.isArray(parentMenu) ? parentMenu : parentMenu.children).splice(
+          index,
+          1,
+          { ...menu, ...omitProp(ctx.request.body, ['children']) }
+        );
+        await RouterInfo.updateOne(
+          { id: res._id },
+          { router_info: res.router_info }
+        );
+      }
+    }
+    // await new Promise((resolve) => {
+    //   setTimeout(() => {
+    //     resolve();
+    //   }, 2000);
+    // });
+    ctx.body = {
+      router_info: res.router_info,
+    };
+  },
+  // 删除路由
+  async deleteRouterInfoController(ctx) {
+    const res = await RouterInfo.findOne({
+      user_type: 'A',
+    });
+    const { id } = ctx.request.body;
+    const { index, parentMenu } =
+      getMenuRouteInfo(id, res.router_info, true) || {};
+
+    if (parentMenu) {
+      (Array.isArray(parentMenu) ? parentMenu : parentMenu.children).splice(
+        index,
+        1
+      );
       await RouterInfo.updateOne(
         { id: res._id },
         { router_info: res.router_info }
       );
     }
     ctx.body = {
-      message: 'ok',
+      router_info: res.router_info,
     };
   },
 };

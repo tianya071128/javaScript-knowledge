@@ -10,6 +10,7 @@ const { check_token } = require('../utils/token'); // 验证 token 是否过期
 const {
   getRouterInfoController,
   resolveRouterInfoController,
+  deleteRouterInfoController,
 } = require('../controllers/v1');
 
 // 统一中间件, 需要登录验证
@@ -21,6 +22,7 @@ router.use(check_token);
 // });
 router
   .get('/routerInfo', getRouterInfoController)
-  .post('/routerInfo', resolveRouterInfoController);
+  .post('/routerInfo', resolveRouterInfoController)
+  .delete('/routerInfo', deleteRouterInfoController);
 
 module.exports = router;
