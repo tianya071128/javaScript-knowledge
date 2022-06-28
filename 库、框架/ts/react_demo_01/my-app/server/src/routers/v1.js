@@ -15,11 +15,6 @@ const {
 
 // 统一中间件, 需要登录验证
 router.use(check_token);
-
-// routerList.forEach((item) => {
-//   const { method, path, controller, valid } = item;
-//   router[method](path, paramValidator(valid), controller);
-// });
 router
   .get('/routerInfo', getRouterInfoController)
   .post('/routerInfo', resolveRouterInfoController)

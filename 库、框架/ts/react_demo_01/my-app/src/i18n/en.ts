@@ -8,6 +8,7 @@ const en = {
     测试: 'test',
     配置: 'config',
     路由配置: 'router config',
+    演练场: 'playground',
   },
 };
 

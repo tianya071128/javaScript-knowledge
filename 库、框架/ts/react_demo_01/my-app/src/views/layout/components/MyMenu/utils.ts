@@ -2,13 +2,7 @@ import { useCustomRoutes } from '@/router';
 import { menus_recoil, type Menus } from '@/store/user';
 import { cache } from '@/utils';
 import { type SidebarStatus } from '@/utils/localStore';
-import {
-  type SetStateAction,
-  type Dispatch,
-  useState,
-  useRef,
-  useMemo,
-} from 'react';
+import { type SetStateAction, type Dispatch, useState, useRef } from 'react';
 import { useRecoilValue } from 'recoil';
 import { getRecoil } from 'recoil-nexus';
 

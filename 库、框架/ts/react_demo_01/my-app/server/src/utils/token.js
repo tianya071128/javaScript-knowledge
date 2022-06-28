@@ -26,9 +26,9 @@ module.exports = {
     try {
       // 验证 token 是否过期
       let { user_id = '' } = await jwt.verify(token, TOKEN_ENCODE_STR); // 从 jwt 中解析出 user_id, 表示用户账号
-
       // 获取到账号信息
       const userInfo = await User.findOne({ user_id });
+      if (!userInfo) throw new Error('没有找到用户');
       // 保存用户的_id，便于操作
       ctx.userInfo = userInfo; // 保存用户信息
     } catch (e) {

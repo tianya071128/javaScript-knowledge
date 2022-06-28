@@ -8,10 +8,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "lib-flexible": "^0.3.2",
+    "vant": "^3.5.1",
     "vue": "^3.2.25"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.3",
+    "postcss-pxtorem": "^6.0.0",
     "typescript": "^4.5.4",
     "vite": "^2.9.9",
     "vue-tsc": "^0.34.7"
