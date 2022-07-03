@@ -1,5 +1,11 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import '@/views/home/index.vue';
+</script>
 
-<template></template>
+<template>
+  <div id="app">
+    <router-view></router-view>
+  </div>
+</template>
 
-<style></style>
+<style lang="scss" scoped></style>
