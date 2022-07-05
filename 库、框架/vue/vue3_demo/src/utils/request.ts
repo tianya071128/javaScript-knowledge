@@ -82,8 +82,8 @@ service.interceptors.response.use(
       return response.data.data;
     } else {
       let errorObj: ErrorObj = {
-        msg: response.data?.msg || '请求异常，请稍后重试',
-        code: response.data?.code ?? -4,
+        msg: response.data?.message || '请求异常，请稍后重试',
+        code: response.data?.resultCode ?? -4,
       };
 
       // 隐藏业务层面报错

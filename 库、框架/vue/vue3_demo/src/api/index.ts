@@ -35,3 +35,18 @@ export const getHome = () => {
     method: 'GET',
   });
 };
+
+export interface LoginParams {
+  /** 用户名 */
+  loginName: string;
+  /** 密码 */
+  passwordMd5: string;
+}
+
+export const login = (data: LoginParams) => {
+  return request<string>({
+    url: '/user/login',
+    method: 'POST',
+    data,
+  });
+};
