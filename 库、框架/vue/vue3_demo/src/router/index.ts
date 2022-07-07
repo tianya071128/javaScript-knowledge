@@ -14,6 +14,7 @@ const router = createRouter({
       component: () => import('@/views/home/index.vue'),
       meta: {
         index: 1,
+        title: '首页',
       },
     },
     {
@@ -23,6 +24,7 @@ const router = createRouter({
       meta: {
         index: 3,
         login: true, // 页面需要登录才能进入
+        title: '商品详情',
       },
     },
     {
@@ -37,6 +39,7 @@ const router = createRouter({
       },
       meta: {
         index: 1,
+        title: '登录',
       },
     },
   ],
@@ -55,6 +58,10 @@ router.beforeEach((to) => {
       },
     };
   }
+});
+/** 全局后置守卫 */
+router.afterEach((to) => {
+  document.title = `${to.meta.title} | vue3_demo`;
 });
 
 export default router;

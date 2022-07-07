@@ -1,6 +1,6 @@
 import { RouteMeta } from '@/router';
 import 'axios';
-import 'react-router-dom';
+import 'vue-router';
 
 /** 扩展第三方库的类型 */
 declare module 'axios' {
@@ -14,9 +14,11 @@ declare module 'axios' {
   }
 }
 
-declare module 'react-router-dom' {
-  export interface RouteObject {
-    meta?: RouteMeta;
+declare module 'vue-router' {
+  // 扩展 vue-router 的 meta 定义
+  export interface RouteMeta {
+    // 页面标题
+    title: string;
   }
 }
 

@@ -11,7 +11,6 @@ import { useRouter } from 'vue-router';
 /**
  * 导航栏登录后替换一下
  * 底部 tab 栏
- * 跳转商品详情时，没有登录需要跳转登录
  */
 
 const token = getToken();

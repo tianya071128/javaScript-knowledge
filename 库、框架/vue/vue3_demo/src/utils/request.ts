@@ -38,15 +38,8 @@ function resolveReuqestError(
 
   // 根据 code 不同来执行不同的策略
   switch (code) {
-    case 100000:
-      /**
-       * 登录失效，退出登录
-       *  但是在组件外部调用 navigate 方法无法实现，应该使用变通方法：
-       *    1. 使用Router自定义history即可: react-router-dom 内部会通过 history 库来实现的，我们自定义一下暴露出 history 即可 -- https://blog.csdn.net/qq1073830130/article/details/101017642
-       *    2. 通过全局状态管理(此项目使用 recoil 进行状态管理): 在 APP.tsx 中使用这个状态, 通过改变状态值，就可以在 APP.tsx 中侦听在状态的改变从而触发跳转
-       *    3. 通过发布订阅模式：在 APP.tsx 中侦听自定义事件，在需要跳转的地方触发这个自定义事件
-       */
-      signLogin(); // 触发 recoil 中的登录信息，就会触发 APP.tsx 重新渲染，触发跳转到登录页
+    case 416:
+      signLogin();
       break;
 
     default:

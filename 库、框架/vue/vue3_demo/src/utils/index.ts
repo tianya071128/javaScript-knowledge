@@ -1,4 +1,16 @@
-export function signLogin() {}
+import { removeToken } from './localStore';
+import router from '../router';
+
+export function signLogin() {
+  removeToken();
+  router.push({
+    name: 'Login',
+    replace: true,
+    query: {
+      from: router.currentRoute.value.path,
+    },
+  });
+}
 
 interface ThrottleOptions {
   /** 是否立即调用一次 */

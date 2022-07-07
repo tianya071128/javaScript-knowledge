@@ -50,3 +50,23 @@ export const login = (data: LoginParams) => {
     data,
   });
 };
+
+export interface ProductDetailResult {
+  goodsCarouselList: string[];
+  goodsName: string;
+  sellingPrice: number;
+  goodsDetailContent: string;
+}
+
+export const getDetail = (id: string) => {
+  return request<ProductDetailResult>({
+    url: `/goods/detail/${id}`,
+    method: 'GET',
+  });
+};
+export const getCart = () => {
+  return request<any[]>({
+    url: `shop-cart`,
+    method: 'GET',
+  });
+};

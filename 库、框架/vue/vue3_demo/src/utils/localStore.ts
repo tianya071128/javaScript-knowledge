@@ -1,3 +1,5 @@
+import { useUserStore } from '@/store';
+
 export function getLocalStore(key: string) {
   const data = localStorage.getItem(key);
 
@@ -20,11 +22,15 @@ function removeLocalStore(key: string) {
 
 /** 封装存入 token 方法 */
 export function setToken(token: string): void {
+  const userSore = useUserStore();
+  userSore.setToken(token);
   setLocalStore('token', token);
 }
 export function getToken(): string | null {
   return getLocalStore('token');
 }
 export function removeToken(): void {
+  const userSore = useUserStore();
+  userSore.removeToken();
   removeLocalStore('token');
 }
