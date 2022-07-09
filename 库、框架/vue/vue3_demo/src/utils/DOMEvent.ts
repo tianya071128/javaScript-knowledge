@@ -2,7 +2,7 @@ import { throttle } from './index';
 
 type ResizeFn = (w: number) => any;
 interface ResizeOptions {
-  // 立即执行一次
+  /** 立即执行一次 */
   immediate: boolean;
 }
 

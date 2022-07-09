@@ -1,26 +1,69 @@
 <script setup lang="ts" name="Product">
 import slHeader from '@/components/Header.vue';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getDetail, type ProductDetailResult } from '@/api';
+import { getDetail, addCart, type ProductDetailResult } from '@/api';
 import { useCartStore } from '@/store';
+import { ErrorObj } from '@/utils/request';
+import { Toast } from 'vant';
 
 const route = useRoute();
 const router = useRouter();
 const cartStore = useCartStore();
+const id = route.params.productId as unknown as string;
 
 onMounted(async () => {
-  const id = route.params.productId as unknown as string;
   detail.value = await getDetail(id);
 });
 
 const detail = ref<ProductDetailResult>();
-const count = cartStore.count;
+const count = computed(() => cartStore.count);
 const goTo = () => {
   router.push('/cart');
 };
-const handleAddCart = () => {};
-const goToCart = () => {};
+// 加入购物车
+const addCartLoading = ref(false);
+const handleAddCart = async () => {
+  addCartLoading.value = true;
+  try {
+    await addCart({
+      goodsCount: 1,
+      goodsId: id,
+    });
+
+    cartStore.updateCount('update');
+  } finally {
+    addCartLoading.value = false;
+  }
+};
+// 点击立即购买
+const toCartLoaing = ref(false);
+const goToCart = async () => {
+  toCartLoaing.value = true;
+  try {
+    await addCart(
+      {
+        goodsCount: 1,
+        goodsId: id,
+      },
+      {
+        customCode: '500',
+      }
+    );
+
+    cartStore.updateCount('update');
+    router.push('/cart');
+  } catch (e: any) {
+    const _e = e as ErrorObj;
+    if (_e?.msg?.includes('已存在')) {
+      router.push('/cart');
+    } else {
+      Toast.fail(_e.msg);
+    }
+  } finally {
+    toCartLoaing.value = false;
+  }
+};
 </script>
 
 <template>
@@ -71,8 +114,16 @@ const goToCart = () => {};
         type="warning"
         @click="handleAddCart"
         text="加入购物车"
+        :loading="addCartLoading"
+        loading-text="加入购物车"
       />
-      <van-action-bar-button type="danger" @click="goToCart" text="立即购买" />
+      <van-action-bar-button
+        type="danger"
+        @click="goToCart"
+        text="立即购买"
+        :loading="toCartLoaing"
+        loading-text="立即购买"
+      />
     </van-action-bar>
   </div>
 </template>

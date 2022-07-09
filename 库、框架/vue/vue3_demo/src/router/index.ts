@@ -32,7 +32,6 @@ const router = createRouter({
       name: 'Login',
       component: () => import('@/views/login/index.vue'),
       beforeEnter(to, form) {
-        console.log(to, form);
         if (getToken()) {
           router.replace((to.query.from as string) || '/');
         }
@@ -46,7 +45,17 @@ const router = createRouter({
 });
 
 /** 全局前置守卫 */
-router.beforeEach((to) => {
+router.beforeEach((to, from) => {
+  /** 页面切换动画效果 */
+  if (to.meta.index && from.meta.index) {
+    if (to.meta.index > from.meta.index) {
+      to.meta.transition = 'slide-right';
+    } else if (to.meta.index < from.meta.index) {
+      to.meta.transition = 'slide-left';
+    }
+  }
+
+  /** 校验登录 */
   const token = getToken();
   if (!token && to.meta.login) {
     // 需要登录才能进入

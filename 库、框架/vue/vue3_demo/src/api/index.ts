@@ -1,4 +1,5 @@
 import request from '@/utils/request';
+import { AxiosRequestConfig } from 'axios';
 
 export interface CarouselsItem {
   /** 轮播图图片地址 */
@@ -68,5 +69,18 @@ export const getCart = () => {
   return request<any[]>({
     url: `shop-cart`,
     method: 'GET',
+  });
+};
+
+interface AddCartType {
+  goodsCount: number;
+  goodsId: string;
+}
+export const addCart = (data: AddCartType, config?: AxiosRequestConfig) => {
+  return request<any[]>({
+    url: `shop-cart`,
+    method: 'POST',
+    data,
+    ...config,
   });
 };

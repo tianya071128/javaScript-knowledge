@@ -4,7 +4,7 @@ import { getToken } from './localStore';
 import { signLogin } from '.';
 
 /** ============  类型声明 start ========= */
-interface ErrorObj {
+export interface ErrorObj {
   msg: string; // 错误信息
   code: number | string; // 错误code
 }

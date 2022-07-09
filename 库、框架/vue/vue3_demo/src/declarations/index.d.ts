@@ -17,8 +17,12 @@ declare module 'axios' {
 declare module 'vue-router' {
   // 扩展 vue-router 的 meta 定义
   export interface RouteMeta {
-    // 页面标题
+    /** 页面标题 */
     title: string;
+    /** 路由等级，用于确定过渡效果 */
+    index?: number;
+    /** 过渡效果， */
+    transition?: 'slide-right' | 'slide-left';
   }
 }
 
