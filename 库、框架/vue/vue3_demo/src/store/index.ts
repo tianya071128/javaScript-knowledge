@@ -18,7 +18,6 @@ export const useUserStore = defineStore('user_pinia', {
 
 export const useCartStore = defineStore('cart_pinia', {
   state: () => ({ count: 0 }),
-  // mutations,
   actions: {
     async updateCount(action: 'remove' | 'update' | 'change', count?: number) {
       if (action === 'remove') {
@@ -29,6 +28,20 @@ export const useCartStore = defineStore('cart_pinia', {
       } else {
         count != undefined && (this.count = count);
       }
+    },
+  },
+});
+
+export const useRequest = defineStore('request_pinia', {
+  state: () => ({ loading: 0, loadingText: '加载中...' }),
+  actions: {
+    updatedLoading(action: -1 | 1) {
+      this.loading += action;
+
+      if (this.loading < 0) this.loading = 0;
+    },
+    updatedLoadingText(text: string) {
+      this.loadingText = text;
     },
   },
 });

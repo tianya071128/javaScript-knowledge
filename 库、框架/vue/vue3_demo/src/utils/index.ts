@@ -1,8 +1,11 @@
 import { removeToken } from './localStore';
 import router from '../router';
+import { AxiosRequestConfig } from 'axios';
+import { useRequest } from '@/store';
 
 export function signLogin() {
   removeToken();
+
   router.push({
     name: 'Login',
     replace: true,
@@ -65,5 +68,25 @@ export function prefixUrl(url: string) {
   } else {
     url = `http://backend-api-01.newbee.ltd${url}`;
     return url;
+  }
+}
+
+/**
+ * 处理全局 loading
+ * @param loading loading 标识
+ */
+export function resolveLoadin(loading?: AxiosRequestConfig['isLoading']) {
+  const requestStore = useRequest();
+  if (typeof loading === 'boolean') {
+    requestStore.updatedLoading(1);
+    requestStore.updatedLoadingText('加载中...');
+  } else if (typeof loading === 'string') {
+    requestStore.updatedLoading(1);
+    requestStore.updatedLoadingText(loading);
+  } else if (loading == undefined) {
+    requestStore.updatedLoading(-1);
+  } else {
+    // 用于校验其他类型
+    const check: never = loading;
   }
 }

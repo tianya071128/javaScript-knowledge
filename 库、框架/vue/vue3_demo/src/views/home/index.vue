@@ -7,11 +7,7 @@ import swiper from '@/components/Swiper.vue';
 import { type CarouselsItem, type GoodsesItem, getHome } from '@/api';
 import { Toast } from 'vant';
 import { useRouter } from 'vue-router';
-
-/**
- * 导航栏登录后替换一下
- * 底部 tab 栏
- */
+import NavBar from '@/components/NavBar.vue';
 
 const token = getToken();
 const isLogin = ref<boolean>(!!token);
@@ -224,6 +220,8 @@ onMounted(async () => {
         </div>
       </van-skeleton>
     </div>
+    <!-- 底部栏 -->
+    <nav-bar />
   </div>
 </template>
 

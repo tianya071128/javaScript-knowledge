@@ -18,6 +18,35 @@ const router = createRouter({
       },
     },
     {
+      path: '/category',
+      name: 'Category',
+      component: () => import('@/views/category/index.vue'),
+      meta: {
+        index: 1,
+        title: '分类',
+      },
+    },
+    {
+      path: '/cart',
+      name: 'Cart',
+      component: () => import('@/views/cart/index.vue'),
+      meta: {
+        index: 1,
+        login: true, // 页面需要登录才能进入
+        title: '购物车',
+      },
+    },
+    {
+      path: '/user',
+      name: 'User',
+      component: () => import('@/views/user/index.vue'),
+      meta: {
+        index: 1,
+        login: true, // 页面需要登录才能进入
+        title: '我的',
+      },
+    },
+    {
       path: '/product/:productId',
       name: 'Product',
       component: () => import('@/views/product/index.vue'),
@@ -39,6 +68,25 @@ const router = createRouter({
       meta: {
         index: 1,
         title: '登录',
+      },
+    },
+    {
+      path: '/about',
+      name: 'About',
+      component: () => import('@/views/about/index.vue'),
+      meta: {
+        index: 2,
+        title: '关于我们',
+      },
+    },
+    {
+      path: '/setting',
+      name: 'Setting',
+      component: () => import('@/views/setting/index.vue'),
+      meta: {
+        index: 2,
+        login: true, // 页面需要登录才能进入
+        title: '账号管理',
       },
     },
   ],

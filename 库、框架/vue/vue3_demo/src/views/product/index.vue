@@ -1,11 +1,11 @@
 <script setup lang="ts" name="Product">
+import { addCart, getDetail, type ProductDetailResult } from '@/api';
 import slHeader from '@/components/Header.vue';
-import { computed, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { getDetail, addCart, type ProductDetailResult } from '@/api';
 import { useCartStore } from '@/store';
 import { ErrorObj } from '@/utils/request';
 import { Toast } from 'vant';
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();

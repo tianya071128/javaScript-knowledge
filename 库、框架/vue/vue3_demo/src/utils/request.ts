@@ -1,7 +1,7 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import { Toast } from 'vant';
 import { getToken } from './localStore';
-import { signLogin } from '.';
+import { resolveLoadin, signLogin } from '.';
 
 /** ============  类型声明 start ========= */
 export interface ErrorObj {
@@ -37,7 +37,7 @@ function resolveReuqestError(
   }
 
   // 根据 code 不同来执行不同的策略
-  switch (code) {
+  switch (+code) {
     case 416:
       signLogin();
       break;
@@ -58,9 +58,19 @@ service.interceptors.request.use(
     if (token) {
       config.headers!['token'] = token;
     }
+
+    if (config.isLoading) {
+      // 此时需要 loading
+      resolveLoadin(config.isLoading);
+    }
     return config;
   },
   (error) => {
+    if (error?.config?.isLoading) {
+      // 此时需要 loading
+      resolveLoadin();
+    }
+
     // 传递错误
     return Promise.reject(error);
   }
@@ -68,6 +78,10 @@ service.interceptors.request.use(
 
 service.interceptors.response.use(
   (response: AxiosResponse) => {
+    if (response.config.isLoading) {
+      // 此时需要 loading
+      resolveLoadin();
+    }
     // code: 200 -- 成功
     // code: 100000 -- 未登录
     if (response.data?.resultCode === 200) {
@@ -87,6 +101,10 @@ service.interceptors.response.use(
     }
   },
   (error) => {
+    if (error?.config.isLoading) {
+      // 此时需要 loading
+      resolveLoadin();
+    }
     let errorObj: ErrorObj = {
       msg: '',
       code: error?.request?.status,

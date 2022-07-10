@@ -65,22 +65,89 @@ export const getDetail = (id: string) => {
     method: 'GET',
   });
 };
-export const getCart = () => {
-  return request<any[]>({
+
+export interface CartItem {
+  /** id */
+  goodsId: number;
+  /** 产品图片地址 */
+  goodsCoverImg: string;
+  /** 标题 */
+  goodsName: string;
+  /** 金额 */
+  sellingPrice: number;
+  /** 购物项 id */
+  cartItemId: number;
+  /**  */
+  goodsCount: number;
+}
+
+export const getCart = (config?: AxiosRequestConfig) => {
+  return request<CartItem[]>({
     url: `shop-cart`,
     method: 'GET',
+    ...config,
   });
 };
 
-interface AddCartType {
+interface AddCartParams {
   goodsCount: number;
   goodsId: string;
 }
-export const addCart = (data: AddCartType, config?: AxiosRequestConfig) => {
+export const addCart = (data: AddCartParams, config?: AxiosRequestConfig) => {
   return request<any[]>({
     url: `shop-cart`,
     method: 'POST',
     data,
     ...config,
+  });
+};
+
+interface ModifyCartParams {
+  /** 购物车 id */
+  cartItemId: number;
+  /** 购物车商品数量 */
+  goodsCount: number;
+}
+export const modifyCart = (data: ModifyCartParams) => {
+  return request<any[]>({
+    url: `shop-cart`,
+    method: 'PUT',
+    data,
+    isLoading: '修改中...',
+  });
+};
+
+export const deleteCartItem = (id: number) => {
+  return request<any[]>({
+    url: `/shop-cart/${id}`,
+    method: 'DELETE',
+    isLoading: '删除中...',
+  });
+};
+
+export interface UserInfoRsult {
+  /** 个性签名 */
+  introduceSign: string;
+  /** 登录名 */
+  loginName: string;
+  /** 昵称 */
+  nickName: string;
+}
+export const getUserInfo = () => {
+  return request<UserInfoRsult>({
+    url: '/user/info',
+    method: 'GET',
+  });
+};
+
+export const EditUserInfo = (data: {
+  introduceSign: string;
+  nickName: string;
+}) => {
+  return request<void>({
+    url: '/user/info',
+    method: 'PUT',
+    data,
+    isLoading: '保存中...',
   });
 };

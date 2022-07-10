@@ -11,6 +11,8 @@ declare module 'axios' {
     hideError?: boolean;
     /** 不处理的 code 列表 */
     customCode?: string | string[];
+    /** loading */
+    isLoading?: boolean | string;
   }
 }
 
