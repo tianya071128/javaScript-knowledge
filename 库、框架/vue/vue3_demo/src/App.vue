@@ -9,13 +9,16 @@ const userSore = useUserStore();
 const cartStore = useCartStore();
 const requestStore = useRequest();
 
-watch(() => requestStore.loading, () => {
-  if (requestStore.loading > 0) {
-    Toast.loading({ message: requestStore.loadingText, forbidClick: true })
-  } else {
-    Toast.clear()
+watch(
+  () => requestStore.loading,
+  () => {
+    if (requestStore.loading > 0) {
+      Toast.loading({ message: requestStore.loadingText, forbidClick: true });
+    } else {
+      Toast.clear();
+    }
   }
-})
+);
 
 watchEffect(() => {
   if (userSore.token) {
@@ -50,7 +53,7 @@ watchEffect(() => {
 .slide-right-enter-active,
 .slide-left-enter-active {
   transition: transform 0.5s ease;
-  background-color: #fff;
+  background-color: #f7f8fa;
   will-change: transform;
   position: fixed;
   top: 0;
@@ -65,5 +68,10 @@ watchEffect(() => {
 
 .slide-left-enter-from {
   transform: translateX(-100vw);
+}
+
+:global(#app) {
+  background-color: #f7f8fa;
+  min-height: 100vh;
 }
 </style>

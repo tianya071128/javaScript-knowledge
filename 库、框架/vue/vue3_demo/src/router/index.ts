@@ -89,6 +89,26 @@ const router = createRouter({
         title: '账号管理',
       },
     },
+    {
+      path: '/address',
+      name: 'Address',
+      component: () => import('@/views/address/index.vue'),
+      meta: {
+        index: 3,
+        login: true, // 页面需要登录才能进入
+        title: '地址管理',
+      },
+    },
+    {
+      path: '/address-edit',
+      name: 'AddressEdit',
+      component: () => import('@/views/address/addressEdit.vue'),
+      meta: {
+        index: 4,
+        login: true, // 页面需要登录才能进入
+        title: '新增地址',
+      },
+    },
   ],
 });
 

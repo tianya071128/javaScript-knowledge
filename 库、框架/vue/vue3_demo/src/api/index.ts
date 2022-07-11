@@ -151,3 +151,47 @@ export const EditUserInfo = (data: {
     isLoading: '保存中...',
   });
 };
+
+interface AddressItem {
+  /** id */
+  addressId: number;
+  /** 收件人姓名 */
+  userName: string;
+  /** 收件人电话 */
+  userPhone: string;
+  /** 省 */
+  provinceName: string;
+  /** 市 */
+  cityName: string;
+  /** 区 */
+  regionName: string;
+  /** 详细地址 */
+  detailAddress: string;
+  /** 是否为默认地址 0(否) | 1(是) */
+  defaultFlag: 0 | 1;
+}
+export const getAddressList = () => {
+  return request<AddressItem[]>({
+    url: 'address',
+    method: 'GET',
+    params: { pageNumber: 1, pageSize: 1000 },
+  });
+};
+
+export interface AddressParams {
+  userName: string;
+  userPhone: string;
+  provinceName: string;
+  cityName: string;
+  regionName: string;
+  detailAddress: string;
+  defaultFlag: number;
+}
+export const addAddress = (data: AddressParams) => {
+  return request<AddressItem[]>({
+    url: 'address',
+    method: 'POST',
+    data,
+    isLoading: '保存中...',
+  });
+};
