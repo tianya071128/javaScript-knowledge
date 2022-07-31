@@ -6,190 +6,154 @@
  -->
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>温祖彪的简历</title>
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paper-css/0.3.0/paper.css" /> -->
+    <style>
+      @page {
+        margin: 0;
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>温祖彪的简历</title>
-  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paper-css/0.3.0/paper.css" /> -->
-  <style>
-    @page {
-      margin: 0
-    }
-
-    body {
-      margin: 0
-    }
-
-    .sheet {
-      margin: 0;
-      overflow: hidden;
-      position: relative;
-      box-sizing: border-box;
-      page-break-after: always;
-    }
-
-    /** Paper sizes **/
-    body.A3 .sheet {
-      width: 297mm;
-      height: 419mm
-    }
-
-    body.A3.landscape .sheet {
-      width: 420mm;
-      height: 296mm
-    }
-
-    body.A4 .sheet {
-      width: 210mm;
-      height: 296mm
-    }
-
-    body.A4.landscape .sheet {
-      width: 297mm;
-      height: 209mm
-    }
-
-    body.A5 .sheet {
-      width: 148mm;
-      height: 209mm
-    }
-
-    body.A5.landscape .sheet {
-      width: 210mm;
-      height: 147mm
-    }
-
-    body.letter .sheet {
-      width: 216mm;
-      height: 279mm
-    }
-
-    body.letter.landscape .sheet {
-      width: 280mm;
-      height: 215mm
-    }
-
-    body.legal .sheet {
-      width: 216mm;
-      height: 356mm
-    }
-
-    body.legal.landscape .sheet {
-      width: 357mm;
-      height: 215mm
-    }
-
-    /** Padding area **/
-    .sheet.padding-10mm {
-      padding: 10mm
-    }
-
-    .sheet.padding-15mm {
-      padding: 15mm
-    }
-
-    .sheet.padding-20mm {
-      padding: 20mm
-    }
-
-    .sheet.padding-25mm {
-      padding: 25mm
-    }
-
-    /** For screen preview **/
-    @media screen {
       body {
-        background: #e0e0e0
+        margin: 0;
       }
 
       .sheet {
-        background: white;
-        box-shadow: 0 .5mm 2mm rgba(0, 0, 0, .3);
-        margin: 5mm auto;
-      }
-    }
-
-    /** Fix for Chrome issue #273306 **/
-    @media print {
-      body.A3.landscape {
-        width: 420mm
+        margin: 0;
+        overflow: hidden;
+        position: relative;
+        box-sizing: border-box;
+        page-break-after: always;
       }
 
-      body.A3,
-      body.A4.landscape {
-        width: 297mm
+      /** Paper sizes **/
+      body.A3 .sheet {
+        width: 297mm;
+        height: 419mm;
       }
 
-      body.A4,
-      body.A5.landscape {
-        width: 210mm
+      body.A3.landscape .sheet {
+        width: 420mm;
+        height: 296mm;
       }
 
-      body.A5 {
-        width: 148mm
+      body.A4 .sheet {
+        width: 210mm;
+        height: 296mm;
       }
 
-      body.letter,
-      body.legal {
-        width: 216mm
+      body.A4.landscape .sheet {
+        width: 297mm;
+        height: 209mm;
       }
 
-      body.letter.landscape {
-        width: 280mm
+      body.A5 .sheet {
+        width: 148mm;
+        height: 209mm;
       }
 
-      body.legal.landscape {
-        width: 357mm
+      body.A5.landscape .sheet {
+        width: 210mm;
+        height: 147mm;
       }
-    }
-  </style>
-  <link rel="stylesheet" href="./style/eliminate.css" />
-  <link rel="stylesheet" type="text/css" href="./style/styles.css" />
-</head>
 
-<body class="A4">
-  <!-- 每一个class为sheet的section在打印时就是单独的一页 -->
-  <section class="sheet">
-    <div class="main-left">
-      <img class="touxiang"
-        src="https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=2446439088,944463208&fm=26&gp=0.jpg" alt="" />
-      <h1>温祖彪</h1>
-      <h3>本科/2017年毕业</h3>
-      <ul class="info">
-        <li data-title="出生年月" class="nianyue">1995/07/11</li>
-        <li data-title="毕业学校" class="xuexiao">新余学院</li>
-        <li data-title="电话" class="shouji">17620490176</li>
-        <li data-title="邮箱" class="youxiang">wenzubiao@126.com</li>
-        <li data-title="git" class="git">github.com/tianya071128</li>
-      </ul>
+      body.letter .sheet {
+        width: 216mm;
+        height: 279mm;
+      }
+
+      body.letter.landscape .sheet {
+        width: 280mm;
+        height: 215mm;
+      }
+
+      body.legal .sheet {
+        width: 216mm;
+        height: 356mm;
+      }
+
+      body.legal.landscape .sheet {
+        width: 357mm;
+        height: 215mm;
+      }
+
+      /** Padding area **/
+      .sheet.padding-10mm {
+        padding: 10mm;
+      }
+
+      .sheet.padding-15mm {
+        padding: 15mm;
+      }
+
+      .sheet.padding-20mm {
+        padding: 20mm;
+      }
+
+      .sheet.padding-25mm {
+        padding: 25mm;
+      }
+
+      /** For screen preview **/
+      @media screen {
+        body {
+          background: #e0e0e0;
+        }
+
+        .sheet {
+          background: white;
+          box-shadow: 0 0.5mm 2mm rgba(0, 0, 0, 0.3);
+          margin: 5mm auto;
+        }
+      }
+
+      /** Fix for Chrome issue #273306 **/
+      @media print {
+        body.A3.landscape {
+          width: 420mm;
+        }
+
+        body.A3,
+        body.A4.landscape {
+          width: 297mm;
+        }
+
+        body.A4,
+        body.A5.landscape {
+          width: 210mm;
+        }
+
+        body.A5 {
+          width: 148mm;
+        }
+
+        body.letter,
+        body.legal {
+          width: 216mm;
+        }
+
+        body.letter.landscape {
+          width: 280mm;
+        }
+
+        body.legal.landscape {
+          width: 357mm;
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="./style/eliminate.css" />
+    <link rel="stylesheet" type="text/css" href="./style/styles.css" />
+  </head>
+
+  <body class="A4">
+    <!-- 每一个class为sheet的section在打印时就是单独的一页 -->
+    <section class="sheet">
+      <!-- 
       <div class="big-title">公司经历</div>
       <ul class="company">
-        <li>
-          <div class="company-title">北京科蓝软件系统股份有限公司</div>
-          <div class="company-time">2020.4 - 2021.3</div>
-          <div class="job-content" data-title="">
-            <span>工作内容：</span>
-            项目为供应链金融平台，负责维护项目的迭代以及维护
-          </div>
-        </li>
-        <li>
-          <div class="company-title">深圳市车资道科技有限公司</div>
-          <div class="company-time">2019.6 - 2020.3</div>
-          <div class="job-content" data-title="">
-            <span>工作内容：</span>
-            负责公司官网、后台管理系统、小程序正常开发，迭代以及维护
-          </div>
-        </li>
-        <li>
-          <div class="company-title">中软国际有限公司</div>
-          <div class="company-time">2017.7 - 2019.5</div>
-          <div class="job-content" data-title="">
-            <span>工作内容：</span>
-            负责华为内部项目 CD-Pipeline 迭代开发，使用Vue重构开发
-            CD-Pipeline2.0 项目
-          </div>
-        </li>
+        
         </li>
       </ul>
       <div class="big-title">个人评价</div>
@@ -200,245 +164,277 @@
         <li data-title="性格">简单、直爽、善良</li>
         <li data-title="生活">旅游、电影、家庭</li>
       </ul>
-    </div>
-    <div class="main-right">
-      <div class="big-title">专业技能</div>
-      <ul class="skill">
-        <li>
-          CSS：熟练 CSS 基本特性、CSS 的基本属性、CSS3 的基本属性；熟练 CSS 的布局方式；熟悉使用 less 和 scss 的 css 预处理器, 了解其基本语法；
-        </li>
-        <li>
-          HTML：熟练 HTML 基本标签、HTML 基本属性；熟练 HTML5 新增特性；
-        </li>
-        <li>
-          JS：熟练 JS 的核心概念(原型、原型链、作用域、作用域链等)；熟练 DOM，BOM，事件流，表单编程等 DOM 编程；熟练 ES6+ 语法；阅读过多次 js 高程、你不知道的 js 系列、ES6 入门教程等前端书籍
-        </li>
-        <li>
-          vue：多年的实际项目经验，熟练 vue + vue-router + vuex + axios 等 vue
-          全家桶，在项目中经常编写全局基础组件，拆分页面组件进行复用，能够对路由(vue-router)、网络(axios)、
-          状态管理(vuex)进行全局的模块配置，对全家桶的源码都大致阅读过；
-        </li>
-        <li>
-          工程化：熟悉 webpack4+ 配置，了解 loader、plugin 的基本原理；熟悉 git 基本概念，分支管理，基本命令；熟悉 eslint、babel、postcss、npm
-          等前端工程化工具，能够进行简单配置；
-        </li>
-        <li>
-          网络：熟悉 HTTP、HTTPS、HTTP2 协议，熟悉各种头部字段、缓存机制、cookie 机制等知识；熟悉 websocket 双工协议，并在项目中实践过；了解部分 TCP/IP 网络架构；阅读过 HTTP
-          权威指南、网络是怎样连接的、图解 HTTP 等网络书籍；
-        </li>
-        <li>
-          浏览器：熟悉 google 浏览器开发者工具；了解浏览器的基本渲染原理；
-        </li>
-      </ul>
-      <div class="big-title">项目经验</div>
-      <div class="gongsi-title">北京科蓝软件系统股份有限公司 - 项目</div>
-      <div class="xiangmu-item">
-        <div class="xiangmu-title">好链 APP 内嵌 H5</div>
-        <div class="tuanduidingwei">
-          <span class="zhize">项目时间：</span>
-          <span class="miaoshu">
-            2020年4月-2021年3月
-          </span>
-        </div>
-        <div class="jishu">
-          <span class="jishu-title">相关技术栈：</span>
-          <ul class="biaoqian">
-            <li>Vue</li>
-            、
-            <li>Pax</li>
-            、
-            <li>Vue-router</li>
+    </div> -->
+
+      <div class="main-right">
+        <div class="basic-info">
+          <h1 class="basic-name">温祖彪</h1>
+          <h3>男 | 本科 | 2017年毕业 | 5年工作经验</h3>
+          <ul class="info">
+            <li data-title="出生年月" class="nianyue">1995/07/11</li>
+            <li data-title="毕业学校" class="xuexiao">新余学院</li>
+            <li data-title="电话" class="shouji">17620490176</li>
+            <li data-title="个人网站" class="wangzhan">https://weshuli.com</li>
+            <li data-title="邮箱" class="youxiang">wenzubiao@126.com</li>
+            <li data-title="git" class="git">
+              https://github.com/tianya071128
+            </li>
           </ul>
         </div>
-        <div class="tuanduidingwei">
-          <span class="zhize">项目描述：</span>
-          <span class="miaoshu">
-            依托平安渠道，针对企业级用户的供应链金融产品，好链 APP 内嵌 H5
-          </span>
-        </div>
-        <div class="tuanduidingwei">
-          <span class="zhize">项目职责：</span>
-          <span class="miaoshu">
-            前端核心开发、通用组件的封装、核心业务的开发
-          </span>
-        </div>
-        <div class="mianshu">项目主要技术点：</div>
-        <ul class="xiangmu-mainshu">
+        <div class="big-title">专业技能</div>
+        <ul class="skill">
+          <li>熟练运用 HTML/CSS 等网页制作技术，熟悉页面架构和布局；</li>
           <li>
-            项目结构：APP 内嵌 H5，通过 pax 框架与原生交互，采用多模块应用、axios封装、请求响应拦截器、vuex管理全局数据等基础项目结构。
+            熟练 JavaScript 的核心概念，熟练 DOM、BOM、事件流、表单编程等 DOM
+            编程，掌握 ES6 以上常用语法；
           </li>
           <li>
-            原生交互：通过 pax 框架在 window 上注册对象，封装调用原生方法，实现系统级的权限使用。
+            熟练使用 Vue 全家桶(Vue + vue-router + Vuex + Axios
+            等)，多年的实际项目经验，能够搭建 Vue
+            开发环境，并且对全家桶的源码都大致阅读过；
+          </li>
+          <li>熟悉 TypeScript，能够对项目进行类型化系统；</li>
+          <li>
+            工程化：熟悉 webpack4+ 配置，了解其相关概念基本原理；熟悉 git
+            基本概念，分支管理，基本命令；熟悉 ESlint、Babel、PostCSS、npm、Sass
+            等前端工程化工具，能够进行项目配置；
           </li>
           <li>
-            项目性能监控：通过引入 SDK 来解决项目埋点、性能监控来监控项目的使用情况及性能。
+            网络：熟悉 HTTP、HTTPS、HTTP2
+            协议，熟悉基础头部字段、缓存机制、cookie 机制等知识；熟悉 websocket
+            双工协议，并在项目中实践过；
           </li>
           <li>
-            项目安全：项目为金融产品，在安全方面，关键接口参数通过原生加密，与后端交互阶段对重要参数进行加密
-          </li>
-        </ul>
-      </div>
-      <div class="gongsi-title">深圳市车资道科技有限公司 - 项目</div>
-      <div class="xiangmu-item">
-        <div class="xiangmu-title">车资道后台管理系统</div>
-      </div>
-  </section>
-  <section class="sheet">
-    <div class="main-left" style="padding-top: 14px;">
-
-    </div>
-    <div class="main-right" style="padding-top: 27px;">
-
-      <div class="xiangmu-item" style="margin-top: 0px;">
-        <div class="tuanduidingwei" style="margin-top: 0px;">
-          <span class="zhize">项目时间：</span>
-          <span class="miaoshu">
-            2019年6月-2020年4月
-          </span>
-        </div>
-        <div class="jishu">
-          <span class="jishu-title">相关技术栈：</span>
-          <ul class="biaoqian">
-            <li>Vue</li>
-            、
-            <li>ElementUI</li>
-            、
-            <li>Axios</li>
-          </ul>
-        </div>
-        <div class="tuanduidingwei">
-          <span class="zhize">项目描述：</span>
-          <span class="miaoshu">
-            公司内部后台管理系统，后面开拓了其他公司业务流程
-          </span>
-        </div>
-        <div class="tuanduidingwei">
-          <span class="zhize">项目职责：</span>
-          <span class="miaoshu">
-            前端核心业务开发、通用组件的封装、日常维护优化
-          </span>
-        </div>
-        <div class="mianshu">项目主要技术点：</div>
-        <ul class="xiangmu-mainshu">
-          <li>
-            项目结构：spa页面应用、axios封装、请求响应拦截器、vuex管理全局数据等基础项目结构。
-          </li>
-          <li>
-            动态路由：表单管理菜单，实现菜单权限控制，前端根据菜单返回树结构，根据不同客户权限实现动态路由。
-          </li>
-          <li>
-            表单的自定义设计：使用 H5
-            拖拽实现表单的自定义设计，根据不同表单字段来设置不同的属性，并生成
-            JSON 数据存储至数据库。
-          </li>
-          <li>
-            工作流程管理：根据工作模式划分流程，流程划分多个操作节点，操作节点具有不同的操作以及不同的权限控制。
+            浏览器：熟悉 google 浏览器开发者工具；了解浏览器的基本渲染原理；
           </li>
         </ul>
-      </div>
-      <div class="xiangmu-item">
-        <div class="xiangmu-title">车资道小程序</div>
-        <div class="tuanduidingwei">
-          <span class="zhize">项目时间：</span>
-          <span class="miaoshu">
-            2019年6月-2020年4月
-          </span>
-        </div>
-        <div class="jishu">
-          <span class="jishu-title">相关技术栈：</span>
-          <ul class="biaoqian">
-            <li>Vue</li>
-            、
-            <li>Vant</li>
-            、
-            <li>微信JS-SDK</li>
+        <div class="big-title">公司经历</div>
+        <ul class="company">
+          <li>
+            <div class="company-title">
+              北京科蓝软件系统股份有限公司
+              <span class="company-time">2020.4 - 2022.8</span>
+            </div>
+            <div class="job-content" data-title="">
+              web 前端工程师，负责平安好链、华融湘江银行手机银行开发以及维护
+            </div>
+          </li>
+          <li>
+            <div class="company-title">
+              深圳市车资道科技有限公司
+              <span class="company-time">2019.6 - 2020.3</span>
+            </div>
+            <div class="job-content" data-title="">
+              web 前端工程师
+              ，负责公司官网、后台管理系统、小程序正常开发，迭代以及维护
+            </div>
+          </li>
+          <li>
+            <div class="company-title">
+              中软国际有限公司
+              <span class="company-time">2017.7 - 2019.5</span>
+            </div>
+            <div class="job-content" data-title="">
+              web 前端工程师，负责华为内部项目 CD-Pipeline
+              迭代开发，使用Vue重构开发 CD-Pipeline2.0 项目
+            </div>
+          </li>
+        </ul>
+        <div class="big-title">项目经验</div>
+        <div class="gongsi-title">北京科蓝软件系统股份有限公司 - 项目</div>
+        <div class="xiangmu-item">
+          <div class="xiangmu-title">华融湘江银行手机银行 3.0</div>
+          <div class="tuanduidingwei">
+            <span class="zhize">项目时间：</span>
+            <span class="miaoshu">2021年4月-2022年8月</span>
+          </div>
+          <div class="jishu">
+            <span class="jishu-title">相关技术栈：</span>
+            <ul class="biaoqian">
+              <li>Vue</li>
+              、
+              <li>Weex</li>
+              、
+              <li>Vant</li>
+            </ul>
+          </div>
+          <div class="tuanduidingwei">
+            <span class="zhize">项目描述：</span>
+            <span class="miaoshu">
+              华融湘江银行的手机银行 APP，APP 采用 Weex
+              渲染部分原生页面，大部分模块使用 Vue
+            </span>
+          </div>
+          <div class="tuanduidingwei">
+            <span class="zhize">项目职责：</span>
+            <span class="miaoshu">
+              基于 Vue-Cli 进行项目的搭建，从 0
+              进行项目的开发，前端核心开发、通用组件的封装、核心业务的开发
+            </span>
+          </div>
+          <div class="mianshu">项目主要技术点：</div>
+          <ul class="xiangmu-mainshu">
+            <li>
+              项目结构：APP 内嵌 H5，通过 Weex
+              框架与原生交互，Axios封装、请求响应拦截器、Vuex管理全局数据等基础项目结构。
+            </li>
+            <li>
+              项目性能监控：通过引入 SDK
+              来解决项目埋点、性能监控来监控项目的使用情况及性能。
+            </li>
           </ul>
         </div>
       </div>
-      <div class="xiangmu-item" style="margin-top: 0;">
-        <div class="tuanduidingwei">
-          <span class="zhize">项目描述：</span>
-          <span class="miaoshu">
-            公司内部小程序，主要处理业务员订单。
-          </span>
-        </div>
-        <div class="tuanduidingwei">
-          <span class="zhize">项目职责：</span>
-          <span class="miaoshu">
-            前端核心业务开发、通用组件的封装、日常维护优化
-          </span>
-        </div>
-        <div class="mianshu">项目主要技术点：</div>
-        <ul class="xiangmu-mainshu">
-          <li>
-            项目结构：使用微信小程序组件 web-view 内嵌 vue
-            网页、axios封装、请求响应拦截器、vuex管理全局数据等基础项目结构。
-          </li>
-          <li>
-            微信JS-SDK：使用微信 JS-SDK 调用相关微信
-            API，上传图片，浏览图片，支付接口
-          </li>
-          <li>
-            自定义表单：根据 PC 端的表单设计，在小程序端根据表单的 JSON
-            数据生成对应的表单，并且实现错误提示，是否填写完成功等表单功能
-          </li>
-        </ul>
-      </div>
-      <div class="gongsi-title">中软国际有限公司 - 项目</div>
-      <div class="xiangmu-item">
-        <div class="xiangmu-title">CD-Pipeline 流水线</div>
-        <div class="tuanduidingwei">
-          <span class="zhize">项目时间：</span>
-          <span class="miaoshu">
-            2017年7月-2019年5月
-          </span>
-        </div>
-        <div class="jishu">
-          <span class="jishu-title">相关技术栈：</span>
-          <ul class="biaoqian">
-            <li>Angular</li>
-            、
-            <li>TypeScript</li>
-            、
-            <li>Vue</li>
-            、
-            <li>ElementUI</li>
+    </section>
+    <section class="sheet">
+      <div class="main-right" style="padding-top: 27px">
+        <div class="xiangmu-item" style="margin-top: 0px">
+          <ul class="xiangmu-mainshu">
+            <li>
+              核心组件：实现大多数核心组件，如数字键盘，layout 布局组件等。
+            </li>
+            <li>
+              项目安全：项目为金融产品，在安全方面，关键接口参数通过原生加密，与后端交互阶段对重要参数进行加密
+            </li>
           </ul>
         </div>
-        <div class="tuanduidingwei">
-          <span class="zhize">项目描述：</span>
-          <span class="miaoshu">
-            华为内部项目，自动部署软件构建、部署、测试过程可视化工具
-          </span>
+        <div class="xiangmu-item">
+          <div class="gongsi-title">深圳市车资道科技有限公司 - 项目</div>
+          <div class="xiangmu-title">车资道后台管理系统</div>
+          <div class="tuanduidingwei" style="margin-top: 0px">
+            <span class="zhize">项目时间：</span>
+            <span class="miaoshu">2019年6月-2020年4月</span>
+          </div>
+          <div class="jishu">
+            <span class="jishu-title">相关技术栈：</span>
+            <ul class="biaoqian">
+              <li>Vue</li>
+              、
+              <li>ElementUI</li>
+              、
+              <li>Axios</li>
+            </ul>
+          </div>
+          <div class="tuanduidingwei">
+            <span class="zhize">项目描述：</span>
+            <span class="miaoshu">
+              公司内部后台管理系统，后面开拓了其他公司业务流程
+            </span>
+          </div>
+          <div class="tuanduidingwei">
+            <span class="zhize">项目职责：</span>
+            <span class="miaoshu">
+              前端核心业务开发、通用组件的封装、日常维护优化
+            </span>
+          </div>
+          <div class="mianshu">项目主要技术点：</div>
+          <ul class="xiangmu-mainshu">
+            <li>
+              项目结构：spa页面应用、Axios封装、请求响应拦截器、Vuex管理全局数据等基础项目结构。
+            </li>
+            <li>
+              动态路由：表单管理菜单，实现菜单权限控制，前端根据菜单返回树结构，根据不同客户权限实现动态路由。
+            </li>
+            <li>
+              表单的自定义设计：使用 H5
+              拖拽实现表单的自定义设计，根据不同表单字段来设置不同的属性，并生成
+              JSON 数据存储至数据库。
+            </li>
+            <li>
+              工作流程管理：根据工作模式划分流程，流程划分多个操作节点，操作节点具有不同的操作以及不同的权限控制。
+            </li>
+          </ul>
         </div>
-        <div class="tuanduidingwei">
-          <span class="zhize">项目职责：</span>
-          <span class="miaoshu">
-            前端除核心外次要模块开发，项目日常维护以及迭代
-          </span>
+        <div class="xiangmu-item">
+          <div class="xiangmu-title">车资道小程序</div>
+          <div class="tuanduidingwei">
+            <span class="zhize">项目时间：</span>
+            <span class="miaoshu">2019年6月-2020年4月</span>
+          </div>
+          <div class="jishu">
+            <span class="jishu-title">相关技术栈：</span>
+            <ul class="biaoqian">
+              <li>Vue</li>
+              、
+              <li>Vant</li>
+              、
+              <li>微信JS-SDK</li>
+            </ul>
+          </div>
+          <div class="tuanduidingwei">
+            <span class="zhize">项目描述：</span>
+            <span class="miaoshu">公司内部小程序，主要处理业务员订单。</span>
+          </div>
+          <div class="tuanduidingwei">
+            <span class="zhize">项目职责：</span>
+            <span class="miaoshu">
+              前端核心业务开发、通用组件的封装、日常维护优化
+            </span>
+          </div>
+          <div class="mianshu">项目主要技术点：</div>
+          <ul class="xiangmu-mainshu">
+            <li>
+              项目结构：使用微信小程序组件 web-view 内嵌 vue
+              网页、Axios封装、请求响应拦截器、Vuex管理全局数据等基础项目结构。
+            </li>
+            <li>
+              微信JS-SDK：使用微信 JS-SDK 调用相关微信
+              API，上传图片，浏览图片，支付接口
+            </li>
+            <li>
+              自定义表单：根据 PC 端的表单设计，在小程序端根据表单的 JSON
+              数据生成对应的表单，并且实现错误提示，是否填写完成功等表单功能
+            </li>
+          </ul>
         </div>
-        <div class="mianshu" style="margin-top: 0;">项目主要技术点：</div>
-        <ul class="xiangmu-mainshu">
-          <li>
-            项目结构：Angular 构建 CD-Pipeline1.0，使用 Vue 重构
-            CD-Pipeline2.0。
-          </li>
-          <li>
-            重构：使用 Vue 框架重构 CD-Pipeline1.0 的 Angular 框架
-          </li>
-          <li>
-            tree：使用 ElementUI 的 Tree 组件构建流水线的 tree
-            结构，并且懒加载，动态添加，删除等功能。
-          </li>
-          <li>
-            websocket：使用 ws 与服务端实时通信，实时获取流水线运行状态。
-          </li>
-        </ul>
+        <div class="gongsi-title">中软国际有限公司 - 项目</div>
+        <div class="xiangmu-item">
+          <div class="xiangmu-title">CD-Pipeline 流水线</div>
+          <div class="tuanduidingwei">
+            <span class="zhize">项目时间：</span>
+            <span class="miaoshu">2017年7月-2019年5月</span>
+          </div>
+          <div class="jishu">
+            <span class="jishu-title">相关技术栈：</span>
+            <ul class="biaoqian">
+              <li>Angular</li>
+              、
+              <li>TypeScript</li>
+              、
+              <li>Vue</li>
+              、
+              <li>ElementUI</li>
+            </ul>
+          </div>
+          <div class="tuanduidingwei">
+            <span class="zhize">项目描述：</span>
+            <span class="miaoshu">
+              华为内部项目，自动部署软件构建、部署、测试过程可视化工具
+            </span>
+          </div>
+          <div class="tuanduidingwei">
+            <span class="zhize">项目职责：</span>
+            <span class="miaoshu">
+              前端除核心外次要模块开发，项目日常维护以及迭代
+            </span>
+          </div>
+          <div class="mianshu" style="margin-top: 0">项目主要技术点：</div>
+          <ul class="xiangmu-mainshu">
+            <li>
+              项目结构：Angular 构建 CD-Pipeline1.0，使用 Vue 重构
+              CD-Pipeline2.0。
+            </li>
+            <li>重构：使用 Vue 框架重构 CD-Pipeline1.0 的 Angular 框架</li>
+            <li>
+              tree：使用 ElementUI 的 Tree 组件构建流水线的 tree
+              结构，并且懒加载，动态添加，删除等功能。
+            </li>
+            <li>
+              websocket：使用 ws 与服务端实时通信，实时获取流水线运行状态。
+            </li>
+          </ul>
+        </div>
       </div>
-
-    </div>
-    </div>
-  </section>
-</body>
-
+    </section>
+  </body>
 </html>

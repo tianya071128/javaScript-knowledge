@@ -1,79 +1,60 @@
 @page {
   size: A4;
 }
-section {
-  display: flex;
-}
-.main-left {
-  height: 100%;
-  flex: 1;
+
+.basic-info {
+  padding: 30px 10% 20px;
   background: #5dc3b1;
-}
-.main-left .touxiang {
-  display: block;
-  margin: 20px auto 0;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
 }
 
 h1 {
   color: #fff;
   font-size: 24px;
-  text-align: center;
   font-weight: bold;
   line-height: 1.5;
 }
 h3 {
   color: #fff;
-  font-size: 14px;
-  text-align: center;
+  font-size: 16px;
   line-height: 2;
-  border-bottom: 1px solid #248578;
-  margin: 0 2%;
+}
+
+.basic-info ul.info {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-wrap: wrap;
 }
 
-.main-left ul.info {
-  margin: 0 2%;
-  border-bottom: 1px solid #248578;
-}
-
-.main-left ul.info li {
-  color: #1d7d71;
+.basic-info ul.info li {
+  width: 50%;
+  color: #fff;
   font-size: 15px;
-  margin: 15px 0;
+  margin: 7px 0;
   padding-left: 25px;
-  background: url(../image/出生日期.png) no-repeat left center;
+  background: url(../image02/出生日期.png) no-repeat left center;
   background-size: 20px 20px;
 }
-.main-left ul.info li::before {
-  content: attr(data-title) "：";
-  color: #1d7d71;
+.basic-info ul.info li::before {
+  content: attr(data-title) '：';
+  color: #fff;
   font-size: 14px;
 }
-.main-left ul.info li.nianyue {
-  background-image: url(../image/出生日期.png);
+.basic-info ul.info li.nianyue {
+  background-image: url(../image02/出生日期.png);
 }
-.main-left ul.info li.shouji {
-  background-image: url(../image/手机号码.png);
+.basic-info ul.info li.shouji {
+  background-image: url(../image02/电话.png);
 }
-.main-left ul.info li.youxiang {
-  background-image: url(../image/邮箱.png);
+.basic-info ul.info li.youxiang {
+  background-image: url(../image02/邮箱.png);
 }
-.main-left ul.info li.git {
-  background-image: url(../image/git.png);
+.basic-info ul.info li.git {
+  background-image: url(../image02/github-fill.png);
 }
-.main-left ul.info li.xuexiao {
-  background-image: url(../image/学校.png);
+.basic-info ul.info li.xuexiao {
+  background-image: url(../image02/学校.png);
 }
-.main-left ul.info li.shijian {
-  background-image: url(../image/时间.png);
-}
-.main-left ul.info li.xueli {
-  background-image: url(../image/学历.png);
+.basic-info ul.info li.wangzhan {
+  background-image: url(../image02/网址.png);
 }
 
 .evaluate {
@@ -85,13 +66,13 @@ ul.evaluate li {
   margin: 7px 0;
 }
 ul.evaluate li::before {
-  content: attr(data-title) "：";
+  content: attr(data-title) '：';
   color: #1d7d71;
   font-size: 14px;
 }
 
 .big-title {
-  margin: 3% 25%;
+  margin: 2% 25%;
   border-radius: 15px;
   text-align: center;
   font-size: 18px;
@@ -113,7 +94,7 @@ ul.skill li {
   color: #333;
 }
 ul.skill li::after {
-  content: "";
+  content: '';
   position: absolute;
   left: -9px;
   top: 8px;
@@ -142,25 +123,26 @@ ul.skill .all .progress {
   bottom: 0;
   background: #fff;
 }
-
 ul.company {
-  border-bottom: 1px solid #248578;
-  margin: 0 2%;
-  padding: 0 3% 3%;
+  padding-left: 3%;
+}
+ul.company li:not(:last-of-type) {
+  margin-bottom: 10px;
 }
 ul.company .company-title {
-  margin: 5% 0;
-  font-size: 16px;
-  color: #1d7d71;
+  font-size: 18px;
+  color: #5dc3b1;
   font-weight: bold;
+  line-height: 1.5;
+  margin-bottom: 5px;
 }
 ul.company .company-time {
-  margin: 3% 0;
-  font-size: 16px;
-  color: #1d7d71;
+  font-size: 14px;
+  color: #333;
+  font-weight: normal;
 }
 ul.company .job-content {
-  color: #1d7d71;
+  color: #333;
   font-size: 14px;
   line-height: 1.5;
 }
@@ -173,16 +155,16 @@ ul.company .job-content {
   font-size: 16px;
 }
 .xiangmu-item {
-  margin: 3%;
+  margin: 16px 3%;
 }
 .xiangmu-title {
   font-size: 20px;
   color: #5dc3b1;
   font-weight: bold;
-  margin: 3% 0;
+  margin: 10px 0;
 }
 .jishu {
-  margin: 3% 0;
+  margin: 10px 0;
   display: flex;
   align-items: center;
   font-size: 14px;
@@ -200,7 +182,7 @@ ul.company .job-content {
   padding: 3px;
 }
 .tuanduidingwei {
-  margin: 3% 0;
+  margin: 10px 0;
   font-size: 14px;
   line-height: 1.3;
 }
@@ -221,7 +203,7 @@ ul.company .job-content {
   padding-left: 15px;
 }
 .xiangmu-mainshu li::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 1px;
   top: 9px;
@@ -237,9 +219,4 @@ ul.company .job-content {
   flex: 2;
   background: #f1eee8;
   height: 100%;
-}
-
-
-.jineng {
-
 }
